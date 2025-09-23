@@ -4,8 +4,9 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
+import { HeaderMenu } from "./components/HeaderMenu";
 import Home from "./pages/Home";
 import Documentation from "./pages/Documentation";
 import ApiKeys from "./pages/ApiKeys";
@@ -37,12 +38,7 @@ function App() {
             <div className="flex h-screen w-full">
               <AppSidebar />
               <div className="flex flex-col flex-1">
-                <header className="flex items-center justify-between p-2 border-b">
-                  <SidebarTrigger data-testid="button-sidebar-toggle" />
-                  <div className="text-sm text-muted-foreground">
-                    Subscription Tracker API Platform
-                  </div>
-                </header>
+                <HeaderMenu />
                 <main className="flex-1 overflow-auto">
                   <Router />
                 </main>
