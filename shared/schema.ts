@@ -30,7 +30,7 @@ export const plans = pgTable("plans", {
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 });
 
-// API keys for users
+// API keys for users (internal system)
 export const apiKeys = pgTable("api_keys", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
@@ -41,6 +41,18 @@ export const apiKeys = pgTable("api_keys", {
   isActive: boolean("is_active").default(true).notNull(),
   expiresAt: timestamp("expires_at"), // null for no expiration
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+});
+
+// External service API keys that users can manage in frontend
+export const userExternalApiKeys = pgTable("user_external_api_keys", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  service: text("service").notNull(), // 'gemini', 'stripe', 'openai', etc.
+  keyValue: text("key_value").notNull(), // encrypted API key
+  isActive: boolean("is_active").default(true).notNull(),
+  lastUsedAt: timestamp("last_used_at"),
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
 });
 
 // User subscriptions (linking users to their actual subscriptions)
@@ -105,6 +117,19 @@ export const updateApiKeySchema = createInsertSchema(apiKeys).omit({
   keyPrefix: true,
 }).partial();
 
+export const insertUserExternalApiKeySchema = createInsertSchema(userExternalApiKeys).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateUserExternalApiKeySchema = createInsertSchema(userExternalApiKeys).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  userId: true,
+}).partial();
+
 export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
   id: true,
   createdAt: true,
@@ -131,6 +156,10 @@ export type InsertPlan = z.infer<typeof insertPlanSchema>;
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type InsertApiKey = z.infer<typeof insertApiKeySchema>;
 export type UpdateApiKey = z.infer<typeof updateApiKeySchema>;
+
+export type UserExternalApiKey = typeof userExternalApiKeys.$inferSelect;
+export type InsertUserExternalApiKey = z.infer<typeof insertUserExternalApiKeySchema>;
+export type UpdateUserExternalApiKey = z.infer<typeof updateUserExternalApiKeySchema>;
 
 export type Subscription = typeof subscriptions.$inferSelect;
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
