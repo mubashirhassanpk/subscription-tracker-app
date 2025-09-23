@@ -40,7 +40,7 @@ export default function ApiKeys() {
       return await response.json();
     },
     onSuccess: (data: any) => {
-      setGeneratedKey(data.apiKey);
+      setGeneratedKey(data.apiKey.key);
       setShowGeneratedKey(true);
       setNewKeyName("");
       setShowCreateDialog(false);
