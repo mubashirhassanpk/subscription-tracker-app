@@ -5,12 +5,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Plus, Calendar } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Plus, Calendar, Crown, AlertTriangle, Info } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertSubscriptionSchema } from "@shared/schema";
 import { z } from "zod";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { format, differenceInDays } from "date-fns";
 
 const formSchema = insertSubscriptionSchema.extend({
   nextBillingDate: z.string().min(1, "Next billing date is required"),
@@ -18,9 +24,22 @@ const formSchema = insertSubscriptionSchema.extend({
 
 type FormData = z.infer<typeof formSchema>;
 
+interface UserStatus {
+  id: string;
+  email: string;
+  subscriptionStatus: 'trial' | 'active' | 'expired' | 'cancelled';
+  trialEndsAt?: string;
+  plan?: {
+    name: string;
+    maxSubscriptions?: number;
+    maxApiCalls?: number;
+  };
+}
+
 interface AddSubscriptionFormProps {
   onSubmit: (data: FormData) => void;
   isLoading?: boolean;
+  currentSubscriptionCount?: number;
 }
 
 const categories = [
@@ -39,8 +58,14 @@ const billingCycles = [
   { value: 'yearly', label: 'Yearly' }
 ];
 
-export default function AddSubscriptionForm({ onSubmit, isLoading = false }: AddSubscriptionFormProps) {
+export default function AddSubscriptionForm({ onSubmit, isLoading = false, currentSubscriptionCount = 0 }: AddSubscriptionFormProps) {
   const [open, setOpen] = useState(false);
+  
+  // Fetch user status and plan information
+  const { data: userStatus } = useQuery<UserStatus>({
+    queryKey: ['/api/account'],
+    enabled: open, // Only fetch when dialog is open
+  });
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -61,6 +86,21 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false }: Add
     form.reset();
     setOpen(false);
   };
+  
+  // Calculate trial status
+  const isTrialUser = userStatus?.subscriptionStatus === 'trial';
+  const trialDaysLeft = userStatus?.trialEndsAt 
+    ? Math.max(0, differenceInDays(new Date(userStatus.trialEndsAt), new Date()))
+    : 0;
+  const isTrialExpired = isTrialUser && trialDaysLeft <= 0;
+  
+  // Calculate subscription limits
+  const maxSubscriptions = userStatus?.plan?.maxSubscriptions || (isTrialUser ? 5 : 100);
+  const canAddSubscription = currentSubscriptionCount < maxSubscriptions;
+  const subscriptionProgress = (currentSubscriptionCount / maxSubscriptions) * 100;
+  
+  // Determine if user should be prompted to upgrade
+  const shouldPromptUpgrade = isTrialUser && (currentSubscriptionCount >= 3 || trialDaysLeft <= 3);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -70,10 +110,88 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false }: Add
           Add Subscription
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add New Subscription</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            Add New Subscription
+            {isTrialUser && (
+              <Badge variant="outline" className="text-orange-600">
+                <Crown className="h-3 w-3 mr-1" />
+                Trial
+              </Badge>
+            )}
+          </DialogTitle>
         </DialogHeader>
+        
+        {/* User Status & Limits */}
+        {userStatus && (
+          <Card className="mb-4">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center justify-between">
+                <span>Account Status</span>
+                <Badge variant={isTrialUser ? "secondary" : "default"}>
+                  {userStatus.plan?.name || (isTrialUser ? "Trial" : "Free")}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {/* Subscription Limit Progress */}
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Subscriptions</span>
+                  <span>{currentSubscriptionCount} / {maxSubscriptions}</span>
+                </div>
+                <Progress value={subscriptionProgress} className="h-2" />
+              </div>
+              
+              {/* Trial Status */}
+              {isTrialUser && (
+                <div className="space-y-2">
+                  {trialDaysLeft > 0 ? (
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertDescription>
+                        {trialDaysLeft} {trialDaysLeft === 1 ? 'day' : 'days'} left in your trial
+                        {trialDaysLeft <= 3 && " - Consider upgrading soon!"}
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <Alert variant="destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        Your trial has expired. Upgrade to continue adding subscriptions.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+              )}
+              
+              {/* Limit Warning */}
+              {!canAddSubscription && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    You've reached the limit of {maxSubscriptions} subscriptions for your plan.
+                    {isTrialUser && " Upgrade to Pro for unlimited subscriptions."}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {/* Upgrade Prompt */}
+              {shouldPromptUpgrade && canAddSubscription && (
+                <Alert>
+                  <Crown className="h-4 w-4" />
+                  <AlertDescription className="flex items-center justify-between">
+                    <span>Unlock unlimited subscriptions with Pro</span>
+                    <Button size="sm" variant="outline" data-testid="button-upgrade-prompt">
+                      Upgrade
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        )}
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -218,10 +336,13 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false }: Add
               </Button>
               <Button 
                 type="submit" 
-                disabled={isLoading}
+                disabled={isLoading || !canAddSubscription || isTrialExpired}
                 data-testid="button-save"
               >
-                {isLoading ? 'Saving...' : 'Save Subscription'}
+                {isLoading ? 'Saving...' : 
+                 !canAddSubscription ? 'Limit Reached' :
+                 isTrialExpired ? 'Trial Expired' :
+                 'Save Subscription'}
               </Button>
             </div>
           </form>

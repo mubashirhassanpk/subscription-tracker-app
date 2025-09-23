@@ -61,6 +61,7 @@ export default function Dashboard({
               <AddSubscriptionForm 
                 onSubmit={onAddSubscription} 
                 isLoading={isLoading}
+                currentSubscriptionCount={subscriptions.length}
               />
               <ThemeToggle />
             </div>
