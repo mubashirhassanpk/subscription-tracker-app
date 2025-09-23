@@ -1,11 +1,27 @@
 import { GoogleGenAI } from "@google/genai";
 import type { Subscription } from "@shared/schema";
+import { getDecryptedApiKey } from "./routes/userExternalApiKeys";
 
 // DON'T DELETE THIS COMMENT
 // Following instructions from the javascript_gemini blueprint
 // Using the newest Gemini model series "gemini-2.5-flash" or "gemini-2.5-pro"
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+// Create Gemini AI instance with dynamic API key
+async function createGeminiAI(userId: string = "dev-user-1"): Promise<GoogleGenAI> {
+  // Try to get user-specific API key first
+  let apiKey = await getDecryptedApiKey(userId, 'gemini');
+  
+  // Fall back to environment variable if no user key
+  if (!apiKey) {
+    apiKey = process.env.GEMINI_API_KEY;
+  }
+  
+  if (!apiKey) {
+    throw new Error('No Gemini API key available. Please configure your API key in Settings.');
+  }
+  
+  return new GoogleGenAI({ apiKey });
+}
 
 export interface SubscriptionInsight {
   type: 'cost_optimization' | 'renewal_reminder' | 'category_analysis' | 'spending_pattern';
@@ -16,8 +32,10 @@ export interface SubscriptionInsight {
   data?: any;
 }
 
-export async function analyzeSubscriptions(subscriptions: Subscription[]): Promise<SubscriptionInsight[]> {
+export async function analyzeSubscriptions(subscriptions: Subscription[], userId: string = "dev-user-1"): Promise<SubscriptionInsight[]> {
   try {
+    const ai = await createGeminiAI(userId);
+    
     const subscriptionData = subscriptions.map(sub => ({
       id: sub.id,
       name: sub.name,
@@ -106,8 +124,10 @@ Provide insights focusing on:
   }
 }
 
-export async function generateSubscriptionSummary(subscriptions: Subscription[]): Promise<string> {
+export async function generateSubscriptionSummary(subscriptions: Subscription[], userId: string = "dev-user-1"): Promise<string> {
   try {
+    const ai = await createGeminiAI(userId);
+    
     const totalMonthly = subscriptions
       .filter(sub => sub.isActive)
       .reduce((sum, sub) => {
@@ -145,8 +165,10 @@ Provide a 2-3 sentence summary that's encouraging and includes one actionable ti
   }
 }
 
-export async function suggestCategory(subscriptionName: string, description?: string): Promise<string> {
+export async function suggestCategory(subscriptionName: string, description?: string, userId: string = "dev-user-1"): Promise<string> {
   try {
+    const ai = await createGeminiAI(userId);
+    
     const prompt = `Suggest the best category for this subscription:
 Name: ${subscriptionName}
 Description: ${description || 'N/A'}
