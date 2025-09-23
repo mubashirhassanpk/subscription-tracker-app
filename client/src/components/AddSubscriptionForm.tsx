@@ -474,6 +474,7 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
                  'Save Subscription'}
               </Button>
             </div>
+            </form>
             </Form>
           </div>
         </div>
