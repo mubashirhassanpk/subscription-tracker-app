@@ -5,6 +5,7 @@ import FilterBar from "./FilterBar";
 import SubscriptionCard from "./SubscriptionCard";
 import AddSubscriptionForm from "./AddSubscriptionForm";
 import AIInsightsDialog from "./AIInsightsDialog";
+import SubscriptionDetailsDialog from "./SubscriptionDetailsDialog";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, List, RefreshCw } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -30,6 +31,8 @@ export default function Dashboard({
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
   const queryClient = useQueryClient();
 
   const handleRefreshDashboard = async () => {
@@ -46,6 +49,12 @@ export default function Dashboard({
     } finally {
       setIsRefreshing(false);
     }
+  };
+
+  const handleViewDetails = (subscription: Subscription) => {
+    console.log('Opening details for subscription:', subscription.id);
+    setSelectedSubscription(subscription);
+    setDetailsDialogOpen(true);
   };
 
   const filteredSubscriptions = useMemo(() => {
@@ -165,12 +174,22 @@ export default function Dashboard({
                   subscription={subscription}
                   onEdit={onEditSubscription}
                   onDelete={onDeleteSubscription}
+                  onViewDetails={handleViewDetails}
                 />
               ))}
             </div>
           )}
         </div>
       </main>
+
+      {/* Subscription Details Dialog */}
+      <SubscriptionDetailsDialog
+        subscription={selectedSubscription}
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        onEdit={onEditSubscription}
+        onDelete={onDeleteSubscription}
+      />
     </div>
   );
 }
