@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { storage } from '../storage';
-import { insertSubscriptionSchema } from '@shared/schema';
+import { insertSubscriptionSchema, insertNotificationSchema } from '@shared/schema';
 import { authenticateApiKey, rateLimitByPlan, type AuthenticatedRequest } from '../middleware/auth';
+import { analyzeSubscriptions, generateSubscriptionSummary, suggestCategory } from '../geminiService';
 
 const apiRouter = Router();
 
@@ -267,6 +268,209 @@ apiRouter.get('/account', async (req: AuthenticatedRequest, res) => {
     });
   } catch (error) {
     console.error('Get account API error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ==================== NOTIFICATION ENDPOINTS ====================
+
+// Get all notifications for user
+apiRouter.get('/notifications', async (req: AuthenticatedRequest, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const notifications = await storage.getNotificationsByUserId(req.user.id);
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+    
+    res.json({
+      notifications,
+      unreadCount,
+      total: notifications.length
+    });
+  } catch (error) {
+    console.error('Get notifications API error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get unread notifications for user
+apiRouter.get('/notifications/unread', async (req: AuthenticatedRequest, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const notifications = await storage.getUnreadNotificationsByUserId(req.user.id);
+    
+    res.json({
+      notifications,
+      count: notifications.length
+    });
+  } catch (error) {
+    console.error('Get unread notifications API error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Mark notification as read
+apiRouter.post('/notifications/:id/read', async (req: AuthenticatedRequest, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const notificationId = req.params.id;
+    const notification = await storage.markNotificationAsRead(notificationId, req.user.id);
+    
+    if (!notification) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+
+    res.json({
+      message: 'Notification marked as read',
+      notification
+    });
+  } catch (error) {
+    console.error('Mark notification read API error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Mark all notifications as read
+apiRouter.post('/notifications/read-all', async (req: AuthenticatedRequest, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const updated = await storage.markAllNotificationsAsRead(req.user.id);
+    
+    res.json({
+      message: 'All notifications marked as read',
+      updated
+    });
+  } catch (error) {
+    console.error('Mark all notifications read API error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Delete notification
+apiRouter.delete('/notifications/:id', async (req: AuthenticatedRequest, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const notificationId = req.params.id;
+    
+    // Verify ownership
+    const notification = await storage.getNotification(notificationId);
+    if (!notification) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+
+    if (notification.userId !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const deleted = await storage.deleteNotification(notificationId);
+    
+    if (!deleted) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+
+    res.json({ message: 'Notification deleted successfully' });
+  } catch (error) {
+    console.error('Delete notification API error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ==================== AI INSIGHTS ENDPOINTS ====================
+
+// Generate AI insights for user's subscriptions
+apiRouter.post('/insights/generate', async (req: AuthenticatedRequest, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // Get user's active subscriptions
+    const subscriptions = await storage.getSubscriptionsByUserId(req.user.id);
+    const activeSubscriptions = subscriptions.filter(sub => sub.isActive === 1);
+
+    if (activeSubscriptions.length === 0) {
+      return res.json({
+        message: 'No active subscriptions to analyze',
+        insights: [],
+        notifications: []
+      });
+    }
+
+    // Generate AI insights
+    const insights = await analyzeSubscriptions(activeSubscriptions);
+    
+    // Create notifications from insights
+    const createdNotifications = [];
+    for (const insight of insights) {
+      const notification = await storage.createNotification({
+        userId: req.user.id,
+        type: insight.type,
+        title: insight.title,
+        message: insight.message,
+        priority: insight.priority,
+        subscriptionId: insight.subscriptionIds?.[0] || null,
+        data: insight.data ? JSON.stringify(insight.data) : null
+      });
+      createdNotifications.push(notification);
+    }
+
+    res.json({
+      message: 'AI insights generated successfully',
+      insights: insights.length,
+      notifications: createdNotifications,
+      summary: await generateSubscriptionSummary(activeSubscriptions)
+    });
+  } catch (error) {
+    console.error('Generate insights API error:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate insights',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Get subscription category suggestion
+const categorySuggestionSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional()
+});
+
+apiRouter.post('/insights/suggest-category', async (req: AuthenticatedRequest, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const { name, description } = categorySuggestionSchema.parse(req.body);
+    const suggestedCategory = await suggestCategory(name, description);
+    
+    res.json({
+      name,
+      description,
+      suggestedCategory
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        error: 'Validation failed', 
+        details: error.errors 
+      });
+    }
+    console.error('Suggest category API error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
