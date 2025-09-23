@@ -157,11 +157,11 @@ notificationsRouter.post('/insights/generate', async (req: any, res) => {
     console.log('Checking isActive values:', subscriptions.map(sub => ({ id: sub.id, name: sub.name, isActive: sub.isActive, type: typeof sub.isActive })));
     
     // Filter for active subscriptions (handle both numeric and boolean values)
-    const activeSubscriptions = subscriptions.filter(sub => 
-      sub.isActive === 1 || 
-      sub.isActive === true || 
-      sub.isActive === '1'
-    );
+    const activeSubscriptions = subscriptions.filter(sub => {
+      // Convert to boolean to handle different types
+      const isActive = sub.isActive;
+      return Boolean(isActive && isActive !== 0 && (typeof isActive !== 'string' || isActive !== '0'));
+    });
     
     console.log('Active subscriptions found:', activeSubscriptions.length);
 
@@ -239,6 +239,53 @@ notificationsRouter.post('/insights/suggest-category', async (req: any, res) => 
     }
     console.error('Suggest category web error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get latest AI insights for user (for the insights dialog)
+notificationsRouter.get('/insights/latest', async (req: any, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // Get user's active subscriptions for summary
+    const subscriptions = await storage.getSubscriptionsByUserId(req.user.id);
+    const activeSubscriptions = subscriptions.filter(sub => {
+      const isActive = sub.isActive;
+      return Boolean(isActive && isActive !== 0 && (typeof isActive !== 'string' || isActive !== '0'));
+    });
+
+    // Get recent AI-generated notifications (insights)
+    const notifications = await storage.getNotificationsByUserId(req.user.id);
+    const aiInsights = notifications
+      .filter(n => ['cost_optimization', 'renewal_reminder', 'category_analysis', 'spending_pattern'].includes(n.type))
+      .slice(0, 10) // Get latest 10 insights
+      .map(n => ({
+        type: n.type as 'cost_optimization' | 'renewal_reminder' | 'category_analysis' | 'spending_pattern',
+        title: n.title,
+        message: n.message,
+        priority: n.priority as 'low' | 'normal' | 'high' | 'urgent',
+        subscriptionIds: n.subscriptionId ? [n.subscriptionId] : [],
+        data: n.data ? JSON.parse(n.data) : null
+      }));
+
+    // Generate summary
+    const summary = await generateSubscriptionSummary(activeSubscriptions);
+
+    res.json({
+      message: 'Latest insights retrieved',
+      insights: aiInsights.length,
+      notifications: [],
+      summary,
+      rawInsights: aiInsights
+    });
+  } catch (error) {
+    console.error('Get latest insights web error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get latest insights',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 });
 
