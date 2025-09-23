@@ -6,26 +6,16 @@ import { authRouter } from "./routes/auth";
 import { apiKeysRouter } from "./routes/apiKeys";
 import { apiRouter } from "./routes/api";
 import { notificationsRouter } from "./routes/notifications";
+import { subscriptionsRouter } from "./routes/subscriptions";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register API route modules
   app.use('/auth', authRouter);
   app.use('/api/api-keys', apiKeysRouter);
   app.use('/api/notifications', notificationsRouter);
+  app.use('/api/subscriptions', subscriptionsRouter);
   app.use('/api/v1', apiRouter);
 
-  // Legacy routes - DEPRECATED (redirect to secure API)
-  app.all("/api/subscriptions*", (req, res) => {
-    res.status(410).json({
-      error: "Legacy API endpoint deprecated",
-      message: "Please use the authenticated API at /api/v1/subscriptions with proper API key authentication",
-      migration: {
-        endpoint: "/api/v1/subscriptions",
-        authentication: "Required - use Authorization: Bearer <your-api-key>",
-        documentation: "/api/docs"
-      }
-    });
-  });
 
   const httpServer = createServer(app);
 

@@ -18,7 +18,7 @@ async function trySessionOrApiKey(req: any, res: any, next: any) {
   
   // Development only: simulate a logged-in user for testing
   req.user = {
-    id: '1',
+    id: 'dev-user-1',
     email: 'test@example.com', 
     name: 'Test User'
   };
@@ -151,14 +151,29 @@ notificationsRouter.post('/insights/generate', async (req: any, res) => {
     }
 
     // Get user's active subscriptions
+    console.log('Generating insights for userId:', req.user.id);
     const subscriptions = await storage.getSubscriptionsByUserId(req.user.id);
-    const activeSubscriptions = subscriptions.filter(sub => sub.isActive === 1);
+    console.log('All subscriptions for insights:', subscriptions);
+    console.log('Checking isActive values:', subscriptions.map(sub => ({ id: sub.id, name: sub.name, isActive: sub.isActive, type: typeof sub.isActive })));
+    
+    // Filter for active subscriptions (handle both numeric and boolean values)
+    const activeSubscriptions = subscriptions.filter(sub => 
+      sub.isActive === 1 || 
+      sub.isActive === true || 
+      sub.isActive === '1'
+    );
+    
+    console.log('Active subscriptions found:', activeSubscriptions.length);
 
     if (activeSubscriptions.length === 0) {
       return res.json({
         message: 'No active subscriptions to analyze',
         insights: [],
-        notifications: []
+        notifications: [],
+        debug: {
+          totalSubscriptions: subscriptions.length,
+          subscriptionActiveValues: subscriptions.map(sub => sub.isActive)
+        }
       });
     }
 
