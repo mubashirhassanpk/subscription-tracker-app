@@ -151,8 +151,10 @@ export function HeaderMenu() {
             </DropdownMenuItem>
             
             <DropdownMenuItem data-testid="menu-settings">
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
+              <Link href="/settings" className="flex items-center w-full">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </Link>
             </DropdownMenuItem>
             
             <DropdownMenuSeparator />
