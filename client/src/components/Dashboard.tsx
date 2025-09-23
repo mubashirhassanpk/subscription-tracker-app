@@ -4,10 +4,11 @@ import StatsCards from "./StatsCards";
 import FilterBar from "./FilterBar";
 import SubscriptionCard from "./SubscriptionCard";
 import AddSubscriptionForm from "./AddSubscriptionForm";
-import { ThemeToggle } from "./ThemeToggle";
 import AIInsightsDialog from "./AIInsightsDialog";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List, RefreshCw } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface DashboardProps {
   subscriptions: Subscription[];
@@ -28,6 +29,24 @@ export default function Dashboard({
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleRefreshDashboard = async () => {
+    setIsRefreshing(true);
+    try {
+      // Refresh all dashboard data
+      queryClient.invalidateQueries({ queryKey: ['/api/subscriptions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+      
+      // Trigger trial expiry check
+      await apiRequest('POST', '/api/notifications/trials/check');
+    } catch (error) {
+      console.error('Failed to refresh dashboard:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const filteredSubscriptions = useMemo(() => {
     return subscriptions.filter(subscription => {
@@ -65,10 +84,16 @@ export default function Dashboard({
                 isLoading={isLoading}
                 currentSubscriptionCount={subscriptions.length}
               />
-              <ThemeToggle onRefresh={() => {
-                // Force re-render of dashboard by triggering the parent to refresh data
-                window.location.reload();
-              }} />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleRefreshDashboard}
+                disabled={isRefreshing}
+                data-testid="button-refresh-dashboard"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span className="sr-only">Refresh dashboard</span>
+              </Button>
             </div>
           </div>
         </div>
