@@ -237,7 +237,8 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
                         type="number" 
                         step="0.01"
                         placeholder="0.00" 
-                        {...field} 
+                        {...field}
+                        disabled={form.watch('isTrial')}
                         data-testid="input-cost"
                       />
                     </FormControl>
@@ -252,7 +253,7 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Billing Cycle</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={form.watch('isTrial')}>
                       <FormControl>
                         <SelectTrigger data-testid="select-billing-cycle">
                           <SelectValue placeholder="Select cycle" />
@@ -307,7 +308,8 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
                     <FormControl>
                       <Input 
                         type="date" 
-                        {...field} 
+                        {...field}
+                        disabled={form.watch('isTrial')}
                         data-testid="input-next-billing"
                       />
                     </FormControl>

@@ -155,7 +155,8 @@ export default function EditSubscriptionForm({
                         type="number" 
                         step="0.01"
                         placeholder="0.00" 
-                        {...field} 
+                        {...field}
+                        disabled={form.watch('isTrial')}
                         data-testid="input-edit-cost"
                       />
                     </FormControl>
@@ -170,7 +171,7 @@ export default function EditSubscriptionForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Billing Cycle</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={form.watch('isTrial')}>
                       <FormControl>
                         <SelectTrigger data-testid="select-edit-billing-cycle">
                           <SelectValue placeholder="Select cycle" />
@@ -225,7 +226,8 @@ export default function EditSubscriptionForm({
                     <FormControl>
                       <Input 
                         type="date" 
-                        {...field} 
+                        {...field}
+                        disabled={form.watch('isTrial')}
                         data-testid="input-edit-next-billing"
                       />
                     </FormControl>
