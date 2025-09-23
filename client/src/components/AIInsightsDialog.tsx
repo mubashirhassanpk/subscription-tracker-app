@@ -109,6 +109,10 @@ export default function AIInsightsDialog() {
   const handleRefresh = () => {
     refetch();
     queryClient.invalidateQueries({ queryKey: ['/api/subscriptions'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+    
+    // Also trigger trial expiry check when refreshing
+    apiRequest('POST', '/api/notifications/trials/check').catch(console.error);
   };
 
   return (

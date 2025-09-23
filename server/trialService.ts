@@ -153,53 +153,90 @@ export async function processExpiredTrials(userId: string): Promise<void> {
     for (const check of expiredTrials) {
       const { subscription } = check;
       
+      // Skip if subscription is no longer a trial (already processed)
+      if (!subscription.isTrial) {
+        console.log(`Subscription ${subscription.name} is no longer a trial, skipping`);
+        continue;
+      }
+      
       // Convert trial subscription to paid subscription
       if (subscription.cardLast4) {
         // Simulate auto-payment process
         console.log(`Processing auto-payment for ${subscription.name} with card ending in ${subscription.cardLast4}`);
         
-        // Update subscription to remove trial status
+        // Update subscription to remove trial status and set next billing date
+        const nextBillingDate = new Date();
+        nextBillingDate.setMonth(nextBillingDate.getMonth() + 1); // Set next billing to 1 month from now
+        
         await storage.updateSubscription(subscription.id, {
           isTrial: false,
-          trialDays: undefined,
-          // Optionally update next billing date to be in the future
+          trialDays: null,
+          trialStartDate: null,
+          trialEndDate: null,
+          nextBillingDate: nextBillingDate.toISOString(),
         });
 
-        // Create notification about successful payment
-        await storage.createNotification({
-          userId,
-          type: 'payment_processed',
-          title: `Payment processed for ${subscription.name}`,
-          message: `Your payment method ending in ${subscription.cardLast4} was charged $${subscription.cost} for ${subscription.name}. Your subscription is now active.`,
-          priority: 'normal',
-          subscriptionId: subscription.id,
-          data: JSON.stringify({
-            amount: subscription.cost,
-            cardLast4: subscription.cardLast4,
-            paymentDate: new Date().toISOString()
-          })
-        });
+        // Check if we've already created a payment notification recently
+        const existingNotifications = await storage.getNotificationsByUserId(userId);
+        const recentPaymentNotification = existingNotifications.find(n => 
+          n.type === 'payment_processed' && 
+          n.subscriptionId === subscription.id &&
+          n.createdAt && 
+          differenceInDays(new Date(), new Date(n.createdAt)) < 1 // Within last day
+        );
+
+        if (!recentPaymentNotification) {
+          // Create notification about successful payment
+          await storage.createNotification({
+            userId,
+            type: 'payment_processed',
+            title: `Payment processed for ${subscription.name}`,
+            message: `Your payment method ending in ${subscription.cardLast4} was charged $${subscription.cost} for ${subscription.name}. Your subscription is now active.`,
+            priority: 'normal',
+            subscriptionId: subscription.id,
+            data: JSON.stringify({
+              amount: subscription.cost,
+              cardLast4: subscription.cardLast4,
+              paymentDate: new Date().toISOString()
+            })
+          });
+        }
       } else {
         // No payment method - pause/deactivate subscription
         console.log(`No payment method for ${subscription.name} - deactivating subscription`);
         
         await storage.updateSubscription(subscription.id, {
           isActive: 0, // Deactivate subscription
+          isTrial: false, // Remove trial status even without payment
+          trialDays: null,
+          trialStartDate: null,
+          trialEndDate: null,
         });
 
-        // Create notification about service interruption
-        await storage.createNotification({
-          userId,
-          type: 'service_suspended',
-          title: `${subscription.name} service suspended`,
-          message: `Your free trial has expired and no payment method is on file. Service has been suspended. Please add a payment method to reactivate your subscription.`,
-          priority: 'urgent',
-          subscriptionId: subscription.id,
-          data: JSON.stringify({
-            suspendedDate: new Date().toISOString(),
-            reason: 'no_payment_method'
-          })
-        });
+        // Check if we've already created a suspension notification recently
+        const existingNotifications = await storage.getNotificationsByUserId(userId);
+        const recentSuspensionNotification = existingNotifications.find(n => 
+          n.type === 'service_suspended' && 
+          n.subscriptionId === subscription.id &&
+          n.createdAt && 
+          differenceInDays(new Date(), new Date(n.createdAt)) < 1 // Within last day
+        );
+
+        if (!recentSuspensionNotification) {
+          // Create notification about service interruption
+          await storage.createNotification({
+            userId,
+            type: 'service_suspended',
+            title: `${subscription.name} service suspended`,
+            message: `Your free trial has expired and no payment method is on file. Service has been suspended. Please add a payment method to reactivate your subscription.`,
+            priority: 'urgent',
+            subscriptionId: subscription.id,
+            data: JSON.stringify({
+              suspendedDate: new Date().toISOString(),
+              reason: 'no_payment_method'
+            })
+          });
+        }
       }
     }
   } catch (error) {
