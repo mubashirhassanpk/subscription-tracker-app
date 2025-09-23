@@ -115,7 +115,7 @@ export default function EditSubscriptionForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-[95vw] sm:w-[90vw] sm:max-w-lg mx-4">
         <DialogHeader>
           <DialogTitle>Edit Subscription</DialogTitle>
         </DialogHeader>
@@ -140,7 +140,7 @@ export default function EditSubscriptionForm({
               )}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="cost"
@@ -187,7 +187,7 @@ export default function EditSubscriptionForm({
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="category"
@@ -349,7 +349,7 @@ export default function EditSubscriptionForm({
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="cardLast4"

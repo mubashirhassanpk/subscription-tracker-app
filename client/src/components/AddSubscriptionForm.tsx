@@ -119,7 +119,7 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
           Add Subscription
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="w-[95vw] sm:w-[90vw] sm:max-w-lg mx-4">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Add New Subscription
@@ -222,7 +222,7 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
               )}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="cost"
@@ -269,7 +269,7 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="category"
@@ -409,7 +409,7 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="cardLast4"
