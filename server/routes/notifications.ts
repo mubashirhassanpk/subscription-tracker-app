@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { storage } from '../storage';
 import { insertNotificationSchema } from '@shared/schema';
 import { analyzeSubscriptions, generateSubscriptionSummary, suggestCategory } from '../geminiService';
+import { checkTrialExpiries, generateTrialExpiryNotifications, processExpiredTrials } from '../trialService';
 
 const notificationsRouter = Router();
 
@@ -284,6 +285,80 @@ notificationsRouter.get('/insights/latest', async (req: any, res) => {
     console.error('Get latest insights web error:', error);
     res.status(500).json({ 
       error: 'Failed to get latest insights',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Check and generate trial expiry notifications
+notificationsRouter.post('/trials/check', async (req: any, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // Check for trial expiries
+    const expiryChecks = await checkTrialExpiries(req.user.id);
+    
+    // Generate notifications for expiring trials
+    await generateTrialExpiryNotifications(req.user.id);
+    
+    // Process expired trials (auto-payment/deactivation)
+    await processExpiredTrials(req.user.id);
+
+    res.json({
+      message: 'Trial expiry check completed',
+      checks: expiryChecks.length,
+      expiring: expiryChecks.filter(c => c.daysUntilExpiry >= 0).length,
+      expired: expiryChecks.filter(c => c.daysUntilExpiry < 0).length,
+      details: expiryChecks.map(c => ({
+        subscriptionName: c.subscription.name,
+        daysUntilExpiry: c.daysUntilExpiry,
+        urgency: c.urgency,
+        hasPaymentMethod: !!c.subscription.cardLast4
+      }))
+    });
+  } catch (error) {
+    console.error('Trial expiry check web error:', error);
+    res.status(500).json({ 
+      error: 'Failed to check trial expiries',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Get trial status summary for user
+notificationsRouter.get('/trials/status', async (req: any, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const expiryChecks = await checkTrialExpiries(req.user.id);
+    const subscriptions = await storage.getSubscriptionsByUserId(req.user.id);
+    
+    const trialSubscriptions = subscriptions.filter(sub => {
+      const isActive = Boolean(sub.isActive && sub.isActive !== 0 && (typeof sub.isActive !== 'string' || sub.isActive !== '0'));
+      return isActive && sub.isTrial;
+    });
+
+    res.json({
+      totalTrials: trialSubscriptions.length,
+      expiring: expiryChecks.filter(c => c.daysUntilExpiry >= 0 && c.daysUntilExpiry <= 7).length,
+      expired: expiryChecks.filter(c => c.daysUntilExpiry < 0).length,
+      trialDetails: trialSubscriptions.map(sub => ({
+        id: sub.id,
+        name: sub.name,
+        trialDays: sub.trialDays,
+        hasPaymentMethod: !!sub.cardLast4,
+        cardLast4: sub.cardLast4,
+        bankName: sub.bankName
+      }))
+    });
+  } catch (error) {
+    console.error('Trial status web error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get trial status',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
