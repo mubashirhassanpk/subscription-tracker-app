@@ -119,7 +119,7 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
           Add Subscription
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] sm:w-[90vw] sm:max-w-lg mx-4">
+      <DialogContent className="w-[98vw] max-w-[90vw] sm:max-w-lg mx-2 sm:mx-4">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Add New Subscription

@@ -115,7 +115,7 @@ export default function EditSubscriptionForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] sm:w-[90vw] sm:max-w-lg mx-4">
+      <DialogContent className="w-[98vw] max-w-[90vw] sm:max-w-lg mx-2 sm:mx-4">
         <DialogHeader>
           <DialogTitle>Edit Subscription</DialogTitle>
         </DialogHeader>
