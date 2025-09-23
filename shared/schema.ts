@@ -57,6 +57,21 @@ export const subscriptions = pgTable("subscriptions", {
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 });
 
+// Notifications for users (subscription alerts, AI insights, Chrome extension sync)
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  type: text("type").notNull(), // 'subscription_reminder', 'ai_insight', 'cost_alert', 'renewal_warning', 'chrome_sync'
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  subscriptionId: varchar("subscription_id"), // linked subscription if applicable
+  data: text("data"), // JSON string for additional data (AI insights, sync info, etc.)
+  isRead: boolean("is_read").default(false).notNull(),
+  priority: text("priority").default("normal").notNull(), // 'low', 'normal', 'high', 'urgent'
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  readAt: timestamp("read_at"),
+});
+
 // Insert schemas and types for all tables
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -87,6 +102,17 @@ export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
   createdAt: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const updateNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+  userId: true,
+}).partial();
+
 // Types for TypeScript
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -100,3 +126,7 @@ export type UpdateApiKey = z.infer<typeof updateApiKeySchema>;
 
 export type Subscription = typeof subscriptions.$inferSelect;
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type UpdateNotification = z.infer<typeof updateNotificationSchema>;
