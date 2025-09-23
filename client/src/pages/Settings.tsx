@@ -90,21 +90,10 @@ export default function Settings() {
     refetchOnWindowFocus: false,
   });
 
-  // Mock API Keys status check
+  // Fetch configuration status from server
   const { data: apiKeysStatus } = useQuery({
-    queryKey: ['/api/api-keys/status'],
-    queryFn: async () => {
-      // Check if user has configured their own API keys
-      const hasGeminiKey = userApiKeys?.find((key: UserExternalApiKey) => key.service === 'gemini')?.hasKey;
-      const hasStripeKey = userApiKeys?.find((key: UserExternalApiKey) => key.service === 'stripe')?.hasKey;
-      
-      return {
-        geminiConfigured: hasGeminiKey || !!import.meta.env.VITE_GEMINI_API_KEY,
-        stripeConfigured: hasStripeKey || !!(import.meta.env.VITE_STRIPE_PUBLIC_KEY && import.meta.env.STRIPE_SECRET_KEY),
-      };
-    },
+    queryKey: ['/api/config/status'],
     refetchOnWindowFocus: false,
-    enabled: !!userApiKeys, // Only run after user API keys are loaded
   });
 
   const saveSettingsMutation = useMutation({
@@ -143,7 +132,7 @@ export default function Settings() {
         description: `Your ${variables.service} API key has been saved successfully.`,
       });
       refetchApiKeys();
-      queryClient.invalidateQueries({ queryKey: ['/api/api-keys/status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/config/status'] });
       // Clear the input field
       if (variables.service === 'gemini') {
         setGeminiApiKey('');
@@ -172,7 +161,7 @@ export default function Settings() {
         description: `Your ${service} API key has been removed.`,
       });
       refetchApiKeys();
-      queryClient.invalidateQueries({ queryKey: ['/api/api-keys/status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/config/status'] });
     },
     onError: (error: any) => {
       toast({
@@ -530,7 +519,7 @@ export default function Settings() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {apiKeysStatus?.stripeConfigured ? (
+                    {apiKeysStatus?.stripe?.configured ? (
                       <Badge variant="default" className="bg-green-100 text-green-800">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Configured
@@ -544,7 +533,7 @@ export default function Settings() {
                   </div>
                 </div>
 
-                {!apiKeysStatus?.stripeConfigured && (
+                {!apiKeysStatus?.stripe?.configured && (
                   <Alert>
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>

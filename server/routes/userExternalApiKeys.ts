@@ -2,18 +2,54 @@ import { Router } from "express";
 import { storage } from "../storage";
 import { insertUserExternalApiKeySchema } from "@shared/schema";
 import { z } from "zod";
+import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
 export const userExternalApiKeysRouter = Router();
 
-// Simple encryption/decryption for API keys (in production, use proper encryption)
+// Get encryption key from environment (should be 32 bytes for AES-256)
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'fallback-key-for-dev-only-not-secure-32';
+
+// Proper AES-256-GCM encryption for API keys
 function encryptKey(key: string): string {
-  // Simple base64 encoding for demo - in production use proper encryption
-  return Buffer.from(key).toString('base64');
+  try {
+    const iv = randomBytes(12); // 12 bytes for GCM
+    const cipher = createCipheriv('aes-256-gcm', Buffer.from(ENCRYPTION_KEY.slice(0, 32)), iv);
+    
+    let encrypted = cipher.update(key, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    
+    const authTag = cipher.getAuthTag();
+    
+    // Combine IV + encrypted data + auth tag
+    return iv.toString('hex') + ':' + encrypted + ':' + authTag.toString('hex');
+  } catch (error) {
+    console.error('Encryption failed:', error);
+    throw new Error('Failed to encrypt API key');
+  }
 }
 
 function decryptKey(encryptedKey: string): string {
-  // Simple base64 decoding for demo - in production use proper decryption
-  return Buffer.from(encryptedKey, 'base64').toString();
+  try {
+    const parts = encryptedKey.split(':');
+    if (parts.length !== 3) {
+      throw new Error('Invalid encrypted key format');
+    }
+    
+    const iv = Buffer.from(parts[0], 'hex');
+    const encrypted = parts[1];
+    const authTag = Buffer.from(parts[2], 'hex');
+    
+    const decipher = createDecipheriv('aes-256-gcm', Buffer.from(ENCRYPTION_KEY.slice(0, 32)), iv);
+    decipher.setAuthTag(authTag);
+    
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    
+    return decrypted;
+  } catch (error) {
+    console.error('Decryption failed:', error);
+    throw new Error('Failed to decrypt API key');
+  }
 }
 
 // Get all external API keys for the current user

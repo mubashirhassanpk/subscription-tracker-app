@@ -8,12 +8,14 @@ import { apiRouter } from "./routes/api";
 import { notificationsRouter } from "./routes/notifications";
 import { subscriptionsRouter } from "./routes/subscriptions";
 import { userExternalApiKeysRouter } from "./routes/userExternalApiKeys";
+import { configStatusRouter } from "./routes/configStatus";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register API route modules
   app.use('/auth', authRouter);
   app.use('/api/api-keys', apiKeysRouter);
   app.use('/api/user-external-api-keys', userExternalApiKeysRouter);
+  app.use('/api/config/status', configStatusRouter);
   app.use('/api/notifications', notificationsRouter);
   app.use('/api/subscriptions', subscriptionsRouter);
   app.use('/api/v1', apiRouter);

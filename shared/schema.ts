@@ -48,7 +48,7 @@ export const userExternalApiKeys = pgTable("user_external_api_keys", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   service: text("service").notNull(), // 'gemini', 'stripe', 'openai', etc.
-  keyValue: text("key_value").notNull(), // encrypted API key
+  keyValue: text("key_value").notNull(), // AES-256-GCM encrypted API key (iv:ciphertext:authTag)
   isActive: boolean("is_active").default(true).notNull(),
   lastUsedAt: timestamp("last_used_at"),
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
