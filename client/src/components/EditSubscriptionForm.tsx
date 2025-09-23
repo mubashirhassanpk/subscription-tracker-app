@@ -116,15 +116,15 @@ export default function EditSubscriptionForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-md mx-2 max-h-[85vh] flex flex-col">
+      <DialogContent className="w-[95vw] max-w-md mx-2 max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Edit Subscription</DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 px-1" style={{ maxHeight: 'calc(85vh - 80px)' }}>
-          <div className="pr-4 space-y-4">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col flex-1 overflow-hidden">
+            <ScrollArea className="flex-1 px-1">
+              <div className="pr-4 space-y-4 pb-4">
             <FormField
               control={form.control}
               name="name"
@@ -394,7 +394,11 @@ export default function EditSubscriptionForm({
               </CardContent>
             </Card>
 
-            <div className="flex gap-2 pt-4">
+              </div>
+            </ScrollArea>
+            
+            {/* Fixed action buttons outside ScrollArea */}
+            <div className="flex gap-2 p-4 border-t">
               <Button 
                 type="button" 
                 variant="outline" 
@@ -411,10 +415,8 @@ export default function EditSubscriptionForm({
                 {isLoading ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
-            </form>
-            </Form>
-          </div>
-        </ScrollArea>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
