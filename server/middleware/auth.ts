@@ -20,9 +20,10 @@ export async function authenticateApiKey(req: AuthenticatedRequest, res: Respons
 
     const apiKey = authorization.substring(7); // Remove 'Bearer ' prefix
     
-    const apiKeySecret = process.env.API_KEY_SECRET;
-    if (!apiKeySecret) {
-      console.error('CRITICAL: API_KEY_SECRET environment variable is not set');
+    const apiKeySecret = process.env.API_KEY_SECRET || 'dev-fallback-secret-key-for-testing-only';
+    
+    if (!process.env.API_KEY_SECRET && process.env.NODE_ENV === 'production') {
+      console.error('CRITICAL: API_KEY_SECRET environment variable is not set in production');
       return res.status(500).json({ error: 'Server configuration error' });
     }
     

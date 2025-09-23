@@ -10,9 +10,10 @@ export function generateApiKey(): string {
 
 // Hash API key for secure storage
 export function hashApiKey(key: string): string {
-  const apiKeySecret = process.env.API_KEY_SECRET;
-  if (!apiKeySecret) {
-    throw new Error('CRITICAL: API_KEY_SECRET environment variable is not set');
+  const apiKeySecret = process.env.API_KEY_SECRET || 'dev-fallback-secret-key-for-testing-only';
+  
+  if (!process.env.API_KEY_SECRET && process.env.NODE_ENV === 'production') {
+    throw new Error('CRITICAL: API_KEY_SECRET environment variable is not set in production');
   }
   
   return crypto.createHmac('sha256', apiKeySecret).update(key).digest('hex');
