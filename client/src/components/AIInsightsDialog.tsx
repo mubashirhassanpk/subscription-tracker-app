@@ -16,7 +16,8 @@ import {
   RefreshCw,
   Sparkles,
   Target,
-  Clock
+  Clock,
+  Settings
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -130,42 +131,49 @@ export default function AIInsightsDialog() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-4xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-purple-500" />
-              Subscription Insights
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isLoading}
-                data-testid="button-refresh-insights"
-              >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleGenerateInsights}
-                disabled={generateInsightsMutation.isPending}
-                data-testid="button-generate-new-insights"
-              >
-                {generateInsightsMutation.isPending ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Target className="h-4 w-4" />
-                    Generate New
-                  </>
-                )}
-              </Button>
-            </div>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-purple-500" />
+            Subscription Insights
           </DialogTitle>
+          <div className="flex items-center justify-end gap-2 mt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.open('/api-keys', '_blank')}
+              data-testid="button-manage-api-keys"
+            >
+              <Settings className="h-4 w-4" />
+              API Keys
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isLoading}
+              data-testid="button-refresh-insights"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateInsights}
+              disabled={generateInsightsMutation.isPending}
+              data-testid="button-generate-new-insights"
+            >
+              {generateInsightsMutation.isPending ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Target className="h-4 w-4" />
+                  Generate New
+                </>
+              )}
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden">
