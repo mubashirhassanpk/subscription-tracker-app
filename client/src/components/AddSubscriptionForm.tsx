@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
@@ -119,7 +120,7 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
           Add Subscription
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[98vw] max-w-[90vw] sm:max-w-lg mx-2 sm:mx-4">
+      <DialogContent className="w-[95vw] max-w-md mx-2 max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Add New Subscription
@@ -202,8 +203,9 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
           </Card>
         )}
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <ScrollArea className="flex-1 px-1">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pr-4">
             <FormField
               control={form.control}
               name="name"
@@ -473,6 +475,7 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
             </div>
           </form>
         </Form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

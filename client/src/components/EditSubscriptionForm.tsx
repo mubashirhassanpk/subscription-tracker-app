@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Crown, CreditCard } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -115,13 +116,14 @@ export default function EditSubscriptionForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[98vw] max-w-[90vw] sm:max-w-lg mx-2 sm:mx-4">
+      <DialogContent className="w-[95vw] max-w-md mx-2 max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Edit Subscription</DialogTitle>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <ScrollArea className="flex-1 px-1">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pr-4">
             <FormField
               control={form.control}
               name="name"
@@ -408,8 +410,9 @@ export default function EditSubscriptionForm({
                 {isLoading ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
