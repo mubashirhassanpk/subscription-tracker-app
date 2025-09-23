@@ -17,11 +17,27 @@ import { format } from "date-fns";
 import { useEffect } from "react";
 
 const formSchema = insertSubscriptionSchema.extend({
-  nextBillingDate: z.string().min(1, "Next billing date is required"),
+  nextBillingDate: z.string().optional(),
   isTrial: z.boolean().default(false),
   trialDays: z.number().optional(),
   cardLast4: z.string().optional(),
   bankName: z.string().optional(),
+}).superRefine((data, ctx) => {
+  // Conditional validation based on trial status
+  if (!data.isTrial && (!data.nextBillingDate || data.nextBillingDate === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Next billing date is required when not in trial",
+      path: ["nextBillingDate"],
+    });
+  }
+  if (data.isTrial && (!data.trialDays || data.trialDays <= 0)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Trial duration must be greater than 0",
+      path: ["trialDays"],
+    });
+  }
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -108,7 +124,22 @@ export default function EditSubscriptionForm({
   const handleSubmit = (data: FormData) => {
     if (!subscription) return;
     console.log('Form submitted:', data);
-    onSubmit(subscription.id, data);
+    
+    // Normalize data based on trial status
+    const normalizedData = { ...data };
+    if (data.isTrial && data.trialDays) {
+      // Calculate next billing date from trial duration
+      const trialEndDate = new Date();
+      trialEndDate.setDate(trialEndDate.getDate() + data.trialDays);
+      normalizedData.nextBillingDate = format(trialEndDate, 'yyyy-MM-dd');
+      // Set cost to 0.00 during trial (decimal format)
+      normalizedData.cost = '0.00';
+    } else if (!data.cost || data.cost.trim() === '') {
+      // Ensure cost has a default value when not in trial
+      normalizedData.cost = '0.00';
+    }
+    
+    onSubmit(subscription.id, normalizedData);
     onOpenChange(false);
   };
 
