@@ -116,15 +116,15 @@ export default function EditSubscriptionForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-md mx-2 max-h-[90vh] flex flex-col">
+      <DialogContent className="w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Edit Subscription</DialogTitle>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col flex-1 overflow-hidden">
-            <ScrollArea className="flex-1 px-1">
-              <div className="pr-4 space-y-4 pb-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="space-y-4">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
@@ -394,29 +394,27 @@ export default function EditSubscriptionForm({
               </CardContent>
             </Card>
 
-              </div>
-            </ScrollArea>
-            
-            {/* Fixed action buttons outside ScrollArea */}
-            <div className="flex gap-2 p-4 border-t">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => onOpenChange(false)}
-                data-testid="button-edit-cancel"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isLoading}
-                data-testid="button-edit-save"
-              >
-                {isLoading ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </div>
-          </form>
-        </Form>
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    type="submit" 
+                    disabled={isLoading}
+                    data-testid="button-edit-save"
+                  >
+                    {isLoading ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => onOpenChange(false)}
+                    data-testid="button-edit-cancel"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
