@@ -10,7 +10,12 @@ export function generateApiKey(): string {
 
 // Hash API key for secure storage
 export function hashApiKey(key: string): string {
-  return crypto.createHmac('sha256', process.env.API_KEY_SECRET || 'default-secret').update(key).digest('hex');
+  const apiKeySecret = process.env.API_KEY_SECRET;
+  if (!apiKeySecret) {
+    throw new Error('CRITICAL: API_KEY_SECRET environment variable is not set');
+  }
+  
+  return crypto.createHmac('sha256', apiKeySecret).update(key).digest('hex');
 }
 
 // Validate API key format

@@ -11,6 +11,7 @@ import { insertSubscriptionSchema } from "@shared/schema";
 import { z } from "zod";
 import { type Subscription } from "@shared/schema";
 import { format } from "date-fns";
+import { useEffect } from "react";
 
 const formSchema = insertSubscriptionSchema.extend({
   nextBillingDate: z.string().min(1, "Next billing date is required"),
@@ -71,17 +72,19 @@ export default function EditSubscriptionForm({
   });
 
   // Reset form when subscription changes
-  if (subscription && open) {
-    form.reset({
-      name: subscription.name,
-      cost: subscription.cost,
-      billingCycle: subscription.billingCycle,
-      category: subscription.category,
-      nextBillingDate: format(new Date(subscription.nextBillingDate), 'yyyy-MM-dd'),
-      description: subscription.description || '',
-      isActive: subscription.isActive,
-    });
-  }
+  useEffect(() => {
+    if (subscription && open) {
+      form.reset({
+        name: subscription.name,
+        cost: subscription.cost,
+        billingCycle: subscription.billingCycle,
+        category: subscription.category,
+        nextBillingDate: format(new Date(subscription.nextBillingDate), 'yyyy-MM-dd'),
+        description: subscription.description || '',
+        isActive: subscription.isActive,
+      });
+    }
+  }, [subscription, open, form]);
 
   const handleSubmit = (data: FormData) => {
     if (!subscription) return;

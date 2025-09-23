@@ -20,7 +20,13 @@ export async function authenticateApiKey(req: AuthenticatedRequest, res: Respons
 
     const apiKey = authorization.substring(7); // Remove 'Bearer ' prefix
     
-    const keyHash = require('crypto').createHmac('sha256', process.env.API_KEY_SECRET || 'default-secret').update(apiKey).digest('hex');
+    const apiKeySecret = process.env.API_KEY_SECRET;
+    if (!apiKeySecret) {
+      console.error('CRITICAL: API_KEY_SECRET environment variable is not set');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+    
+    const keyHash = require('crypto').createHmac('sha256', apiKeySecret).update(apiKey).digest('hex');
     const foundApiKey = await storage.getApiKeyByKeyHash(keyHash);
     
     if (!foundApiKey) {
