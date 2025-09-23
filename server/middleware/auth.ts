@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { createHmac } from 'crypto';
 import { storage } from '../storage';
 import { type User, type ApiKey } from '@shared/schema';
 
@@ -27,7 +28,7 @@ export async function authenticateApiKey(req: AuthenticatedRequest, res: Respons
       return res.status(500).json({ error: 'Server configuration error' });
     }
     
-    const keyHash = require('crypto').createHmac('sha256', apiKeySecret).update(apiKey).digest('hex');
+    const keyHash = createHmac('sha256', apiKeySecret).update(apiKey).digest('hex');
     const foundApiKey = await storage.getApiKeyByKeyHash(keyHash);
     
     if (!foundApiKey) {

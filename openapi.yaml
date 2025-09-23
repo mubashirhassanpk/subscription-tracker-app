@@ -1,0 +1,771 @@
+openapi: 3.1.0
+info:
+  title: Subscription Tracker API
+  description: |
+    Comprehensive REST API for managing subscriptions, API keys, and user accounts.
+    
+    Supports Chrome extensions, web applications, mobile apps, and AI integrations
+    with secure authentication and rate limiting.
+    
+    ## Authentication
+    All API endpoints require authentication using API keys. Include your API key in the Authorization header:
+    ```
+    Authorization: Bearer sk_1234567890abcdef...
+    ```
+    
+    ## Base URL
+    - Production: `https://your-app-domain.replit.app`
+    - Development: `http://localhost:5000`
+  version: 1.0.0
+  contact:
+    name: API Support
+    url: https://your-app-domain.replit.app/support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://your-app-domain.replit.app
+    description: Production server
+  - url: http://localhost:5000
+    description: Development server
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user account
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - name
+                - password
+                - confirmPassword
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                name:
+                  type: string
+                  description: User's full name
+                password:
+                  type: string
+                  minLength: 8
+                  description: User's password
+                confirmPassword:
+                  type: string
+                  description: Password confirmation
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/UserProfile'
+                  trialDays:
+                    type: integer
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/api-keys:
+    get:
+      tags:
+        - API Keys
+      summary: List all API keys for authenticated user
+      operationId: listApiKeys
+      responses:
+        '200':
+          description: List of API keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiKey'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      tags:
+        - API Keys
+      summary: Create a new API key
+      operationId: createApiKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  description: Descriptive name for the API key
+                expiresAt:
+                  type: string
+                  format: date-time
+                  description: Optional expiration date
+      responses:
+        '201':
+          description: API key created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  apiKey:
+                    allOf:
+                      - $ref: '#/components/schemas/ApiKey'
+                      - type: object
+                        properties:
+                          key:
+                            type: string
+                            description: Full API key (only shown once)
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/api-keys/{id}:
+    put:
+      tags:
+        - API Keys
+      summary: Update an API key
+      operationId: updateApiKey
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 100
+                isActive:
+                  type: boolean
+                expiresAt:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: API key updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  apiKey:
+                    $ref: '#/components/schemas/ApiKey'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags:
+        - API Keys
+      summary: Delete an API key
+      operationId: deleteApiKey
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: API key deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/v1/account:
+    get:
+      tags:
+        - Account
+      summary: Get user account information and statistics
+      operationId: getAccount
+      responses:
+        '200':
+          description: Account information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserProfile'
+                  stats:
+                    type: object
+                    properties:
+                      totalSubscriptions:
+                        type: integer
+                      activeSubscriptions:
+                        type: integer
+                      totalApiKeys:
+                        type: integer
+                      activeApiKeys:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/v1/subscriptions:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get all subscriptions for authenticated user
+      operationId: getSubscriptions
+      responses:
+        '200':
+          description: List of subscriptions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscriptions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subscription'
+                  total:
+                    type: integer
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      email:
+                        type: string
+                      subscriptionStatus:
+                        type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      tags:
+        - Subscriptions
+      summary: Create a new subscription
+      operationId: createSubscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionRequest'
+      responses:
+        '201':
+          description: Subscription created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  subscription:
+                    $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/v1/subscriptions/{id}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get a specific subscription
+      operationId: getSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Subscription details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags:
+        - Subscriptions
+      summary: Update a subscription
+      operationId: updateSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionRequest'
+      responses:
+        '200':
+          description: Subscription updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  subscription:
+                    $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags:
+        - Subscriptions
+      summary: Delete a subscription
+      operationId: deleteSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Subscription deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/v1/subscriptions/sync:
+    post:
+      tags:
+        - Subscriptions
+      summary: Bulk sync subscriptions
+      operationId: bulkSyncSubscriptions
+      description: |
+        Create or replace multiple subscriptions in a single operation.
+        Useful for importing from other services or bulk updates.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - subscriptions
+              properties:
+                operation:
+                  type: string
+                  enum: [create, replace]
+                  default: create
+                  description: |
+                    - create: Add subscriptions to existing ones
+                    - replace: Delete all existing and create new ones
+                subscriptions:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CreateSubscriptionRequest'
+      responses:
+        '200':
+          description: Bulk sync completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  created:
+                    type: integer
+                  total:
+                    type: integer
+                  subscriptions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: Use your API key as a bearer token
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Alternative API key header
+
+  schemas:
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        subscriptionStatus:
+          type: string
+          enum: [trial, active, expired, cancelled]
+        planId:
+          type: string
+          nullable: true
+        trialEndsAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        keyPrefix:
+          type: string
+          description: First and last few characters of the key for identification
+        lastUsedAt:
+          type: string
+          format: date-time
+          nullable: true
+        isActive:
+          type: boolean
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+          description: Name of the subscription service
+        cost:
+          type: string
+          pattern: '^\d+(\.\d{2})?$'
+          description: Cost per billing cycle (decimal string)
+        billingCycle:
+          type: string
+          enum: [monthly, yearly, weekly]
+        category:
+          type: string
+          description: Category of the subscription
+        nextBillingDate:
+          type: string
+          format: date-time
+        description:
+          type: string
+          nullable: true
+        isActive:
+          type: integer
+          enum: [0, 1]
+          description: 1 for active, 0 for inactive
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateSubscriptionRequest:
+      type: object
+      required:
+        - name
+        - cost
+        - billingCycle
+        - category
+        - nextBillingDate
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Name of the subscription service
+        cost:
+          type: string
+          pattern: '^\d+(\.\d{2})?$'
+          description: Cost per billing cycle (e.g., "9.99")
+        billingCycle:
+          type: string
+          enum: [monthly, yearly, weekly]
+        category:
+          type: string
+          minLength: 1
+          description: Category of the subscription
+        nextBillingDate:
+          type: string
+          format: date-time
+        description:
+          type: string
+          description: Optional description
+        isActive:
+          type: integer
+          enum: [0, 1]
+          default: 1
+
+    UpdateSubscriptionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        cost:
+          type: string
+          pattern: '^\d+(\.\d{2})?$'
+        billingCycle:
+          type: string
+          enum: [monthly, yearly, weekly]
+        category:
+          type: string
+          minLength: 1
+        nextBillingDate:
+          type: string
+          format: date-time
+        description:
+          type: string
+        isActive:
+          type: integer
+          enum: [0, 1]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+          description: Detailed validation errors (when applicable)
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required or invalid API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Authentication required"
+
+    ForbiddenError:
+      description: Access denied - you don't own this resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Access denied"
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Subscription not found"
+
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Validation failed"
+            details:
+              - field: "cost"
+                message: "Cost must be a valid number"
+
+    ConflictError:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "User already exists with this email"
+
+    RateLimitError:
+      description: Rate limit exceeded
+      headers:
+        X-Rate-Limit-Remaining:
+          schema:
+            type: integer
+        X-Rate-Limit-Reset:
+          schema:
+            type: integer
+            description: Unix timestamp when the rate limit resets
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Rate limit exceeded"
+
+  examples:
+    CreateNetflixSubscription:
+      summary: Netflix subscription
+      value:
+        name: "Netflix Premium"
+        cost: "15.99"
+        billingCycle: "monthly"
+        category: "Entertainment"
+        nextBillingDate: "2024-02-01T00:00:00Z"
+        description: "4K streaming plan"
+
+    CreateSpotifySubscription:
+      summary: Spotify subscription
+      value:
+        name: "Spotify Premium"
+        cost: "9.99"
+        billingCycle: "monthly"
+        category: "Music"
+        nextBillingDate: "2024-02-15T00:00:00Z"
+
+    BulkSyncExample:
+      summary: Bulk sync multiple subscriptions
+      value:
+        operation: "create"
+        subscriptions:
+          - name: "Adobe Creative Cloud"
+            cost: "52.99"
+            billingCycle: "monthly"
+            category: "Software"
+            nextBillingDate: "2024-02-20T00:00:00Z"
+          - name: "GitHub Pro"
+            cost: "4.00"
+            billingCycle: "monthly"
+            category: "Development"
+            nextBillingDate: "2024-02-25T00:00:00Z"
