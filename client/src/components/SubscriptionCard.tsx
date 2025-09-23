@@ -9,6 +9,7 @@ interface SubscriptionCardProps {
   subscription: Subscription;
   onEdit?: (subscription: Subscription) => void;
   onDelete?: (id: string) => void;
+  onViewDetails?: (subscription: Subscription) => void;
 }
 
 const categoryColors: Record<string, string> = {
@@ -21,22 +22,33 @@ const categoryColors: Record<string, string> = {
   Other: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
 };
 
-export default function SubscriptionCard({ subscription, onEdit, onDelete }: SubscriptionCardProps) {
+export default function SubscriptionCard({ subscription, onEdit, onDelete, onViewDetails }: SubscriptionCardProps) {
   const nextBilling = new Date(subscription.nextBillingDate);
   const isUpcomingSoon = nextBilling.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000; // 7 days
 
-  const handleEdit = () => {
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
     console.log('Edit subscription:', subscription.id);
     onEdit?.(subscription);
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
     console.log('Delete subscription:', subscription.id);
     onDelete?.(subscription.id);
   };
 
+  const handleViewDetails = () => {
+    console.log('View details for subscription:', subscription.id);
+    onViewDetails?.(subscription);
+  };
+
   return (
-    <Card className="hover-elevate">
+    <Card 
+      className="hover-elevate cursor-pointer transition-all"
+      onClick={handleViewDetails}
+      data-testid={`card-subscription-${subscription.id}`}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-base" data-testid={`text-subscription-name-${subscription.id}`}>
@@ -51,7 +63,10 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete }: Sub
         <Button 
           variant="ghost" 
           size="icon"
-          onClick={() => console.log('More options for:', subscription.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log('More options for:', subscription.id);
+          }}
           data-testid={`button-more-${subscription.id}`}
         >
           <MoreHorizontal className="h-4 w-4" />
