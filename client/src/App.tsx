@@ -8,6 +8,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
 import Home from "./pages/Home";
 import Documentation from "./pages/Documentation";
+import ApiKeys from "./pages/ApiKeys";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -15,6 +16,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/docs" component={Documentation} />
+      <Route path="/api-keys" component={ApiKeys} />
       <Route component={NotFound} />
     </Switch>
   );
