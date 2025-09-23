@@ -2,7 +2,7 @@ import {
   subscriptions, users, apiKeys, plans,
   type Subscription, type InsertSubscription,
   type User, type InsertUser,
-  type ApiKey, type InsertApiKey,
+  type ApiKey, type InsertApiKey, type UpdateApiKey,
   type Plan, type InsertPlan
 } from "@shared/schema";
 import { db } from "./db";
@@ -28,9 +28,9 @@ export interface IStorage {
   // API Keys
   getApiKeysByUserId(userId: string): Promise<ApiKey[]>;
   getApiKey(id: string): Promise<ApiKey | undefined>;
-  getApiKeyByKey(key: string): Promise<ApiKey | undefined>;
+  getApiKeyByKeyHash(keyHash: string): Promise<ApiKey | undefined>;
   createApiKey(apiKey: InsertApiKey): Promise<ApiKey>;
-  updateApiKey(id: string, apiKey: Partial<InsertApiKey>): Promise<ApiKey | undefined>;
+  updateApiKey(id: string, apiKey: UpdateApiKey): Promise<ApiKey | undefined>;
   deleteApiKey(id: string): Promise<boolean>;
 
   // Plans
@@ -130,8 +130,8 @@ export class DatabaseStorage implements IStorage {
     return apiKey || undefined;
   }
 
-  async getApiKeyByKey(key: string): Promise<ApiKey | undefined> {
-    const [apiKey] = await db.select().from(apiKeys).where(eq(apiKeys.key, key));
+  async getApiKeyByKeyHash(keyHash: string): Promise<ApiKey | undefined> {
+    const [apiKey] = await db.select().from(apiKeys).where(eq(apiKeys.keyHash, keyHash));
     return apiKey || undefined;
   }
 
@@ -143,7 +143,7 @@ export class DatabaseStorage implements IStorage {
     return apiKey;
   }
 
-  async updateApiKey(id: string, updates: Partial<InsertApiKey>): Promise<ApiKey | undefined> {
+  async updateApiKey(id: string, updates: UpdateApiKey): Promise<ApiKey | undefined> {
     const [apiKey] = await db
       .update(apiKeys)
       .set(updates)
