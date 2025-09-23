@@ -1,8 +1,28 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// CORS configuration for Chrome extensions and web apps
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5000', 
+    'https://localhost:3000',
+    'https://localhost:5000',
+    // Chrome extension origins (will be chrome-extension://<extension-id>)
+    /^chrome-extension:\/\/[a-z]+$/,
+    // Allow any origin in development for testing
+    ...(process.env.NODE_ENV === 'development' ? ['*'] : [])
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
+  exposedHeaders: ['X-Total-Count', 'X-Rate-Limit-Remaining']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
