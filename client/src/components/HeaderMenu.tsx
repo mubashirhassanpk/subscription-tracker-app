@@ -6,7 +6,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { User, Settings, LogOut, Crown, CreditCard, HelpCircle, Search, Menu, Bell, Plus } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Link, useLocation } from "wouter";
@@ -49,9 +48,8 @@ export function HeaderMenu() {
 
   return (
     <header className="flex items-center justify-between p-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      {/* Left side - Sidebar Toggle, Logo and Search */}
+      {/* Left side - Logo and Search */}
       <div className="flex items-center gap-4">
-        <SidebarTrigger data-testid="button-sidebar-toggle" />
         <div className="flex items-center gap-2">
           <Crown className="h-6 w-6 text-primary" />
           <span className="font-semibold text-lg hidden sm:block">Subscription Tracker</span>
