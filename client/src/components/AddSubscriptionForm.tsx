@@ -120,7 +120,7 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
           Add Subscription
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-md mx-2 max-h-[85vh] flex flex-col">
+      <DialogContent className="w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Add New Subscription
@@ -133,8 +133,8 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
           </DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 px-1" style={{ maxHeight: 'calc(85vh - 120px)' }}>
-          <div className="pr-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="space-y-4">
             {/* User Status & Limits */}
             {userStatus && (
               <Card className="mb-4">
@@ -474,10 +474,9 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
                  'Save Subscription'}
               </Button>
             </div>
-              </form>
             </Form>
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

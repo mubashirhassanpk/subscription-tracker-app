@@ -120,11 +120,7 @@ export default function Settings() {
   // Save API Key mutation
   const saveApiKeyMutation = useMutation({
     mutationFn: async ({ service, keyValue }: { service: string; keyValue: string }) => {
-      return apiRequest(`/api/user-external-api-keys`, {
-        method: 'POST',
-        body: JSON.stringify({ service, keyValue, isActive: true }),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return apiRequest('POST', '/api/user-external-api-keys', { service, keyValue, isActive: true });
     },
     onSuccess: (data, variables) => {
       toast({
@@ -151,9 +147,7 @@ export default function Settings() {
   // Delete API Key mutation
   const deleteApiKeyMutation = useMutation({
     mutationFn: async (service: string) => {
-      return apiRequest(`/api/user-external-api-keys/${service}`, {
-        method: 'DELETE',
-      });
+      return apiRequest('DELETE', `/api/user-external-api-keys/${service}`);
     },
     onSuccess: (data, service) => {
       toast({
