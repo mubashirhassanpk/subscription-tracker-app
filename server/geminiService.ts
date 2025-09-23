@@ -40,8 +40,7 @@ Respond with JSON in this exact format:
       "title": "Brief insight title",
       "message": "Detailed actionable message for the user",
       "priority": "low" | "normal" | "high" | "urgent",
-      "subscriptionIds": ["optional array of subscription IDs this applies to"],
-      "data": {} // optional additional data
+      "subscriptionIds": ["optional array of subscription IDs this applies to"]
     }
   ]
 }
@@ -81,8 +80,7 @@ Provide insights focusing on:
                   subscriptionIds: { 
                     type: "array", 
                     items: { type: "string" }
-                  },
-                  data: { type: "object" }
+                  }
                 },
                 required: ["type", "title", "message", "priority"]
               }

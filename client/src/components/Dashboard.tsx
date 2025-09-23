@@ -65,7 +65,10 @@ export default function Dashboard({
                 isLoading={isLoading}
                 currentSubscriptionCount={subscriptions.length}
               />
-              <ThemeToggle />
+              <ThemeToggle onRefresh={() => {
+                // Force re-render of dashboard by triggering the parent to refresh data
+                window.location.reload();
+              }} />
             </div>
           </div>
         </div>
