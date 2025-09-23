@@ -1,10 +1,11 @@
 import { 
-  subscriptions, users, apiKeys, plans, notifications,
+  subscriptions, users, apiKeys, plans, notifications, userExternalApiKeys,
   type Subscription, type InsertSubscription,
   type User, type InsertUser,
   type ApiKey, type InsertApiKey, type UpdateApiKey,
   type Plan, type InsertPlan,
-  type Notification, type InsertNotification, type UpdateNotification
+  type Notification, type InsertNotification, type UpdateNotification,
+  type UserExternalApiKey, type InsertUserExternalApiKey, type UpdateUserExternalApiKey
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -52,6 +53,13 @@ export interface IStorage {
   markAllNotificationsAsRead(userId: string): Promise<boolean>;
   deleteNotification(id: string): Promise<boolean>;
   deleteNotificationsByUserId(userId: string): Promise<boolean>;
+
+  // User External API Keys
+  getUserExternalApiKeys(userId: string): Promise<UserExternalApiKey[]>;
+  getUserExternalApiKey(userId: string, service: string): Promise<UserExternalApiKey | undefined>;
+  createUserExternalApiKey(apiKey: InsertUserExternalApiKey): Promise<UserExternalApiKey>;
+  updateUserExternalApiKey(userId: string, service: string, keyValue: string): Promise<UserExternalApiKey | undefined>;
+  deleteUserExternalApiKey(userId: string, service: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -277,6 +285,52 @@ export class DatabaseStorage implements IStorage {
 
   async deleteNotificationsByUserId(userId: string): Promise<boolean> {
     const result = await db.delete(notifications).where(eq(notifications.userId, userId));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // User External API Key methods
+  async getUserExternalApiKeys(userId: string): Promise<UserExternalApiKey[]> {
+    return await db
+      .select()
+      .from(userExternalApiKeys)
+      .where(eq(userExternalApiKeys.userId, userId));
+  }
+
+  async getUserExternalApiKey(userId: string, service: string): Promise<UserExternalApiKey | undefined> {
+    const [apiKey] = await db
+      .select()
+      .from(userExternalApiKeys)
+      .where(and(eq(userExternalApiKeys.userId, userId), eq(userExternalApiKeys.service, service)));
+    return apiKey || undefined;
+  }
+
+  async createUserExternalApiKey(insertApiKey: InsertUserExternalApiKey): Promise<UserExternalApiKey> {
+    const [apiKey] = await db
+      .insert(userExternalApiKeys)
+      .values({
+        ...insertApiKey,
+        updatedAt: new Date()
+      })
+      .returning();
+    return apiKey;
+  }
+
+  async updateUserExternalApiKey(userId: string, service: string, keyValue: string): Promise<UserExternalApiKey | undefined> {
+    const [apiKey] = await db
+      .update(userExternalApiKeys)
+      .set({ 
+        keyValue,
+        updatedAt: new Date()
+      })
+      .where(and(eq(userExternalApiKeys.userId, userId), eq(userExternalApiKeys.service, service)))
+      .returning();
+    return apiKey || undefined;
+  }
+
+  async deleteUserExternalApiKey(userId: string, service: string): Promise<boolean> {
+    const result = await db
+      .delete(userExternalApiKeys)
+      .where(and(eq(userExternalApiKeys.userId, userId), eq(userExternalApiKeys.service, service)));
     return (result.rowCount ?? 0) > 0;
   }
 }
