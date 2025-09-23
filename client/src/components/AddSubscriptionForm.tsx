@@ -9,7 +9,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Calendar, Crown, AlertTriangle, Info } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Plus, Calendar, Crown, AlertTriangle, Info, CreditCard } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertSubscriptionSchema } from "@shared/schema";
@@ -20,6 +21,10 @@ import { format, differenceInDays } from "date-fns";
 
 const formSchema = insertSubscriptionSchema.extend({
   nextBillingDate: z.string().min(1, "Next billing date is required"),
+  isTrial: z.boolean().default(false),
+  trialDays: z.number().optional(),
+  cardLast4: z.string().optional(),
+  bankName: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -77,6 +82,10 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
       nextBillingDate: '',
       description: '',
       isActive: 1,
+      isTrial: false,
+      trialDays: undefined,
+      cardLast4: '',
+      bankName: '',
     },
   });
 
@@ -324,6 +333,123 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
                 </FormItem>
               )}
             />
+
+            {/* Free Trial Section */}
+            <Card className="border-dashed">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Crown className="h-4 w-4" />
+                  Free Trial
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Set up a free trial period before billing begins
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="isTrial"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Enable Free Trial</FormLabel>
+                        <div className="text-sm text-muted-foreground">
+                          Start with a free trial period
+                        </div>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          data-testid="switch-trial"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                {form.watch('isTrial') && (
+                  <FormField
+                    control={form.control}
+                    name="trialDays"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Trial Duration (Days)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="7"
+                            min="1"
+                            max="365"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                            data-testid="input-trial-days"
+                          />
+                        </FormControl>
+                        <div className="text-xs text-muted-foreground">
+                          How many days should the trial last?
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Payment Card Section */}
+            <Card className="border-dashed">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Payment Card (Optional)
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Add card details for reminders and auto-payment tracking
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="cardLast4"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last 4 Digits</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="1234"
+                            maxLength={4}
+                            pattern="[0-9]{4}"
+                            {...field}
+                            data-testid="input-card-last4"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="bankName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bank/Card Name</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Chase, Visa, etc."
+                            {...field}
+                            data-testid="input-bank-name"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             <div className="flex gap-2 pt-4">
               <Button 

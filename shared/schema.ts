@@ -54,6 +54,14 @@ export const subscriptions = pgTable("subscriptions", {
   nextBillingDate: timestamp("next_billing_date").notNull(),
   description: text("description"),
   isActive: integer("is_active").default(1).notNull(), // 1 for active, 0 for inactive
+  // Free trial fields
+  isTrial: boolean("is_trial").default(false).notNull(),
+  trialDays: integer("trial_days"), // number of trial days
+  trialStartDate: timestamp("trial_start_date"), // when trial started
+  trialEndDate: timestamp("trial_end_date"), // when trial ends
+  // Payment card fields for reminders and auto-payment
+  cardLast4: text("card_last_4"), // last 4 digits of card
+  bankName: text("bank_name"), // name of the bank/card issuer
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 });
 
