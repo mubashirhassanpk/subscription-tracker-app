@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { User, Settings, LogOut, Crown, CreditCard, HelpCircle, Search, Menu, Bell, Plus } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { NotificationCenter } from "./NotificationCenter";
 import { Link, useLocation } from "wouter";
 
 interface UserStatus {
@@ -102,9 +103,7 @@ export function HeaderMenu() {
         )}
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" data-testid="button-notifications">
-          <Bell className="h-4 w-4" />
-        </Button>
+        <NotificationCenter />
 
         {/* Theme Toggle */}
         <ThemeToggle />

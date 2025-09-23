@@ -5,6 +5,7 @@ import FilterBar from "./FilterBar";
 import SubscriptionCard from "./SubscriptionCard";
 import AddSubscriptionForm from "./AddSubscriptionForm";
 import { ThemeToggle } from "./ThemeToggle";
+import { AIInsightsButton } from "./NotificationCenter";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, List } from "lucide-react";
 
@@ -58,6 +59,7 @@ export default function Dashboard({
               </p>
             </div>
             <div className="flex items-center gap-4">
+              <AIInsightsButton />
               <AddSubscriptionForm 
                 onSubmit={onAddSubscription} 
                 isLoading={isLoading}
