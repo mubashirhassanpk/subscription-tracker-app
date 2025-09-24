@@ -1,7 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { MoreHorizontal, Calendar, DollarSign, Crown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Calendar, DollarSign, Crown, Copy, Heart, Pause, Play, FileText, ExternalLink } from "lucide-react";
 import { type Subscription } from "@shared/schema";
 import { format } from "date-fns";
 
@@ -10,6 +11,10 @@ interface SubscriptionCardProps {
   onEdit?: (subscription: Subscription) => void;
   onDelete?: (id: string) => void;
   onViewDetails?: (subscription: Subscription) => void;
+  onDuplicate?: (subscription: Subscription) => void;
+  onToggleFavorite?: (id: string) => void;
+  onTogglePause?: (id: string) => void;
+  onExport?: (subscription: Subscription) => void;
 }
 
 const categoryColors: Record<string, string> = {
@@ -22,7 +27,7 @@ const categoryColors: Record<string, string> = {
   Other: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
 };
 
-export default function SubscriptionCard({ subscription, onEdit, onDelete, onViewDetails }: SubscriptionCardProps) {
+export default function SubscriptionCard({ subscription, onEdit, onDelete, onViewDetails, onDuplicate, onToggleFavorite, onTogglePause, onExport }: SubscriptionCardProps) {
   const nextBilling = new Date(subscription.nextBillingDate);
   const isUpcomingSoon = nextBilling.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -41,6 +46,37 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
   const handleViewDetails = () => {
     console.log('View details for subscription:', subscription.id);
     onViewDetails?.(subscription);
+  };
+
+  const handleDuplicate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('Duplicate subscription:', subscription.id);
+    onDuplicate?.(subscription);
+  };
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('Toggle favorite for:', subscription.id);
+    onToggleFavorite?.(subscription.id);
+  };
+
+  const handleTogglePause = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('Toggle pause for:', subscription.id);
+    onTogglePause?.(subscription.id);
+  };
+
+  const handleExport = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('Export subscription:', subscription.id);
+    onExport?.(subscription);
+  };
+
+  const handleOpenWebsite = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Try to construct a website URL from the subscription name
+    const searchQuery = encodeURIComponent(subscription.name + ' subscription');
+    window.open(`https://www.google.com/search?q=${searchQuery}`, '_blank');
   };
 
   return (
@@ -66,17 +102,44 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
             </Badge>
           )}
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log('More options for:', subscription.id);
-          }}
-          data-testid={`button-more-${subscription.id}`}
-        >
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={(e) => e.stopPropagation()}
+              data-testid={`button-more-${subscription.id}`}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={handleDuplicate} data-testid={`menu-duplicate-${subscription.id}`}>
+              <Copy className="mr-2 h-4 w-4" />
+              <span>Duplicate</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleToggleFavorite} data-testid={`menu-favorite-${subscription.id}`}>
+              <Heart className="mr-2 h-4 w-4" />
+              <span>Add to favorites</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleTogglePause} data-testid={`menu-pause-${subscription.id}`}>
+              {subscription.isActive ? (
+                <><Pause className="mr-2 h-4 w-4" /><span>Pause subscription</span></>
+              ) : (
+                <><Play className="mr-2 h-4 w-4" /><span>Resume subscription</span></>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleExport} data-testid={`menu-export-${subscription.id}`}>
+              <FileText className="mr-2 h-4 w-4" />
+              <span>Export details</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleOpenWebsite} data-testid={`menu-website-${subscription.id}`}>
+              <ExternalLink className="mr-2 h-4 w-4" />
+              <span>Find website</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-start justify-between gap-2">

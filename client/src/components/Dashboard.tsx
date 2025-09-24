@@ -57,6 +57,70 @@ export default function Dashboard({
     setDetailsDialogOpen(true);
   };
 
+  const handleDuplicateSubscription = (subscription: Subscription) => {
+    console.log('Duplicating subscription:', subscription.id);
+    // Create a duplicate subscription with modified name
+    const duplicateData = {
+      ...subscription,
+      name: `${subscription.name} (Copy)`,
+      id: undefined, // Remove ID so a new one is generated
+      createdAt: undefined, // Remove timestamp so a new one is generated
+    };
+    onAddSubscription(duplicateData);
+  };
+
+  const handleToggleFavorite = (id: string) => {
+    console.log('Toggle favorite for subscription:', id);
+    // This would require adding isFavorite field to schema
+    // For now, just show a placeholder action
+    alert('Favorite feature coming soon!');
+  };
+
+  const handleTogglePause = async (id: string) => {
+    console.log('Toggle pause for subscription:', id);
+    try {
+      const subscription = subscriptions.find(s => s.id === id);
+      if (!subscription) return;
+      
+      // Toggle the isActive status
+      const updatedData = {
+        isActive: subscription.isActive ? 0 : 1
+      };
+      
+      await apiRequest('PUT', `/api/subscriptions/${id}`, updatedData);
+      queryClient.invalidateQueries({ queryKey: ['/api/subscriptions'] });
+    } catch (error) {
+      console.error('Failed to toggle subscription status:', error);
+    }
+  };
+
+  const handleExportSubscription = (subscription: Subscription) => {
+    console.log('Exporting subscription:', subscription.id);
+    // Create a downloadable JSON file with subscription details
+    const exportData = {
+      name: subscription.name,
+      cost: subscription.cost,
+      billingCycle: subscription.billingCycle,
+      category: subscription.category,
+      nextBillingDate: subscription.nextBillingDate,
+      description: subscription.description,
+      isTrial: subscription.isTrial,
+      trialDays: subscription.trialDays,
+      exportedAt: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${subscription.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_subscription.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const filteredSubscriptions = useMemo(() => {
     return subscriptions.filter(subscription => {
       const matchesSearch = subscription.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -175,6 +239,10 @@ export default function Dashboard({
                   onEdit={onEditSubscription}
                   onDelete={onDeleteSubscription}
                   onViewDetails={handleViewDetails}
+                  onDuplicate={handleDuplicateSubscription}
+                  onToggleFavorite={handleToggleFavorite}
+                  onTogglePause={handleTogglePause}
+                  onExport={handleExportSubscription}
                 />
               ))}
             </div>
