@@ -26,6 +26,8 @@ const formSchema = insertSubscriptionSchema.extend({
   trialDays: z.number().optional(),
   cardLast4: z.string().optional(),
   bankName: z.string().optional(),
+  email: z.string().email().optional().or(z.literal('')),
+  paymentStatus: z.enum(['paid', 'pending', 'failed', 'overdue']).default('paid'),
 }).superRefine((data, ctx) => {
   // Conditional validation based on trial status
   if (!data.isTrial && (!data.nextBillingDate || data.nextBillingDate === '')) {
@@ -98,6 +100,8 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
       category: 'Entertainment',
       nextBillingDate: '',
       description: '',
+      email: '',
+      paymentStatus: 'paid',
       isActive: 1,
       isTrial: false,
       trialDays: undefined,
@@ -369,6 +373,55 @@ export default function AddSubscriptionForm({ onSubmit, isLoading = false, curre
                 </FormItem>
               )}
             />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="email"
+                        placeholder="your@email.com"
+                        {...field}
+                        value={field.value || ''}
+                        data-testid="input-email"
+                      />
+                    </FormControl>
+                    <div className="text-xs text-muted-foreground">
+                      For renewal reminders and notifications
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="paymentStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-payment-status">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="paid">Paid</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
+                        <SelectItem value="overdue">Overdue</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* Free Trial Section */}
             <Card className="border-dashed">
