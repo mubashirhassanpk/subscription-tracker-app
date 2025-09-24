@@ -249,7 +249,43 @@ subscriptionsRouter.get('/history/all', async (req: any, res) => {
     }
 
     const history = await storage.getSubscriptionHistoryByUserId(req.user.id);
-    res.json(history);
+    
+    // Transform the data to match frontend expectations
+    const transformedHistory = await Promise.all(history.map(async (entry) => {
+      let subscriptionName = 'Unknown Subscription';
+      
+      // Try to get subscription name from current subscriptions
+      try {
+        const subscription = await storage.getSubscription(entry.subscriptionId);
+        if (subscription) {
+          subscriptionName = subscription.name;
+        } else {
+          // Extract subscription name from description if subscription is deleted
+          const nameMatch = entry.description.match(/"([^"]+)"/); 
+          if (nameMatch) {
+            subscriptionName = nameMatch[1];
+          }
+        }
+      } catch (error) {
+        // Extract name from description as fallback
+        const nameMatch = entry.description.match(/"([^"]+)"/); 
+        if (nameMatch) {
+          subscriptionName = nameMatch[1];
+        }
+      }
+      
+      return {
+        id: entry.id,
+        subscriptionId: entry.subscriptionId,
+        subscriptionName,
+        action: entry.eventType,
+        oldValue: null,
+        newValue: entry.amount ? `$${entry.amount}` : null,
+        createdAt: entry.createdAt || entry.eventDate
+      };
+    }));
+    
+    res.json(transformedHistory);
   } catch (error) {
     console.error('Get user subscription history error:', error);
     res.status(500).json({ error: 'Internal server error' });
