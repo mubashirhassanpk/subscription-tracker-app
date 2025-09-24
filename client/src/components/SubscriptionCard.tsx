@@ -86,10 +86,19 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
       data-testid={`card-subscription-${subscription.id}`}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="space-y-1 flex-1 min-w-0">
+          <Badge 
+            className={`${categoryColors[subscription.category] || categoryColors.Other} text-xs px-1.5 py-0.5 w-fit`}
+            variant="secondary"
+            data-testid={`badge-category-${subscription.id}`}
+          >
+            {subscription.category.slice(0, 4)}
+          </Badge>
           <h3 className="font-semibold text-sm sm:text-base truncate" data-testid={`text-subscription-name-${subscription.id}`}>
             {subscription.name}
           </h3>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
           {subscription.isTrial && (
             <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200" data-testid={`badge-trial-${subscription.id}`}>
               <Crown className="h-3 w-3 mr-1" />
@@ -152,30 +161,21 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
         </DropdownMenu>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <div className="flex flex-wrap items-baseline gap-1">
-              <span className="text-xl sm:text-2xl font-bold" data-testid={`text-cost-${subscription.id}`}>
-                ${subscription.cost}
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          <div className="flex flex-wrap items-baseline gap-1">
+            <span className="text-xl sm:text-2xl font-bold" data-testid={`text-cost-${subscription.id}`}>
+              ${subscription.cost}
+            </span>
+            <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+              /{subscription.billingCycle}
+            </span>
+            {subscription.isTrial && subscription.trialDays && (
+              <span className="text-xs text-orange-600 ml-1">
+                ({subscription.trialDays} day trial)
               </span>
-              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                /{subscription.billingCycle}
-              </span>
-              {subscription.isTrial && subscription.trialDays && (
-                <span className="text-xs text-orange-600 ml-1">
-                  ({subscription.trialDays} day trial)
-                </span>
-              )}
-            </div>
+            )}
           </div>
-          <Badge 
-            className={`${categoryColors[subscription.category] || categoryColors.Other} text-xs flex-shrink-0`}
-            variant="secondary"
-            data-testid={`badge-category-${subscription.id}`}
-          >
-            {subscription.category}
-          </Badge>
         </div>
 
         <CountdownTimer

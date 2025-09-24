@@ -130,7 +130,7 @@ export function NotificationCenter() {
           {unreadCount > 0 && (
             <Badge 
               variant="destructive" 
-              className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs p-0 min-w-[1.25rem] rounded-full border-2 border-background z-10"
+              className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center text-xs p-0 min-w-[1rem] rounded-full border border-background z-10"
               data-testid="badge-unread-count"
             >
               {unreadCount > 99 ? "99+" : unreadCount}
