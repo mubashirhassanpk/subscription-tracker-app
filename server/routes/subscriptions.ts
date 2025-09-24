@@ -95,6 +95,20 @@ subscriptionsRouter.post('/', async (req: any, res) => {
 
     const subscription = await storage.createSubscription(subscriptionData);
     console.log('Created subscription:', subscription);
+
+    // Create history entry for subscription creation
+    await storage.createSubscriptionHistoryEntry({
+      userId: req.user.id,
+      subscriptionId: subscription.id,
+      eventType: 'created',
+      paymentStatus: null,
+      amount: null,
+      currency: 'USD',
+      paymentMethod: null,
+      description: `Subscription "${subscription.name}" was created with cost $${subscription.cost}/${subscription.billingCycle}`,
+      eventDate: new Date()
+    });
+
     res.status(201).json(subscription);
   } catch (error) {
     console.error('Create subscription web error:', error);
@@ -135,6 +149,19 @@ subscriptionsRouter.put('/:id', async (req: any, res) => {
       return res.status(404).json({ error: 'Subscription not found' });
     }
 
+    // Create history entry for subscription update
+    await storage.createSubscriptionHistoryEntry({
+      userId: req.user.id,
+      subscriptionId: subscriptionId,
+      eventType: 'updated',
+      paymentStatus: null,
+      amount: null,
+      currency: 'USD',
+      paymentMethod: null,
+      description: `Subscription "${updatedSubscription.name}" was updated`,
+      eventDate: new Date()
+    });
+
     res.json(updatedSubscription);
   } catch (error) {
     console.error('Update subscription web error:', error);
@@ -160,6 +187,19 @@ subscriptionsRouter.delete('/:id', async (req: any, res) => {
     if (existingSubscription.userId !== req.user.id) {
       return res.status(403).json({ error: 'Access denied' });
     }
+
+    // Create history entry before deletion
+    await storage.createSubscriptionHistoryEntry({
+      userId: req.user.id,
+      subscriptionId: subscriptionId,
+      eventType: 'deleted',
+      paymentStatus: null,
+      amount: null,
+      currency: 'USD',
+      paymentMethod: null,
+      description: `Subscription "${existingSubscription.name}" was deleted`,
+      eventDate: new Date()
+    });
 
     const deleted = await storage.deleteSubscription(subscriptionId);
     
