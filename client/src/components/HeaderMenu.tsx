@@ -3,14 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { User, Settings, LogOut, Crown, CreditCard, HelpCircle, Search, Menu, Bell, Plus, Clock, Calendar as CalendarIcon } from "lucide-react";
+import { User, Settings, LogOut, Crown, CreditCard, HelpCircle, Menu, Bell, Plus, Clock, Calendar as CalendarIcon } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { NotificationCenter } from "./NotificationCenter";
 import { Link, useLocation } from "wouter";
-import { useSearch } from "../contexts/SearchContext";
 
 interface UserStatus {
   id: string;
@@ -27,7 +25,6 @@ interface UserStatus {
 export function HeaderMenu() {
   const [location] = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const { searchTerm, setSearchTerm } = useSearch();
 
   // Fetch user status
   const { data: userStatus } = useQuery<UserStatus>({
@@ -59,17 +56,6 @@ export function HeaderMenu() {
           <span className="font-semibold text-sm sm:text-lg hidden xs:block truncate">Subscription Tracker</span>
         </Link>
         
-        {/* Search Bar - Hidden on mobile, smaller on medium */}
-        <div className="relative hidden lg:block flex-1 max-w-sm">
-          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search subscriptions..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8 text-sm"
-            data-testid="input-header-search"
-          />
-        </div>
       </div>
 
       {/* Center - Navigation (Hidden on mobile and medium) */}
@@ -205,17 +191,6 @@ export function HeaderMenu() {
             </SheetHeader>
             
             <div className="mt-6 space-y-6">
-              {/* Mobile Search */}
-              <div className="relative">
-                <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search subscriptions..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                  data-testid="input-mobile-search"
-                />
-              </div>
 
               {/* Mobile Navigation */}
               <nav className="space-y-1">
