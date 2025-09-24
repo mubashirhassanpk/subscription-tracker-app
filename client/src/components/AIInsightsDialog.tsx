@@ -198,8 +198,8 @@ export default function AIInsightsDialog() {
               </div>
             </div>
           ) : (
-            <ScrollArea className="h-full">
-              <div className="space-y-6 pr-4">
+            <ScrollArea className="h-[60vh]">
+              <div className="space-y-6 pr-6 pb-4">
                 {/* Summary Cards */}
                 {insightsData.summary && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
