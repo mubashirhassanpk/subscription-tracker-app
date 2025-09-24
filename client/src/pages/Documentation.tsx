@@ -71,14 +71,26 @@ export default function Documentation() {
 
         {/* API Sections */}
         <Tabs defaultValue="auth" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-            <TabsTrigger value="auth" data-testid="tab-auth" className="text-xs sm:text-sm px-2 sm:px-3">Authentication</TabsTrigger>
-            <TabsTrigger value="subscriptions" data-testid="tab-subscriptions" className="text-xs sm:text-sm px-2 sm:px-3">Subscriptions</TabsTrigger>
-            <TabsTrigger value="keys" data-testid="tab-keys" className="text-xs sm:text-sm px-2 sm:px-3">API Keys</TabsTrigger>
-            <TabsTrigger value="chrome" data-testid="tab-chrome" className="text-xs sm:text-sm px-2 sm:px-3">Chrome Extensions</TabsTrigger>
-            <TabsTrigger value="ai" data-testid="tab-ai" className="text-xs sm:text-sm px-2 sm:px-3">AI Integration</TabsTrigger>
-            <TabsTrigger value="examples" data-testid="tab-examples" className="text-xs sm:text-sm px-2 sm:px-3">Examples</TabsTrigger>
-          </TabsList>
+          <div className="sm:hidden overflow-x-auto">
+            <TabsList className="inline-flex h-auto w-auto min-w-full p-1">
+              <TabsTrigger value="auth" data-testid="tab-auth" className="text-xs px-2 whitespace-nowrap">Auth</TabsTrigger>
+              <TabsTrigger value="subscriptions" data-testid="tab-subscriptions" className="text-xs px-2 whitespace-nowrap">Subscriptions</TabsTrigger>
+              <TabsTrigger value="keys" data-testid="tab-keys" className="text-xs px-2 whitespace-nowrap">API Keys</TabsTrigger>
+              <TabsTrigger value="chrome" data-testid="tab-chrome" className="text-xs px-2 whitespace-nowrap">Extensions</TabsTrigger>
+              <TabsTrigger value="ai" data-testid="tab-ai" className="text-xs px-2 whitespace-nowrap">AI</TabsTrigger>
+              <TabsTrigger value="examples" data-testid="tab-examples" className="text-xs px-2 whitespace-nowrap">Examples</TabsTrigger>
+            </TabsList>
+          </div>
+          <div className="hidden sm:block">
+            <TabsList className="grid w-full grid-cols-3 md:grid-cols-6">
+              <TabsTrigger value="auth" data-testid="tab-auth" className="text-sm px-2 sm:px-3">Authentication</TabsTrigger>
+              <TabsTrigger value="subscriptions" data-testid="tab-subscriptions" className="text-sm px-2 sm:px-3">Subscriptions</TabsTrigger>
+              <TabsTrigger value="keys" data-testid="tab-keys" className="text-sm px-2 sm:px-3">API Keys</TabsTrigger>
+              <TabsTrigger value="chrome" data-testid="tab-chrome" className="text-sm px-2 sm:px-3">Chrome Extensions</TabsTrigger>
+              <TabsTrigger value="ai" data-testid="tab-ai" className="text-sm px-2 sm:px-3">AI Integration</TabsTrigger>
+              <TabsTrigger value="examples" data-testid="tab-examples" className="text-sm px-2 sm:px-3">Examples</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Authentication Tab */}
           <TabsContent value="auth" className="space-y-6">
@@ -177,12 +189,12 @@ export default function Documentation() {
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-2">Create Subscription</h4>
-                  <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="text-green-600">POST</div>
-                        <div>{baseUrl}/api/v1/subscriptions</div>
+                  <h4 className="font-semibold mb-2 text-sm sm:text-base">Create Subscription</h4>
+                  <div className="bg-muted p-3 sm:p-4 rounded-lg font-mono text-xs sm:text-sm overflow-x-auto">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                      <div className="min-w-0">
+                        <div className="text-green-600 font-semibold">POST</div>
+                        <div className="break-all text-xs sm:text-sm">{baseUrl}/api/v1/subscriptions</div>
                       </div>
                       <Button 
                         size="sm" 
@@ -208,12 +220,12 @@ export default function Documentation() {
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-2">Bulk Sync Subscriptions</h4>
-                  <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="text-green-600">POST</div>
-                        <div>{baseUrl}/api/v1/subscriptions/sync</div>
+                  <h4 className="font-semibold mb-2 text-sm sm:text-base">Bulk Sync Subscriptions</h4>
+                  <div className="bg-muted p-3 sm:p-4 rounded-lg font-mono text-xs sm:text-sm overflow-x-auto">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                      <div className="min-w-0">
+                        <div className="text-green-600 font-semibold">POST</div>
+                        <div className="break-all text-xs sm:text-sm">{baseUrl}/api/v1/subscriptions/sync</div>
                       </div>
                       <Button 
                         size="sm" 
