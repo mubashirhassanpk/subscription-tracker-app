@@ -35,8 +35,8 @@ export const apiKeys = pgTable("api_keys", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   name: text("name").notNull(), // user-defined name for the key
-  keyHash: text("key_hash").notNull().unique(), // hashed version of the API key
-  keyPrefix: text("key_prefix").notNull(), // first 8 chars for display (e.g., "sk_1234567...")
+  keyHash: varchar("key_hash", { length: 255 }).notNull().unique(), // hashed version of the API key
+  keyPrefix: varchar("key_prefix", { length: 20 }).notNull(), // first 8 chars for display (e.g., "sk_1234567...")
   lastUsedAt: timestamp("last_used_at"),
   isActive: boolean("is_active").default(true).notNull(),
   expiresAt: timestamp("expires_at"), // null for no expiration
@@ -65,7 +65,9 @@ export const subscriptions = pgTable("subscriptions", {
   category: text("category").notNull(),
   nextBillingDate: timestamp("next_billing_date").notNull(),
   description: text("description"),
+  email: text("email"), // optional email for subscription notifications
   isActive: integer("is_active").default(1).notNull(), // 1 for active, 0 for inactive
+  paymentStatus: text("payment_status").default("paid").notNull(), // 'paid', 'pending', 'failed', 'overdue'
   // Free trial fields
   isTrial: boolean("is_trial").default(false).notNull(),
   trialDays: integer("trial_days"), // number of trial days
@@ -74,6 +76,21 @@ export const subscriptions = pgTable("subscriptions", {
   // Payment card fields for reminders and auto-payment
   cardLast4: text("card_last_4"), // last 4 digits of card
   bankName: text("bank_name"), // name of the bank/card issuer
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+});
+
+// Payment history for tracking all subscription payments and events
+export const subscriptionHistory = pgTable("subscription_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  subscriptionId: varchar("subscription_id").notNull(),
+  eventType: text("event_type").notNull(), // 'payment', 'renewal', 'trial_start', 'trial_end', 'pause', 'resume', 'cancel', 'refund'
+  paymentStatus: text("payment_status"), // 'paid', 'pending', 'failed', 'refunded' - null for non-payment events
+  amount: decimal("amount", { precision: 10, scale: 2 }), // payment amount - null for non-payment events
+  currency: text("currency").default("USD"), // currency code
+  paymentMethod: text("payment_method"), // 'card', 'paypal', 'bank_transfer', etc.
+  description: text("description").notNull(), // human readable description of the event
+  eventDate: timestamp("event_date").default(sql`now()`).notNull(),
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 });
 
@@ -135,6 +152,11 @@ export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
   createdAt: true,
 });
 
+export const insertSubscriptionHistorySchema = createInsertSchema(subscriptionHistory).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
   id: true,
   createdAt: true,
@@ -163,6 +185,9 @@ export type UpdateUserExternalApiKey = z.infer<typeof updateUserExternalApiKeySc
 
 export type Subscription = typeof subscriptions.$inferSelect;
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+
+export type SubscriptionHistory = typeof subscriptionHistory.$inferSelect;
+export type InsertSubscriptionHistory = z.infer<typeof insertSubscriptionHistorySchema>;
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
