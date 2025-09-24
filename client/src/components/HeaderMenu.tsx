@@ -51,10 +51,10 @@ export function HeaderMenu() {
     <header className="flex items-center justify-between px-3 py-2 sm:p-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Left side - Logo and Search */}
       <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-        <div className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 hover-elevate rounded-md px-2 py-1 -mx-2 -my-1" data-testid="link-dashboard-logo">
           <Crown className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" />
           <span className="font-semibold text-sm sm:text-lg hidden xs:block truncate">Subscription Tracker</span>
-        </div>
+        </Link>
         
         {/* Search Bar - Hidden on mobile, smaller on medium */}
         <div className="relative hidden lg:block flex-1 max-w-sm">
