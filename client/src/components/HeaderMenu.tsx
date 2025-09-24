@@ -10,6 +10,7 @@ import { User, Settings, LogOut, Crown, CreditCard, HelpCircle, Search, Menu, Be
 import { ThemeToggle } from "./ThemeToggle";
 import { NotificationCenter } from "./NotificationCenter";
 import { Link, useLocation } from "wouter";
+import { useSearch } from "../contexts/SearchContext";
 
 interface UserStatus {
   id: string;
@@ -26,7 +27,7 @@ interface UserStatus {
 export function HeaderMenu() {
   const [location] = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const { searchTerm, setSearchTerm } = useSearch();
 
   // Fetch user status
   const { data: userStatus } = useQuery<UserStatus>({
@@ -61,8 +62,8 @@ export function HeaderMenu() {
           <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search subscriptions..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-8 text-sm"
             data-testid="input-header-search"
           />
@@ -207,8 +208,8 @@ export function HeaderMenu() {
                 <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search subscriptions..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-8"
                   data-testid="input-mobile-search"
                 />

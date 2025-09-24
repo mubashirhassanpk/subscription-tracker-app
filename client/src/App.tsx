@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { SearchProvider } from "./contexts/SearchContext";
 import { HeaderMenu } from "./components/HeaderMenu";
 import Home from "./pages/Home";
 import Documentation from "./pages/Documentation";
@@ -28,13 +29,15 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="subscription-tracker-theme">
         <TooltipProvider>
-          <div className="min-h-screen w-full">
-            <HeaderMenu />
-            <main className="flex-1">
-              <Router />
-            </main>
-          </div>
-          <Toaster />
+          <SearchProvider>
+            <div className="min-h-screen w-full">
+              <HeaderMenu />
+              <main className="flex-1">
+                <Router />
+              </main>
+            </div>
+            <Toaster />
+          </SearchProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
