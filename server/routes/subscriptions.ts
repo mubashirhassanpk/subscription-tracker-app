@@ -13,8 +13,8 @@ const webSubscriptionSchema = z.object({
   description: z.string().optional().default(''),
   isActive: z.coerce.number().int().min(0).max(1).default(1), // Coerce to integer
   // Trial fields
-  isTrial: z.boolean().optional().default(false),
-  trialDays: z.number().optional(),
+  isTrial: z.coerce.boolean().optional().default(false),
+  trialDays: z.coerce.number().int().min(0).optional(),
   trialStartDate: z.coerce.date().optional(),
   trialEndDate: z.coerce.date().optional(),
   // Payment card fields
