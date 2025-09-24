@@ -76,13 +76,17 @@ export default function Dashboard({
       const subscription = subscriptions.find(s => s.id === id);
       if (!subscription) return;
       
-      // Toggle the isActive status (send boolean, not integer)
+      // Toggle the isActive status (send integer: 1 for active, 0 for inactive)
       const updatedData = {
-        isActive: !subscription.isActive
+        isActive: subscription.isActive ? 0 : 1
       };
       
       await apiRequest('PUT', `/api/subscriptions/${id}`, updatedData);
       queryClient.invalidateQueries({ queryKey: ['/api/subscriptions'] });
+      
+      // Show success feedback
+      const newStatus = subscription.isActive ? 'paused' : 'resumed';
+      console.log(`Subscription ${newStatus} successfully`);
     } catch (error) {
       console.error('Failed to toggle subscription status:', error);
       alert('Failed to update subscription status. Please try again.');

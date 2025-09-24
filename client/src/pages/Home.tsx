@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { type Subscription } from "@shared/schema";
@@ -6,14 +6,27 @@ import Dashboard from "@/components/Dashboard";
 import EditSubscriptionForm from "@/components/EditSubscriptionForm";
 import { useToast } from "@/hooks/use-toast";
 
+// Normalized subscription type with isActive as boolean
+type NormalizedSubscription = Omit<Subscription, 'isActive'> & {
+  isActive: boolean;
+};
+
 export default function Home() {
   const { toast } = useToast();
-  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+  const [editingSubscription, setEditingSubscription] = useState<NormalizedSubscription | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  const { data: subscriptions = [], isLoading } = useQuery<Subscription[]>({
+  const { data: rawSubscriptions = [], isLoading } = useQuery<Subscription[]>({
     queryKey: ['/api/subscriptions'],
   });
+
+  // Normalize isActive field from integer (0/1) to boolean
+  const subscriptions: NormalizedSubscription[] = useMemo(() => {
+    return rawSubscriptions.map(subscription => ({
+      ...subscription,
+      isActive: Boolean(subscription.isActive)
+    }));
+  }, [rawSubscriptions]);
 
   const addMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -79,7 +92,7 @@ export default function Home() {
     addMutation.mutate(data);
   };
 
-  const handleEditSubscription = (subscription: Subscription) => {
+  const handleEditSubscription = (subscription: NormalizedSubscription) => {
     setEditingSubscription(subscription);
     setEditDialogOpen(true);
   };
