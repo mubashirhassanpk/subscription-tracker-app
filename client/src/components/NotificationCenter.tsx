@@ -139,14 +139,14 @@ export function NotificationCenter() {
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[75vw] sm:w-96 max-w-xs p-0 mx-6" 
+        className="w-[70vw] sm:w-96 max-w-xs p-0 mx-8" 
         align="end"
         side="bottom"
-        sideOffset={8}
+        sideOffset={12}
         data-testid="popover-notifications"
       >
         <Card className="border-0 shadow-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-3 py-1.5">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-2.5 py-1">
             <h3 className="font-semibold text-sm" data-testid="text-notifications-title">
               Notifications
             </h3>
@@ -154,18 +154,18 @@ export function NotificationCenter() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs"
+                className="text-xs h-7 px-2"
                 onClick={handleMarkAllAsRead}
                 disabled={markAllAsReadMutation.isPending}
                 data-testid="button-mark-all-read"
               >
-                Mark all read
+                Mark all
               </Button>
             )}
           </CardHeader>
           <Separator />
           <CardContent className="p-0">
-            <ScrollArea className="h-[35vh] sm:h-80 max-h-80">
+            <ScrollArea className="h-[25vh] sm:h-80 max-h-80">
               {isLoading ? (
                 <div className="p-4 text-center text-sm text-muted-foreground">
                   Loading notifications...
@@ -175,24 +175,24 @@ export function NotificationCenter() {
                   No notifications yet
                 </div>
               ) : (
-                <div className="space-y-1">
+                <div className="space-y-0">
                   {notifications.map((notification) => (
                     <div
                       key={notification.id}
                       className={cn(
-                        "flex flex-col sm:flex-row items-start gap-2 p-2.5 hover-elevate transition-colors border-b border-border last:border-b-0",
+                        "flex flex-col sm:flex-row items-start gap-1.5 p-2 hover-elevate transition-colors border-b border-border last:border-b-0",
                         !notification.isRead && "bg-blue-50 dark:bg-blue-950/20"
                       )}
                       data-testid={`notification-${notification.id}`}
                     >
                       {/* Mobile layout - stacked */}
-                      <div className="flex items-start gap-2 w-full sm:hidden">
+                      <div className="flex items-start gap-1.5 w-full sm:hidden">
                         <div className="flex-shrink-0 mt-0.5">
                           {getNotificationIcon(notification.type, notification.priority)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-1 mb-1">
-                            <h4 className="text-sm font-medium leading-tight flex-1 pr-1">
+                          <div className="flex items-start justify-between gap-1 mb-0.5">
+                            <h4 className="text-sm font-medium leading-tight flex-1 pr-1 line-clamp-1">
                               {notification.title}
                             </h4>
                             <Badge
@@ -202,10 +202,10 @@ export function NotificationCenter() {
                               {notification.priority}
                             </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground leading-snug mb-1 break-words line-clamp-2">
+                          <p className="text-xs text-muted-foreground leading-snug mb-1 break-words line-clamp-2">
                             {notification.message}
                           </p>
-                          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
                             <span className="capitalize flex-shrink-0 text-xs">{notification.type.replace('_', ' ')}</span>
                             <span className="text-right flex-shrink-0 ml-2 text-xs">
                               {new Date(notification.createdAt).toLocaleDateString('en-US', {
@@ -214,29 +214,29 @@ export function NotificationCenter() {
                               })}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1.5 flex-wrap">
+                          <div className="flex items-center gap-1 flex-wrap">
                             {!notification.isRead && (
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-xs"
+                                className="text-xs h-7 px-2"
                                 onClick={(e) => handleMarkAsRead(notification.id, e)}
                                 disabled={markAsReadMutation.isPending}
                                 data-testid={`button-mark-read-${notification.id}`}
                               >
-                                <Check className="h-3 w-3 mr-1" />
+                                <Check className="h-2.5 w-2.5 mr-0.5" />
                                 Read
                               </Button>
                             )}
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-xs"
+                              className="text-xs h-7 px-2"
                               onClick={(e) => handleDelete(notification.id, e)}
                               disabled={deleteNotificationMutation.isPending}
                               data-testid={`button-delete-${notification.id}`}
                             >
-                              <X className="h-3 w-3 mr-1" />
+                              <X className="h-2.5 w-2.5 mr-0.5" />
                               Delete
                             </Button>
                           </div>
