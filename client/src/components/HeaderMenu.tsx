@@ -48,35 +48,35 @@ export function HeaderMenu() {
   };
 
   return (
-    <header className="flex items-center justify-between p-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="flex items-center justify-between px-3 py-2 sm:p-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Left side - Logo and Search */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <Crown className="h-6 w-6 text-primary" />
-          <span className="font-semibold text-lg hidden sm:block">Subscription Tracker</span>
+          <Crown className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" />
+          <span className="font-semibold text-sm sm:text-lg hidden xs:block truncate">Subscription Tracker</span>
         </div>
         
-        {/* Search Bar - Hidden on mobile */}
-        <div className="relative hidden md:block">
+        {/* Search Bar - Hidden on mobile, smaller on medium */}
+        <div className="relative hidden lg:block flex-1 max-w-sm">
           <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search subscriptions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-64 pl-8"
+            className="w-full pl-8 text-sm"
             data-testid="input-header-search"
           />
         </div>
       </div>
 
-      {/* Center - Navigation (Hidden on mobile) */}
-      <nav className="hidden lg:flex items-center space-x-1">
+      {/* Center - Navigation (Hidden on mobile and medium) */}
+      <nav className="hidden xl:flex items-center space-x-1 flex-shrink-0">
         {navigationItems.map((item) => (
           <Button 
             key={item.url}
             variant={item.active ? "secondary" : "ghost"} 
             size="sm" 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-sm"
             data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
             asChild
           >
@@ -89,12 +89,12 @@ export function HeaderMenu() {
       </nav>
 
       {/* Right side - Actions and User Menu */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
         {/* Plan Badge */}
         {userStatus && (
           <Badge 
             variant={isTrialUser ? "secondary" : "default"}
-            className="hidden sm:flex"
+            className="hidden md:flex text-xs"
             data-testid="badge-user-plan"
           >
             <Crown className="h-3 w-3 mr-1" />
@@ -103,12 +103,16 @@ export function HeaderMenu() {
         )}
 
         {/* Notifications */}
-        <NotificationCenter />
+        <div className="hidden sm:block">
+          <NotificationCenter />
+        </div>
 
         {/* Theme Toggle */}
-        <ThemeToggle />
+        <div className="hidden sm:block">
+          <ThemeToggle />
+        </div>
 
-        {/* User Account Dropdown */}
+        {/* User Account Dropdown - Hidden on mobile */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" data-testid="button-user-menu">
@@ -184,8 +188,8 @@ export function HeaderMenu() {
 
         {/* Mobile Menu */}
         <Sheet open={showMobileMenu} onOpenChange={setShowMobileMenu}>
-          <SheetTrigger asChild className="lg:hidden">
-            <Button variant="ghost" size="icon" data-testid="button-mobile-menu">
+          <SheetTrigger asChild className="xl:hidden">
+            <Button variant="ghost" size="icon" data-testid="button-mobile-menu" className="ml-1">
               <Menu className="h-4 w-4" />
             </Button>
           </SheetTrigger>
@@ -197,7 +201,7 @@ export function HeaderMenu() {
               </SheetDescription>
             </SheetHeader>
             
-            <div className="mt-6 space-y-4">
+            <div className="mt-6 space-y-6">
               {/* Mobile Search */}
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -211,32 +215,44 @@ export function HeaderMenu() {
               </div>
 
               {/* Mobile Navigation */}
-              <nav className="space-y-2">
+              <nav className="space-y-1">
                 {navigationItems.map((item) => (
                   <Button 
                     key={item.url}
                     variant={item.active ? "secondary" : "ghost"} 
-                    className="w-full justify-start"
+                    className="w-full justify-start h-12 text-left"
                     onClick={() => setShowMobileMenu(false)}
                     data-testid={`mobile-nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                     asChild
                   >
                     <Link href={item.url}>
-                      <item.icon className="h-4 w-4 mr-2" />
+                      <item.icon className="h-4 w-4 mr-3" />
                       {item.title}
                     </Link>
                   </Button>
                 ))}
               </nav>
 
+              {/* Mobile Actions */}
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Theme</span>
+                  <ThemeToggle />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Notifications</span>
+                  <NotificationCenter />
+                </div>
+              </div>
+
               {/* Mobile User Info */}
               {userStatus && (
-                <div className="pt-4 border-t space-y-2">
+                <div className="pt-4 border-t space-y-3">
                   <div className="text-sm">
                     <p className="font-medium">{userStatus.name}</p>
-                    <p className="text-muted-foreground">{userStatus.email}</p>
+                    <p className="text-muted-foreground text-xs">{userStatus.email}</p>
                   </div>
-                  <Badge variant={isTrialUser ? "secondary" : "default"}>
+                  <Badge variant={isTrialUser ? "secondary" : "default"} className="w-fit">
                     <Crown className="h-3 w-3 mr-1" />
                     {planName}
                   </Badge>
