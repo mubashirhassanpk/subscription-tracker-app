@@ -6,27 +6,14 @@ import Dashboard from "@/components/Dashboard";
 import EditSubscriptionForm from "@/components/EditSubscriptionForm";
 import { useToast } from "@/hooks/use-toast";
 
-// Normalized subscription type with isActive as boolean
-type NormalizedSubscription = Omit<Subscription, 'isActive'> & {
-  isActive: boolean;
-};
-
 export default function Home() {
   const { toast } = useToast();
-  const [editingSubscription, setEditingSubscription] = useState<NormalizedSubscription | null>(null);
+  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  const { data: rawSubscriptions = [], isLoading } = useQuery<Subscription[]>({
+  const { data: subscriptions = [], isLoading } = useQuery<Subscription[]>({
     queryKey: ['/api/subscriptions'],
   });
-
-  // Normalize isActive field from integer (0/1) to boolean
-  const subscriptions: NormalizedSubscription[] = useMemo(() => {
-    return rawSubscriptions.map(subscription => ({
-      ...subscription,
-      isActive: Boolean(subscription.isActive)
-    }));
-  }, [rawSubscriptions]);
 
   const addMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -92,7 +79,7 @@ export default function Home() {
     addMutation.mutate(data);
   };
 
-  const handleEditSubscription = (subscription: NormalizedSubscription) => {
+  const handleEditSubscription = (subscription: Subscription) => {
     setEditingSubscription(subscription);
     setEditDialogOpen(true);
   };
