@@ -139,10 +139,11 @@ export function NotificationCenter() {
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[92vw] sm:w-96 max-w-sm p-0" 
-        align="end"
+        className="w-[90vw] sm:w-96 max-w-sm p-0 mx-2" 
+        align="center"
+        alignOffset={-50}
         side="bottom"
-        sideOffset={4}
+        sideOffset={8}
         data-testid="popover-notifications"
       >
         <Card className="border-0 shadow-none">
@@ -165,7 +166,7 @@ export function NotificationCenter() {
           </CardHeader>
           <Separator />
           <CardContent className="p-0">
-            <ScrollArea className="h-[70vh] sm:h-80 max-h-80">
+            <ScrollArea className="h-[60vh] sm:h-80 max-h-80">
               {isLoading ? (
                 <div className="p-4 text-center text-sm text-muted-foreground">
                   Loading notifications...
@@ -180,29 +181,29 @@ export function NotificationCenter() {
                     <div
                       key={notification.id}
                       className={cn(
-                        "flex flex-col sm:flex-row items-start gap-3 p-3 hover-elevate transition-colors border-b border-border last:border-b-0",
+                        "flex flex-col sm:flex-row items-start gap-2 p-3 hover-elevate transition-colors border-b border-border last:border-b-0",
                         !notification.isRead && "bg-blue-50 dark:bg-blue-950/20"
                       )}
                       data-testid={`notification-${notification.id}`}
                     >
                       {/* Mobile layout - stacked */}
-                      <div className="flex items-start gap-3 w-full sm:hidden">
-                        <div className="flex-shrink-0 mt-1">
+                      <div className="flex items-start gap-2 w-full sm:hidden">
+                        <div className="flex-shrink-0 mt-0.5">
                           {getNotificationIcon(notification.type, notification.priority)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <h4 className="text-sm font-medium leading-tight flex-1 pr-1">
+                          <div className="flex items-start justify-between gap-1 mb-1.5">
+                            <h4 className="text-sm font-medium leading-tight flex-1">
                               {notification.title}
                             </h4>
                             <Badge
                               variant={getPriorityBadgeVariant(notification.priority)}
-                              className="text-xs whitespace-nowrap flex-shrink-0"
+                              className="text-xs whitespace-nowrap flex-shrink-0 ml-1"
                             >
                               {notification.priority}
                             </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground leading-relaxed mb-2 break-words">
+                          <p className="text-sm text-muted-foreground leading-relaxed mb-1.5 break-words">
                             {notification.message}
                           </p>
                           <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
@@ -216,12 +217,12 @@ export function NotificationCenter() {
                               })}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-center gap-1.5 flex-wrap">
                             {!notification.isRead && (
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-7 px-2 text-xs"
+                                className="h-6 px-2 text-xs"
                                 onClick={(e) => handleMarkAsRead(notification.id, e)}
                                 disabled={markAsReadMutation.isPending}
                                 data-testid={`button-mark-read-${notification.id}`}
@@ -233,7 +234,7 @@ export function NotificationCenter() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 px-2 text-xs"
+                              className="h-6 px-2 text-xs"
                               onClick={(e) => handleDelete(notification.id, e)}
                               disabled={deleteNotificationMutation.isPending}
                               data-testid={`button-delete-${notification.id}`}
