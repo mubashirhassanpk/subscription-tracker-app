@@ -19,21 +19,21 @@ export default function Documentation() {
   const baseUrl = window.location.origin;
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="space-y-8">
+    <div className="container mx-auto py-4 sm:py-8 px-3 sm:px-4 max-w-4xl">
+      <div className="space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold" data-testid="text-api-docs-title">
+        <div className="text-center space-y-3 sm:space-y-4">
+          <h1 className="text-2xl sm:text-4xl font-bold" data-testid="text-api-docs-title">
             Subscription Tracker API Documentation
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto">
             Integrate your subscription data with our powerful API. Sync subscriptions, 
             manage users, and build custom workflows with secure authentication.
           </p>
-          <div className="flex gap-2 justify-center">
-            <Badge variant="secondary">REST API</Badge>
-            <Badge variant="secondary">JSON</Badge>
-            <Badge variant="secondary">Rate Limited</Badge>
+          <div className="flex gap-2 justify-center flex-wrap">
+            <Badge variant="secondary" className="text-xs">REST API</Badge>
+            <Badge variant="secondary" className="text-xs">JSON</Badge>
+            <Badge variant="secondary" className="text-xs">Rate Limited</Badge>
           </div>
         </div>
 
@@ -48,22 +48,22 @@ export default function Documentation() {
               Get started with the API in 3 simple steps
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 rounded-lg border">
-                <Key className="h-8 w-8 mx-auto mb-2 text-primary" />
-                <h3 className="font-semibold mb-1">1. Get API Key</h3>
-                <p className="text-sm text-muted-foreground">Register and generate your API key</p>
+          <CardContent className="space-y-3 sm:space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+              <div className="text-center p-3 sm:p-4 rounded-lg border hover-elevate">
+                <Key className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-primary" />
+                <h3 className="font-semibold mb-1 text-sm sm:text-base">1. Get API Key</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Register and generate your API key</p>
               </div>
-              <div className="text-center p-4 rounded-lg border">
-                <Shield className="h-8 w-8 mx-auto mb-2 text-primary" />
-                <h3 className="font-semibold mb-1">2. Authenticate</h3>
-                <p className="text-sm text-muted-foreground">Include Bearer token in headers</p>
+              <div className="text-center p-3 sm:p-4 rounded-lg border hover-elevate">
+                <Shield className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-primary" />
+                <h3 className="font-semibold mb-1 text-sm sm:text-base">2. Authenticate</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Include Bearer token in headers</p>
               </div>
-              <div className="text-center p-4 rounded-lg border">
-                <Database className="h-8 w-8 mx-auto mb-2 text-primary" />
-                <h3 className="font-semibold mb-1">3. Sync Data</h3>
-                <p className="text-sm text-muted-foreground">Use endpoints to manage subscriptions</p>
+              <div className="text-center p-3 sm:p-4 rounded-lg border hover-elevate sm:col-span-2 md:col-span-1">
+                <Database className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-primary" />
+                <h3 className="font-semibold mb-1 text-sm sm:text-base">3. Sync Data</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Use endpoints to manage subscriptions</p>
               </div>
             </div>
           </CardContent>
@@ -71,13 +71,13 @@ export default function Documentation() {
 
         {/* API Sections */}
         <Tabs defaultValue="auth" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="auth" data-testid="tab-auth">Authentication</TabsTrigger>
-            <TabsTrigger value="subscriptions" data-testid="tab-subscriptions">Subscriptions</TabsTrigger>
-            <TabsTrigger value="keys" data-testid="tab-keys">API Keys</TabsTrigger>
-            <TabsTrigger value="chrome" data-testid="tab-chrome">Chrome Extensions</TabsTrigger>
-            <TabsTrigger value="ai" data-testid="tab-ai">AI Integration</TabsTrigger>
-            <TabsTrigger value="examples" data-testid="tab-examples">Examples</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+            <TabsTrigger value="auth" data-testid="tab-auth" className="text-xs sm:text-sm px-2 sm:px-3">Authentication</TabsTrigger>
+            <TabsTrigger value="subscriptions" data-testid="tab-subscriptions" className="text-xs sm:text-sm px-2 sm:px-3">Subscriptions</TabsTrigger>
+            <TabsTrigger value="keys" data-testid="tab-keys" className="text-xs sm:text-sm px-2 sm:px-3">API Keys</TabsTrigger>
+            <TabsTrigger value="chrome" data-testid="tab-chrome" className="text-xs sm:text-sm px-2 sm:px-3">Chrome Extensions</TabsTrigger>
+            <TabsTrigger value="ai" data-testid="tab-ai" className="text-xs sm:text-sm px-2 sm:px-3">AI Integration</TabsTrigger>
+            <TabsTrigger value="examples" data-testid="tab-examples" className="text-xs sm:text-sm px-2 sm:px-3">Examples</TabsTrigger>
           </TabsList>
 
           {/* Authentication Tab */}
@@ -91,12 +91,12 @@ export default function Documentation() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h4 className="font-semibold mb-2">Register Account</h4>
-                  <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="text-green-600">POST</div>
-                        <div>{baseUrl}/auth/register</div>
+                  <h4 className="font-semibold mb-2 text-sm sm:text-base">Register Account</h4>
+                  <div className="bg-muted p-3 sm:p-4 rounded-lg font-mono text-xs sm:text-sm overflow-x-auto">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                      <div className="min-w-0">
+                        <div className="text-green-600 font-semibold">POST</div>
+                        <div className="break-all text-xs sm:text-sm">{baseUrl}/auth/register</div>
                       </div>
                       <Button 
                         size="sm" 
@@ -118,12 +118,12 @@ export default function Documentation() {
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-2">Generate API Key</h4>
-                  <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="text-green-600">POST</div>
-                        <div>{baseUrl}/api-keys</div>
+                  <h4 className="font-semibold mb-2 text-sm sm:text-base">Generate API Key</h4>
+                  <div className="bg-muted p-3 sm:p-4 rounded-lg font-mono text-xs sm:text-sm overflow-x-auto">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                      <div className="min-w-0">
+                        <div className="text-green-600 font-semibold">POST</div>
+                        <div className="break-all text-xs sm:text-sm">{baseUrl}/api-keys</div>
                       </div>
                       <Button 
                         size="sm" 
@@ -156,12 +156,12 @@ export default function Documentation() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h4 className="font-semibold mb-2">Get All Subscriptions</h4>
-                  <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="text-blue-600">GET</div>
-                        <div>{baseUrl}/api/v1/subscriptions</div>
+                  <h4 className="font-semibold mb-2 text-sm sm:text-base">Get All Subscriptions</h4>
+                  <div className="bg-muted p-3 sm:p-4 rounded-lg font-mono text-xs sm:text-sm overflow-x-auto">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                      <div className="min-w-0">
+                        <div className="text-blue-600 font-semibold">GET</div>
+                        <div className="break-all text-xs sm:text-sm">{baseUrl}/api/v1/subscriptions</div>
                       </div>
                       <Button 
                         size="sm" 
@@ -277,20 +277,20 @@ export default function Documentation() {
               <CardContent className="space-y-4">
                 <div>
                   <h4 className="font-semibold mb-2">List API Keys</h4>
-                  <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                    <div className="text-blue-600">GET {baseUrl}/api-keys</div>
+                  <div className="bg-muted p-3 sm:p-4 rounded-lg font-mono text-xs sm:text-sm overflow-x-auto">
+                    <div className="text-blue-600 font-semibold break-all">GET {baseUrl}/api-keys</div>
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Create API Key</h4>
-                  <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                    <div className="text-green-600">POST {baseUrl}/api-keys</div>
+                  <h4 className="font-semibold mb-2 text-sm sm:text-base">Create API Key</h4>
+                  <div className="bg-muted p-3 sm:p-4 rounded-lg font-mono text-xs sm:text-sm overflow-x-auto">
+                    <div className="text-green-600 font-semibold break-all">POST {baseUrl}/api-keys</div>
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Delete API Key</h4>
-                  <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                    <div className="text-red-600">DELETE {baseUrl}/api-keys/:id</div>
+                  <h4 className="font-semibold mb-2 text-sm sm:text-base">Delete API Key</h4>
+                  <div className="bg-muted p-3 sm:p-4 rounded-lg font-mono text-xs sm:text-sm overflow-x-auto">
+                    <div className="text-red-600 font-semibold break-all">DELETE {baseUrl}/api-keys/:id</div>
                   </div>
                 </div>
               </CardContent>

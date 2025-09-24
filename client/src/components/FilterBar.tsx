@@ -85,27 +85,30 @@ export default function FilterBar({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between">
-        <div className="relative w-full sm:flex-1 sm:max-w-md">
+      <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:gap-4 sm:items-center sm:justify-between">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search subscriptions..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10"
+            className="pl-10 w-full"
             data-testid="input-search"
           />
         </div>
         
-        <div className="flex gap-2 w-full sm:w-auto justify-end">
+        <div className="flex gap-2 justify-center sm:justify-end sm:flex-shrink-0">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
             data-testid="button-toggle-filters"
+            className={showFilters ? "bg-accent" : ""}
           >
-            <Filter className="h-4 w-4 mr-2" />
-            Filters
+            <Filter className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Filters</span>
+            <span className="sm:hidden">Filter</span>
+            <ChevronDown className={`h-3 w-3 ml-1 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
           </Button>
           
           {hasActiveFilters && (
@@ -115,23 +118,23 @@ export default function FilterBar({
               onClick={clearAllFilters}
               data-testid="button-clear-filters"
             >
-              <X className="h-4 w-4 mr-2" />
-              Clear
+              <X className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Clear</span>
             </Button>
           )}
         </div>
       </div>
 
       {showFilters && (
-        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg bg-card">
+        <div className="animate-in slide-in-from-top-2 duration-200 space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg bg-card/50 backdrop-blur-sm">
           <div>
-            <h4 className="text-sm font-medium mb-2">Category</h4>
-            <div className="flex flex-wrap gap-1.5 sm:gap-2">
+            <h4 className="text-sm font-medium mb-2 text-foreground/90">Category</h4>
+            <div className="flex flex-wrap gap-1.5 justify-start">
               {categories.map((category) => (
                 <Badge
                   key={category}
                   variant={selectedCategory === category ? "default" : "outline"}
-                  className="cursor-pointer hover-elevate"
+                  className="cursor-pointer hover-elevate active-elevate-2 text-xs px-2 py-1"
                   onClick={() => {
                     onCategoryChange(category);
                     console.log('Category selected:', category);
@@ -145,8 +148,8 @@ export default function FilterBar({
           </div>
 
           <div>
-            <h4 className="text-sm font-medium mb-2">Status</h4>
-            <div className="flex flex-wrap gap-1.5 sm:gap-2">
+            <h4 className="text-sm font-medium mb-2 text-foreground/90">Status</h4>
+            <div className="flex flex-wrap gap-1.5 justify-start">
               {[
                 { value: 'all', label: 'All' },
                 { value: 'active', label: 'Active' },
@@ -155,7 +158,7 @@ export default function FilterBar({
                 <Badge
                   key={status.value}
                   variant={activeFilter === status.value ? "default" : "outline"}
-                  className="cursor-pointer hover-elevate"
+                  className="cursor-pointer hover-elevate active-elevate-2 text-xs px-2 py-1"
                   onClick={() => {
                     onActiveFilterChange(status.value as 'all' | 'active' | 'inactive');
                     console.log('Status filter:', status.value);

@@ -130,64 +130,69 @@ export default function CalendarView({ subscriptions, onSelectSubscription }: Ca
   }, [subscriptions, currentDate]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Calendar Header */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
+        <CardHeader className="p-3 sm:p-6">
+          <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
                 Renewal Calendar
               </CardTitle>
-              <Badge variant="secondary" className="font-mono">
+              <Badge variant="secondary" className="font-mono text-xs sm:text-sm w-fit">
                 {format(currentDate, 'MMMM yyyy')}
               </Badge>
             </div>
             
-            <div className="flex items-center gap-2">
-              <div className="text-sm text-muted-foreground hidden sm:block">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="text-sm text-muted-foreground text-center sm:text-left">
                 Monthly Total: <span className="font-medium text-foreground">{formatCurrency(monthlyTotal.toString())}</span>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={goToToday}
-                data-testid="button-today"
-              >
-                Today
-              </Button>
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
-                  size="icon"
-                  onClick={() => navigateMonth('prev')}
-                  data-testid="button-prev-month"
+                  size="sm"
+                  onClick={goToToday}
+                  data-testid="button-today"
+                  className="flex-1 sm:flex-none"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  Today
                 </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => navigateMonth('next')}
-                  data-testid="button-next-month"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigateMonth('prev')}
+                    data-testid="button-prev-month"
+                    className="px-2"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigateMonth('next')}
+                    data-testid="button-next-month"
+                    className="px-2"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         </CardHeader>
         
-        <CardContent>
+        <CardContent className="p-3 sm:p-6">
           {/* Calendar Grid */}
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-4">
             {/* Weekday Headers */}
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
                 <div 
                   key={day} 
-                  className="text-center text-sm font-medium text-muted-foreground p-2"
+                  className="text-center text-xs sm:text-sm font-medium text-muted-foreground p-1 sm:p-2"
                 >
                   {day}
                 </div>
@@ -195,14 +200,14 @@ export default function CalendarView({ subscriptions, onSelectSubscription }: Ca
             </div>
 
             {/* Calendar Days */}
-            <div className="space-y-1">
+            <div className="space-y-0.5 sm:space-y-1">
               {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="grid grid-cols-7 gap-1">
+                <div key={weekIndex} className="grid grid-cols-7 gap-0.5 sm:gap-1">
                   {week.map((day) => (
                     <div
                       key={day.date.toISOString()}
                       className={cn(
-                        "min-h-24 p-1 border rounded-lg cursor-pointer transition-all hover-elevate relative",
+                        "min-h-16 sm:min-h-24 p-1 border rounded-md sm:rounded-lg cursor-pointer transition-all hover-elevate relative",
                         day.isCurrentMonth 
                           ? "bg-background border-border" 
                           : "bg-muted/30 border-muted text-muted-foreground",
@@ -214,7 +219,7 @@ export default function CalendarView({ subscriptions, onSelectSubscription }: Ca
                     >
                       {/* Date Number */}
                       <div className={cn(
-                        "text-sm font-medium mb-1",
+                        "text-xs sm:text-sm font-medium mb-0.5 sm:mb-1",
                         !day.isCurrentMonth && "text-muted-foreground/60",
                         isToday(day.date) && "text-primary font-semibold"
                       )}>
@@ -222,34 +227,40 @@ export default function CalendarView({ subscriptions, onSelectSubscription }: Ca
                       </div>
 
                       {/* Subscription Indicators */}
-                      <div className="space-y-1">
-                        {day.subscriptions.slice(0, 2).map((subscription) => (
+                      <div className="space-y-0.5 sm:space-y-1">
+                        {day.subscriptions.slice(0, 1).map((subscription) => (
                           <div
                             key={subscription.id}
                             className={cn(
-                              "text-xs px-1 py-0.5 rounded border text-center truncate font-medium",
+                              "text-xs px-0.5 sm:px-1 py-0.5 rounded border text-center truncate font-medium",
                               getPaymentStatusColor(subscription.paymentStatus || 'paid')
                             )}
                             title={`${subscription.name} - ${formatCurrency(subscription.cost)}`}
                           >
-                            {subscription.name}
+                            <span className="hidden sm:inline">{subscription.name}</span>
+                            <span className="sm:hidden">{subscription.name.substring(0, 3)}</span>
                           </div>
                         ))}
-                        {day.subscriptions.length > 2 && (
+                        {day.subscriptions.length > 1 && (
                           <div className="text-xs text-center text-muted-foreground">
-                            +{day.subscriptions.length - 2} more
+                            +{day.subscriptions.length - 1}
                           </div>
                         )}
                       </div>
 
                       {/* Daily Total */}
                       {day.subscriptions.length > 0 && (
-                        <div className="absolute bottom-1 right-1 text-xs font-mono text-muted-foreground">
-                          {formatCurrency(
-                            day.subscriptions
-                              .reduce((sum, sub) => sum + parseFloat(sub.cost), 0)
-                              .toString()
-                          )}
+                        <div className="absolute bottom-0.5 right-0.5 sm:bottom-1 sm:right-1 text-xs font-mono text-muted-foreground">
+                          <span className="hidden sm:inline">
+                            {formatCurrency(
+                              day.subscriptions
+                                .reduce((sum, sub) => sum + parseFloat(sub.cost), 0)
+                                .toString()
+                            )}
+                          </span>
+                          <span className="sm:hidden">
+                            ${day.subscriptions.reduce((sum, sub) => sum + parseFloat(sub.cost), 0).toFixed(0)}
+                          </span>
                         </div>
                       )}
                     </div>

@@ -107,11 +107,11 @@ export default function ApiKeys() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">API Keys</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" data-testid="text-page-title">API Keys</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage your API keys to access the Subscription Tracker API
           </p>
         </div>
@@ -141,11 +141,12 @@ export default function ApiKeys() {
                   data-testid="input-api-key-name"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   variant="outline"
                   onClick={() => setShowCreateDialog(false)}
                   data-testid="button-cancel-create"
+                  className="sm:flex-1"
                 >
                   Cancel
                 </Button>
@@ -153,6 +154,7 @@ export default function ApiKeys() {
                   onClick={handleCreateApiKey}
                   disabled={createApiKeyMutation.isPending}
                   data-testid="button-confirm-create"
+                  className="sm:flex-1"
                 >
                   {createApiKeyMutation.isPending ? "Creating..." : "Create Key"}
                 </Button>
@@ -174,26 +176,30 @@ export default function ApiKeys() {
               <p className="text-sm text-green-700 dark:text-green-300">
                 Make sure to copy and save this key now. You won't be able to see it again.
               </p>
-              <div className="flex items-center gap-2 p-3 bg-white dark:bg-green-950/50 rounded border">
-                <code className="flex-1 text-sm font-mono break-all" data-testid="text-generated-key">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-white dark:bg-green-950/50 rounded border">
+                <code className="flex-1 text-xs sm:text-sm font-mono break-all min-w-0" data-testid="text-generated-key">
                   {showGeneratedKey ? generatedKey : "••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••"}
                 </code>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowGeneratedKey(!showGeneratedKey)}
-                  data-testid="button-toggle-key-visibility"
-                >
-                  {showGeneratedKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(generatedKey)}
-                  data-testid="button-copy-key"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-2 justify-center sm:justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowGeneratedKey(!showGeneratedKey)}
+                    data-testid="button-toggle-key-visibility"
+                    className="flex-1 sm:flex-none"
+                  >
+                    {showGeneratedKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(generatedKey)}
+                    data-testid="button-copy-key"
+                    className="flex-1 sm:flex-none"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               <Button
                 variant="outline"
@@ -234,15 +240,15 @@ export default function ApiKeys() {
           <div className="grid gap-4">
             {(apiKeys as ApiKey[]).map((apiKey: ApiKey) => (
               <Card key={apiKey.id} data-testid={`card-api-key-${apiKey.id}`}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <div>
-                    <CardTitle className="text-base">{apiKey.name}</CardTitle>
-                    <CardDescription>
+                <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-2">
+                  <div className="min-w-0">
+                    <CardTitle className="text-base truncate">{apiKey.name}</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
                       Key ID: {apiKey.keyPrefix}••••
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={apiKey.isActive ? "default" : "secondary"}>
+                    <Badge variant={apiKey.isActive ? "default" : "secondary"} className="text-xs">
                       {apiKey.isActive ? "Active" : "Inactive"}
                     </Badge>
                     <Button
@@ -256,8 +262,8 @@ export default function ApiKeys() {
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between text-sm text-muted-foreground">
+                <CardContent className="pt-0">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 text-xs sm:text-sm text-muted-foreground">
                     <span>Created: {format(new Date(apiKey.createdAt), 'MMM d, yyyy')}</span>
                     <span>
                       Last used: {apiKey.lastUsedAt 
@@ -283,21 +289,25 @@ export default function ApiKeys() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h4 className="font-medium mb-2">Authentication</h4>
-            <p className="text-sm text-muted-foreground mb-2">
+            <h4 className="font-medium mb-2 text-sm sm:text-base">Authentication</h4>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-2">
               Include your API key in the Authorization header:
             </p>
-            <code className="block p-2 bg-muted rounded text-sm">
-              Authorization: Bearer your_api_key_here
-            </code>
+            <div className="overflow-x-auto">
+              <code className="block p-2 bg-muted rounded text-xs sm:text-sm whitespace-nowrap">
+                Authorization: Bearer your_api_key_here
+              </code>
+            </div>
           </div>
           <div>
-            <h4 className="font-medium mb-2">Base URL</h4>
-            <code className="block p-2 bg-muted rounded text-sm">
-              {window.location.origin}/api
-            </code>
+            <h4 className="font-medium mb-2 text-sm sm:text-base">Base URL</h4>
+            <div className="overflow-x-auto">
+              <code className="block p-2 bg-muted rounded text-xs sm:text-sm break-all">
+                {window.location.origin}/api
+              </code>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Visit the <a href="/docs" className="text-primary hover:underline">API Documentation</a> for detailed endpoint information and examples.
           </p>
         </CardContent>
