@@ -9,6 +9,7 @@ import { notificationsRouter } from "./routes/notifications";
 import { subscriptionsRouter } from "./routes/subscriptions";
 import { userExternalApiKeysRouter } from "./routes/userExternalApiKeys";
 import { configStatusRouter } from "./routes/configStatus";
+import plansRouter from "./routes/plans";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register API route modules
@@ -18,6 +19,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/config/status', configStatusRouter);
   app.use('/api/notifications', notificationsRouter);
   app.use('/api/subscriptions', subscriptionsRouter);
+  app.use('/api/plans', plansRouter);
   app.use('/api/v1', apiRouter);
 
   // API Keys management page

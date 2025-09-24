@@ -254,11 +254,26 @@ apiRouter.get('/account', async (req: AuthenticatedRequest, res) => {
 
     const subscriptions = await storage.getSubscriptionsByUserId(req.user.id);
     const apiKeys = await storage.getApiKeysByUserId(req.user.id);
+    
+    // Get user's plan information if they have one
+    let plan = null;
+    if (req.user.planId) {
+      plan = await storage.getPlan(req.user.planId);
+    }
 
     const { password, ...userInfo } = req.user;
 
     res.json({
       user: userInfo,
+      plan: plan ? {
+        id: plan.id,
+        name: plan.name,
+        price: plan.price,
+        billingInterval: plan.billingInterval,
+        maxSubscriptions: plan.maxSubscriptions,
+        maxApiCalls: plan.maxApiCalls,
+        features: plan.features
+      } : null,
       stats: {
         totalSubscriptions: subscriptions.length,
         activeSubscriptions: subscriptions.filter(s => s.isActive === 1).length,
