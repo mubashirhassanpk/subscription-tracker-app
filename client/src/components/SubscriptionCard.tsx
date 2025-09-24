@@ -12,7 +12,6 @@ interface SubscriptionCardProps {
   onDelete?: (id: string) => void;
   onViewDetails?: (subscription: Subscription) => void;
   onDuplicate?: (subscription: Subscription) => void;
-  onToggleFavorite?: (id: string) => void;
   onTogglePause?: (id: string) => void;
   onExport?: (subscription: Subscription) => void;
 }
@@ -27,7 +26,7 @@ const categoryColors: Record<string, string> = {
   Other: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
 };
 
-export default function SubscriptionCard({ subscription, onEdit, onDelete, onViewDetails, onDuplicate, onToggleFavorite, onTogglePause, onExport }: SubscriptionCardProps) {
+export default function SubscriptionCard({ subscription, onEdit, onDelete, onViewDetails, onDuplicate, onTogglePause, onExport }: SubscriptionCardProps) {
   const nextBilling = new Date(subscription.nextBillingDate);
   const isUpcomingSoon = nextBilling.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -54,11 +53,6 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
     onDuplicate?.(subscription);
   };
 
-  const handleToggleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log('Toggle favorite for:', subscription.id);
-    onToggleFavorite?.(subscription.id);
-  };
 
   const handleTogglePause = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -117,10 +111,6 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
             <DropdownMenuItem onClick={handleDuplicate} data-testid={`menu-duplicate-${subscription.id}`}>
               <Copy className="mr-2 h-4 w-4" />
               <span>Duplicate</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleToggleFavorite} data-testid={`menu-favorite-${subscription.id}`}>
-              <Heart className="mr-2 h-4 w-4" />
-              <span>Add to favorites</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleTogglePause} data-testid={`menu-pause-${subscription.id}`}>
               {subscription.isActive ? (

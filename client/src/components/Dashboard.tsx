@@ -69,12 +69,6 @@ export default function Dashboard({
     onAddSubscription(duplicateData);
   };
 
-  const handleToggleFavorite = (id: string) => {
-    console.log('Toggle favorite for subscription:', id);
-    // This would require adding isFavorite field to schema
-    // For now, just show a placeholder action
-    alert('Favorite feature coming soon!');
-  };
 
   const handleTogglePause = async (id: string) => {
     console.log('Toggle pause for subscription:', id);
@@ -82,15 +76,16 @@ export default function Dashboard({
       const subscription = subscriptions.find(s => s.id === id);
       if (!subscription) return;
       
-      // Toggle the isActive status
+      // Toggle the isActive status (send boolean, not integer)
       const updatedData = {
-        isActive: subscription.isActive ? 0 : 1
+        isActive: !subscription.isActive
       };
       
       await apiRequest('PUT', `/api/subscriptions/${id}`, updatedData);
       queryClient.invalidateQueries({ queryKey: ['/api/subscriptions'] });
     } catch (error) {
       console.error('Failed to toggle subscription status:', error);
+      alert('Failed to update subscription status. Please try again.');
     }
   };
 
@@ -240,7 +235,6 @@ export default function Dashboard({
                   onDelete={onDeleteSubscription}
                   onViewDetails={handleViewDetails}
                   onDuplicate={handleDuplicateSubscription}
-                  onToggleFavorite={handleToggleFavorite}
                   onTogglePause={handleTogglePause}
                   onExport={handleExportSubscription}
                 />
