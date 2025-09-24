@@ -65,6 +65,9 @@ export default function Dashboard({
       name: `${subscription.name} (Copy)`,
       id: undefined, // Remove ID so a new one is generated
       createdAt: undefined, // Remove timestamp so a new one is generated
+      // Convert null values to empty strings for validation
+      cardLast4: subscription.cardLast4 || '',
+      bankName: subscription.bankName || '',
     };
     onAddSubscription(duplicateData);
   };
