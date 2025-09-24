@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { storage } from '../storage';
 import { insertNotificationSchema } from '@shared/schema';
-import { analyzeSubscriptions, generateSubscriptionSummary, suggestCategory } from '../geminiService';
+import { analyzeSubscriptions, generateSubscriptionSummary, calculateSubscriptionSummary, suggestCategory } from '../geminiService';
 import { checkTrialExpiries, generateTrialExpiryNotifications, processExpiredTrials } from '../trialService';
 
 const notificationsRouter = Router();
@@ -272,7 +272,7 @@ notificationsRouter.get('/insights/latest', async (req: any, res) => {
       }));
 
     // Generate summary
-    const summary = await generateSubscriptionSummary(activeSubscriptions);
+    const summary = calculateSubscriptionSummary(subscriptions);
 
     res.json({
       message: 'Latest insights retrieved',

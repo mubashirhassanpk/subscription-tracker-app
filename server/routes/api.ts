@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { storage } from '../storage';
 import { insertSubscriptionSchema, insertNotificationSchema } from '@shared/schema';
 import { authenticateApiKey, rateLimitByPlan, type AuthenticatedRequest } from '../middleware/auth';
-import { analyzeSubscriptions, generateSubscriptionSummary, suggestCategory } from '../geminiService';
+import { analyzeSubscriptions, generateSubscriptionSummary, calculateSubscriptionSummary, suggestCategory } from '../geminiService';
 
 const apiRouter = Router();
 
@@ -432,7 +432,7 @@ apiRouter.post('/insights/generate', async (req: AuthenticatedRequest, res) => {
       message: 'AI insights generated successfully',
       insights: insights.length,
       notifications: createdNotifications,
-      summary: await generateSubscriptionSummary(activeSubscriptions)
+      summary: calculateSubscriptionSummary(subscriptions)
     });
   } catch (error) {
     console.error('Generate insights API error:', error);

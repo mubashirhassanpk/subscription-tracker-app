@@ -13,7 +13,7 @@ async function createGeminiAI(userId: string = "dev-user-1"): Promise<GoogleGenA
   
   // Fall back to environment variable if no user key
   if (!apiKey) {
-    apiKey = process.env.GEMINI_API_KEY;
+    apiKey = process.env.GEMINI_API_KEY || null;
   }
   
   if (!apiKey) {
@@ -122,6 +122,67 @@ Provide insights focusing on:
     console.error("Failed to analyze subscriptions with Gemini AI:", error);
     throw new Error(`Subscription analysis failed: ${error}`);
   }
+}
+
+// Generate structured summary for AI insights dialog
+export function calculateSubscriptionSummary(subscriptions: Subscription[]) {
+  console.log('Generating insights for userId:', subscriptions[0]?.userId || 'unknown');
+  console.log('All subscriptions for insights:', subscriptions);
+
+  // Filter active subscriptions
+  const activeSubscriptions = subscriptions.filter(sub => {
+    const isActive = sub.isActive;
+    console.log(`Checking subscription ${sub.id} (${sub.name}): isActive = ${isActive}, type: ${typeof isActive}`);
+    return Boolean(isActive && isActive !== 0 && (typeof isActive !== 'string' || isActive !== '0'));
+  });
+
+  console.log('Checking isActive values:', activeSubscriptions.map(sub => ({
+    id: sub.id,
+    name: sub.name,
+    isActive: sub.isActive,
+    type: typeof sub.isActive
+  })));
+
+  console.log('Active subscriptions found:', activeSubscriptions.length);
+
+  // Calculate total monthly cost
+  const totalCost = activeSubscriptions.reduce((sum, sub) => {
+    const cost = parseFloat(sub.cost) || 0;
+    switch (sub.billingCycle) {
+      case 'monthly': 
+        return sum + cost;
+      case 'yearly': 
+        return sum + (cost / 12);
+      case 'weekly': 
+        return sum + (cost * 4.33);
+      default: 
+        return sum + cost;
+    }
+  }, 0);
+
+  // Calculate upcoming renewals (next 30 days)
+  const now = new Date();
+  const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const upcomingRenewals = activeSubscriptions.filter(sub => {
+    const renewalDate = new Date(sub.nextBillingDate);
+    return renewalDate >= now && renewalDate <= thirtyDaysFromNow;
+  }).length;
+
+  // Calculate category costs
+  const categoryCosts = activeSubscriptions.reduce((acc, sub) => {
+    const cost = parseFloat(sub.cost) || 0;
+    const monthlyCost = sub.billingCycle === 'yearly' ? cost / 12 : 
+                      sub.billingCycle === 'weekly' ? cost * 4.33 : cost;
+    acc[sub.category] = (acc[sub.category] || 0) + monthlyCost;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return {
+    totalCost,
+    activeSubscriptions: activeSubscriptions.length,
+    upcomingRenewals,
+    categoryCosts
+  };
 }
 
 export async function generateSubscriptionSummary(subscriptions: Subscription[], userId: string = "dev-user-1"): Promise<string> {
