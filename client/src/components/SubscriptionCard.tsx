@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { MoreHorizontal, Calendar, DollarSign, Crown, Copy, Heart, Pause, Play, FileText, ExternalLink } from "lucide-react";
 import { type Subscription } from "@shared/schema";
 import { format } from "date-fns";
+import CountdownTimer from "./CountdownTimer";
 
 interface SubscriptionCardProps {
   subscription: Subscription;
@@ -29,6 +30,8 @@ const categoryColors: Record<string, string> = {
 export default function SubscriptionCard({ subscription, onEdit, onDelete, onViewDetails, onDuplicate, onTogglePause, onExport }: SubscriptionCardProps) {
   const nextBilling = new Date(subscription.nextBillingDate);
   const isUpcomingSoon = nextBilling.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000; // 7 days
+  const paymentStatus = (subscription as any).paymentStatus || 'paid';
+  const email = (subscription as any).email || '';
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -95,6 +98,15 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
               Inactive
             </Badge>
           )}
+          {paymentStatus !== 'paid' && (
+            <Badge 
+              variant={paymentStatus === 'overdue' || paymentStatus === 'failed' ? 'destructive' : 'default'}
+              className="text-xs"
+              data-testid={`badge-payment-status-${subscription.id}`}
+            >
+              {paymentStatus === 'pending' ? 'Pending' : paymentStatus === 'failed' ? 'Failed' : paymentStatus === 'overdue' ? 'Overdue' : paymentStatus}
+            </Badge>
+          )}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -158,17 +170,12 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
           </Badge>
         </div>
 
-        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
-          <Calendar className="h-4 w-4 flex-shrink-0" />
-          <span data-testid={`text-next-billing-${subscription.id}`} className="flex-1">
-            {subscription.isTrial ? 'Trial ends:' : 'Next billing:'} {format(nextBilling, 'MMM dd, yyyy')}
-          </span>
-          {isUpcomingSoon && (
-            <Badge variant="destructive" className="text-xs">
-              Soon
-            </Badge>
-          )}
-        </div>
+        <CountdownTimer
+          targetDate={nextBilling}
+          isActive={Boolean(subscription.isActive)}
+          isTrial={subscription.isTrial}
+          data-testid={`countdown-${subscription.id}`}
+        />
 
         {subscription.description && (
           <p className="text-sm text-muted-foreground" data-testid={`text-description-${subscription.id}`}>
