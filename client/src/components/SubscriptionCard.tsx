@@ -85,80 +85,83 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
       onClick={handleViewDetails}
       data-testid={`card-subscription-${subscription.id}`}
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="space-y-1 flex-1 min-w-0">
-          <Badge 
-            className={`${categoryColors[subscription.category] || categoryColors.Other} text-xs px-1.5 py-0.5 w-fit`}
-            variant="secondary"
-            data-testid={`badge-category-${subscription.id}`}
-          >
-            {subscription.category.slice(0, 4)}
-          </Badge>
-          <h3 className="font-semibold text-sm sm:text-base truncate" data-testid={`text-subscription-name-${subscription.id}`}>
-            {subscription.name}
-          </h3>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {subscription.isTrial && (
-            <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200" data-testid={`badge-trial-${subscription.id}`}>
-              <Crown className="h-3 w-3 mr-1" />
-              Trial
-            </Badge>
-          )}
-          {!subscription.isActive && (
-            <Badge variant="secondary" className="text-xs" data-testid={`badge-inactive-${subscription.id}`}>
-              Inactive
-            </Badge>
-          )}
-          {paymentStatus !== 'paid' && (
+      <CardHeader className="space-y-3 pb-2">
+        {/* Single line with category badge, status badges, and menu */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0 overflow-x-auto scrollbar-hide">
             <Badge 
-              variant={paymentStatus === 'overdue' || paymentStatus === 'failed' ? 'destructive' : 'default'}
-              className="text-xs"
-              data-testid={`badge-payment-status-${subscription.id}`}
+              className={`${categoryColors[subscription.category] || categoryColors.Other} text-xs px-1.5 py-0.5 flex-shrink-0`}
+              variant="secondary"
+              data-testid={`badge-category-${subscription.id}`}
             >
-              {paymentStatus === 'pending' ? 'Pending' : paymentStatus === 'failed' ? 'Failed' : paymentStatus === 'overdue' ? 'Overdue' : paymentStatus}
+              {subscription.category.slice(0, 4)}
             </Badge>
-          )}
+            {subscription.isTrial && (
+              <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200 flex-shrink-0" data-testid={`badge-trial-${subscription.id}`}>
+                <Crown className="h-3 w-3 mr-1" />
+                Trial
+              </Badge>
+            )}
+            {!subscription.isActive && (
+              <Badge variant="secondary" className="text-xs flex-shrink-0" data-testid={`badge-inactive-${subscription.id}`}>
+                Inactive
+              </Badge>
+            )}
+            {paymentStatus !== 'paid' && (
+              <Badge 
+                variant={paymentStatus === 'overdue' || paymentStatus === 'failed' ? 'destructive' : 'default'}
+                className="text-xs flex-shrink-0"
+                data-testid={`badge-payment-status-${subscription.id}`}
+              >
+                {paymentStatus === 'pending' ? 'Pending' : paymentStatus === 'failed' ? 'Failed' : paymentStatus === 'overdue' ? 'Overdue' : paymentStatus}
+              </Badge>
+            )}
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="flex-shrink-0"
+                onClick={(e) => e.stopPropagation()}
+                data-testid={`button-more-${subscription.id}`}
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onClick={handleDuplicate} data-testid={`menu-duplicate-${subscription.id}`}>
+                <Copy className="mr-2 h-4 w-4" />
+                <span>Duplicate</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleTogglePause} data-testid={`menu-pause-${subscription.id}`}>
+                {subscription.isActive ? (
+                  <><Pause className="mr-2 h-4 w-4" /><span>Pause subscription</span></>
+                ) : (
+                  <><Play className="mr-2 h-4 w-4" /><span>Resume subscription</span></>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleExport} data-testid={`menu-export-${subscription.id}`}>
+                <FileText className="mr-2 h-4 w-4" />
+                <span>Export details</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleOpenWebsite} data-testid={`menu-website-${subscription.id}`}>
+                <ExternalLink className="mr-2 h-4 w-4" />
+                <span>Find website</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setShowHistory(true); }} data-testid={`menu-history-${subscription.id}`}>
+                <History className="mr-2 h-4 w-4" />
+                <span>View history</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={(e) => e.stopPropagation()}
-              data-testid={`button-more-${subscription.id}`}
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onClick={handleDuplicate} data-testid={`menu-duplicate-${subscription.id}`}>
-              <Copy className="mr-2 h-4 w-4" />
-              <span>Duplicate</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleTogglePause} data-testid={`menu-pause-${subscription.id}`}>
-              {subscription.isActive ? (
-                <><Pause className="mr-2 h-4 w-4" /><span>Pause subscription</span></>
-              ) : (
-                <><Play className="mr-2 h-4 w-4" /><span>Resume subscription</span></>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleExport} data-testid={`menu-export-${subscription.id}`}>
-              <FileText className="mr-2 h-4 w-4" />
-              <span>Export details</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleOpenWebsite} data-testid={`menu-website-${subscription.id}`}>
-              <ExternalLink className="mr-2 h-4 w-4" />
-              <span>Find website</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setShowHistory(true); }} data-testid={`menu-history-${subscription.id}`}>
-              <History className="mr-2 h-4 w-4" />
-              <span>View history</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Title on separate line */}
+        <h3 className="font-semibold text-sm sm:text-base truncate" data-testid={`text-subscription-name-${subscription.id}`}>
+          {subscription.name}
+        </h3>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2 flex-1 min-w-0">
