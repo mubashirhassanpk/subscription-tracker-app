@@ -103,7 +103,8 @@ export default function Profile() {
     setIsEditing(false);
   };
 
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | undefined) => {
+    if (!name) return 'U';
     return name
       .split(' ')
       .map(word => word[0])
