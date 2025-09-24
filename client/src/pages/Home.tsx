@@ -5,11 +5,27 @@ import { type Subscription } from "@shared/schema";
 import Dashboard from "@/components/Dashboard";
 import EditSubscriptionForm from "@/components/EditSubscriptionForm";
 import { useToast } from "@/hooks/use-toast";
+import { useAutoInsights } from "@/hooks/useAutoInsights";
 
 export default function Home() {
   const { toast } = useToast();
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+  // Enable automatic AI insights generation every 5 hours
+  useAutoInsights({
+    enabled: true,
+    onSuccess: () => {
+      toast({
+        title: "AI Insights Generated",
+        description: "New insights about your subscriptions are available in notifications.",
+      });
+    },
+    onError: (error) => {
+      console.error('Auto insights error:', error);
+      // Don't show error toast for auto-generation to avoid annoying users
+    }
+  });
 
   const { data: subscriptions = [], isLoading } = useQuery<Subscription[]>({
     queryKey: ['/api/subscriptions'],

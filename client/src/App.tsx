@@ -11,12 +11,14 @@ import Documentation from "./pages/Documentation";
 import ApiKeys from "./pages/ApiKeys";
 import Settings from "./pages/Settings";
 import History from "./pages/History";
+import Calendar from "./pages/Calendar";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/calendar" component={Calendar} />
       <Route path="/history" component={History} />
       <Route path="/docs" component={Documentation} />
       <Route path="/api-keys" component={ApiKeys} />

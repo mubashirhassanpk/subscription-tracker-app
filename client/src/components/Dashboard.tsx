@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { LayoutGrid, List, RefreshCw } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useSearch } from "../contexts/SearchContext";
 
 interface DashboardProps {
   subscriptions: Subscription[];
@@ -26,7 +27,7 @@ export default function Dashboard({
   onDeleteSubscription,
   isLoading = false
 }: DashboardProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+  const { searchTerm, setSearchTerm } = useSearch();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');

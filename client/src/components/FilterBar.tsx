@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Search, Filter, X, ChevronDown, SortAsc, SortDesc } from "lucide-react";
 import { useState } from "react";
 
 interface FilterBarProps {
@@ -11,6 +14,19 @@ interface FilterBarProps {
   onCategoryChange: (category: string) => void;
   activeFilter: 'all' | 'active' | 'inactive';
   onActiveFilterChange: (filter: 'all' | 'active' | 'inactive') => void;
+  // Enhanced filter props
+  paymentStatusFilter?: string;
+  onPaymentStatusFilterChange?: (status: string) => void;
+  billingCycleFilter?: string;
+  onBillingCycleFilterChange?: (cycle: string) => void;
+  priceRange?: [number, number];
+  onPriceRangeChange?: (range: [number, number]) => void;
+  sortBy?: string;
+  onSortByChange?: (sort: string) => void;
+  sortOrder?: 'asc' | 'desc';
+  onSortOrderChange?: (order: 'asc' | 'desc') => void;
+  trialFilter?: 'all' | 'trial' | 'paid';
+  onTrialFilterChange?: (filter: 'all' | 'trial' | 'paid') => void;
 }
 
 const categories = [
@@ -22,6 +38,30 @@ const categories = [
   'Gaming',
   'News',
   'Other'
+];
+
+const paymentStatuses = [
+  { value: 'all', label: 'All Statuses' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'failed', label: 'Failed' },
+  { value: 'overdue', label: 'Overdue' }
+];
+
+const billingCycles = [
+  { value: 'all', label: 'All Cycles' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'quarterly', label: 'Quarterly' },
+  { value: 'yearly', label: 'Yearly' },
+  { value: 'weekly', label: 'Weekly' }
+];
+
+const sortOptions = [
+  { value: 'name', label: 'Name' },
+  { value: 'cost', label: 'Cost' },
+  { value: 'nextBillingDate', label: 'Next Billing Date' },
+  { value: 'createdAt', label: 'Date Added' },
+  { value: 'category', label: 'Category' }
 ];
 
 export default function FilterBar({
