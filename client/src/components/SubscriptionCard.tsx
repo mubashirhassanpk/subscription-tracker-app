@@ -88,7 +88,7 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
       <CardHeader className="space-y-3 pb-2">
         {/* Single line with category badge, status badges, and menu */}
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-2 flex-wrap">
             <Badge 
               className={`${categoryColors[subscription.category] || categoryColors.Other} text-xs px-1.5 py-0.5 flex-shrink-0`}
               variant="secondary"
