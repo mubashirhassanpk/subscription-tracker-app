@@ -143,17 +143,17 @@ export default function Dashboard({
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground" data-testid="text-page-title">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+            <div className="text-center sm:text-left">
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground" data-testid="text-page-title">
                 Subscription Tracker
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-0">
                 Manage and monitor your recurring subscriptions
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center sm:justify-end gap-2 sm:gap-4">
               <AIInsightsDialog />
               <AddSubscriptionForm 
                 onSubmit={onAddSubscription} 
@@ -162,12 +162,13 @@ export default function Dashboard({
               />
               <Button
                 variant="outline"
-                size="icon"
+                size="sm"
+                className="sm:w-9 sm:h-9 sm:p-0"
                 onClick={handleRefreshDashboard}
                 disabled={isRefreshing}
                 data-testid="button-refresh-dashboard"
               >
-                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                 <span className="sr-only">Refresh dashboard</span>
               </Button>
             </div>
@@ -176,7 +177,7 @@ export default function Dashboard({
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 space-y-8">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 space-y-4 sm:space-y-8">
         {/* Stats Cards */}
         <StatsCards subscriptions={subscriptions} />
 

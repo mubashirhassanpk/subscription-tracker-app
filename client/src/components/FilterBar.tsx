@@ -85,8 +85,8 @@ export default function FilterBar({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between">
+        <div className="relative w-full sm:flex-1 sm:max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search subscriptions..."
@@ -97,7 +97,7 @@ export default function FilterBar({
           />
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto justify-end">
           <Button
             variant="outline"
             size="sm"
@@ -123,10 +123,10 @@ export default function FilterBar({
       </div>
 
       {showFilters && (
-        <div className="space-y-4 p-4 border rounded-lg bg-card">
+        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg bg-card">
           <div>
             <h4 className="text-sm font-medium mb-2">Category</h4>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {categories.map((category) => (
                 <Badge
                   key={category}
@@ -146,7 +146,7 @@ export default function FilterBar({
 
           <div>
             <h4 className="text-sm font-medium mb-2">Status</h4>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {[
                 { value: 'all', label: 'All' },
                 { value: 'active', label: 'Active' },
