@@ -15,8 +15,8 @@ const webSubscriptionSchema = z.object({
   // Trial fields
   isTrial: z.coerce.boolean().optional().default(false),
   trialDays: z.coerce.number().int().min(0).optional(),
-  trialStartDate: z.coerce.date().optional(),
-  trialEndDate: z.coerce.date().optional(),
+  trialStartDate: z.preprocess((val) => val === '' ? undefined : val, z.coerce.date().optional()),
+  trialEndDate: z.preprocess((val) => val === '' ? undefined : val, z.coerce.date().optional()),
   // Payment card fields
   cardLast4: z.string().optional(),
   bankName: z.string().optional(),
