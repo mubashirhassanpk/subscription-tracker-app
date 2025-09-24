@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { MoreHorizontal, Calendar, DollarSign } from "lucide-react";
+import { MoreHorizontal, Calendar, DollarSign, Crown } from "lucide-react";
 import { type Subscription } from "@shared/schema";
 import { format } from "date-fns";
 
@@ -50,12 +50,18 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
       data-testid={`card-subscription-${subscription.id}`}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-base" data-testid={`text-subscription-name-${subscription.id}`}>
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="font-semibold text-sm sm:text-base truncate" data-testid={`text-subscription-name-${subscription.id}`}>
             {subscription.name}
           </h3>
+          {subscription.isTrial && (
+            <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200" data-testid={`badge-trial-${subscription.id}`}>
+              <Crown className="h-3 w-3 mr-1" />
+              Trial
+            </Badge>
+          )}
           {!subscription.isActive && (
-            <Badge variant="secondary" data-testid={`badge-inactive-${subscription.id}`}>
+            <Badge variant="secondary" className="text-xs" data-testid={`badge-inactive-${subscription.id}`}>
               Inactive
             </Badge>
           )}
@@ -73,18 +79,25 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-            <span className="text-2xl font-bold" data-testid={`text-cost-${subscription.id}`}>
-              ${subscription.cost}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              /{subscription.billingCycle}
-            </span>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <div className="flex flex-wrap items-baseline gap-1">
+              <span className="text-xl sm:text-2xl font-bold" data-testid={`text-cost-${subscription.id}`}>
+                ${subscription.cost}
+              </span>
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                /{subscription.billingCycle}
+              </span>
+              {subscription.isTrial && subscription.trialDays && (
+                <span className="text-xs text-orange-600 ml-1">
+                  ({subscription.trialDays} day trial)
+                </span>
+              )}
+            </div>
           </div>
           <Badge 
-            className={categoryColors[subscription.category] || categoryColors.Other}
+            className={`${categoryColors[subscription.category] || categoryColors.Other} text-xs flex-shrink-0`}
             variant="secondary"
             data-testid={`badge-category-${subscription.id}`}
           >
@@ -92,13 +105,13 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
           </Badge>
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Calendar className="h-4 w-4" />
-          <span data-testid={`text-next-billing-${subscription.id}`}>
-            Next billing: {format(nextBilling, 'MMM dd, yyyy')}
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
+          <Calendar className="h-4 w-4 flex-shrink-0" />
+          <span data-testid={`text-next-billing-${subscription.id}`} className="flex-1">
+            {subscription.isTrial ? 'Trial ends:' : 'Next billing:'} {format(nextBilling, 'MMM dd, yyyy')}
           </span>
           {isUpcomingSoon && (
-            <Badge variant="destructive" className="ml-2">
+            <Badge variant="destructive" className="text-xs">
               Soon
             </Badge>
           )}
@@ -110,12 +123,13 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
           </p>
         )}
 
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-2 pt-2 flex-wrap">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={handleEdit}
             data-testid={`button-edit-${subscription.id}`}
+            className="text-xs sm:text-sm"
           >
             Edit
           </Button>

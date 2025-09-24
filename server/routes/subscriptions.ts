@@ -12,6 +12,14 @@ const webSubscriptionSchema = z.object({
   nextBillingDate: z.coerce.date(), // Coerce string to Date
   description: z.string().optional().default(''),
   isActive: z.coerce.number().int().min(0).max(1).default(1), // Coerce to integer
+  // Trial fields
+  isTrial: z.boolean().optional().default(false),
+  trialDays: z.number().optional(),
+  trialStartDate: z.coerce.date().optional(),
+  trialEndDate: z.coerce.date().optional(),
+  // Payment card fields
+  cardLast4: z.string().optional(),
+  bankName: z.string().optional(),
 });
 
 export const subscriptionsRouter = Router();
