@@ -139,8 +139,10 @@ export function HeaderMenu() {
             <DropdownMenuSeparator />
             
             <DropdownMenuItem data-testid="menu-profile">
-              <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+              <Link href="/profile" className="flex items-center w-full">
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </Link>
             </DropdownMenuItem>
             
             <DropdownMenuItem data-testid="menu-settings">

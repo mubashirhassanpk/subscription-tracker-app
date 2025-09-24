@@ -363,11 +363,11 @@ export default function Settings() {
                 <div>
                   <h4 className="font-medium">Stripe Status</h4>
                   <p className="text-sm text-muted-foreground">
-                    {apiKeysStatus?.stripeConfigured ? 'Configured and ready' : 'Not configured'}
+                    {(apiKeysStatus as any)?.stripeConfigured ? 'Configured and ready' : 'Not configured'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {apiKeysStatus?.stripeConfigured ? (
+                  {(apiKeysStatus as any)?.stripeConfigured ? (
                     <Badge variant="default" className="bg-green-100 text-green-800">
                       <CheckCircle className="h-3 w-3 mr-1" />
                       Active
@@ -381,7 +381,7 @@ export default function Settings() {
                 </div>
               </div>
               
-              {!apiKeysStatus?.stripeConfigured && (
+              {!(apiKeysStatus as any)?.stripeConfigured && (
                 <Alert>
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>
@@ -513,7 +513,7 @@ export default function Settings() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {apiKeysStatus?.stripe?.configured ? (
+                    {(apiKeysStatus as any)?.stripe?.configured ? (
                       <Badge variant="default" className="bg-green-100 text-green-800">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Configured
@@ -527,7 +527,7 @@ export default function Settings() {
                   </div>
                 </div>
 
-                {!apiKeysStatus?.stripe?.configured && (
+                {!(apiKeysStatus as any)?.stripe?.configured && (
                   <Alert>
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
