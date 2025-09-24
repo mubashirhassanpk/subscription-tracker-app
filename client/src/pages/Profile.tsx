@@ -20,12 +20,14 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
 interface UserProfile {
-  id: string;
-  email: string;
-  name: string;
-  subscriptionStatus: 'trial' | 'active' | 'expired' | 'cancelled';
-  trialEndsAt?: string;
-  createdAt: string;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    subscriptionStatus: 'trial' | 'active' | 'expired' | 'cancelled';
+    trialEndsAt?: string;
+    createdAt: string;
+  };
   plan?: {
     name: string;
     price: string;
@@ -51,10 +53,10 @@ export default function Profile() {
 
   // Initialize form data when user profile loads
   useEffect(() => {
-    if (userProfile) {
+    if (userProfile?.user) {
       setProfileData({
-        name: userProfile.name,
-        email: userProfile.email
+        name: userProfile.user.name || '',
+        email: userProfile.user.email || ''
       });
     }
   }, [userProfile]);
@@ -94,10 +96,10 @@ export default function Profile() {
   };
 
   const handleCancelEdit = () => {
-    if (userProfile) {
+    if (userProfile?.user) {
       setProfileData({
-        name: userProfile.name,
-        email: userProfile.email
+        name: userProfile.user.name || '',
+        email: userProfile.user.email || ''
       });
     }
     setIsEditing(false);
@@ -185,14 +187,14 @@ export default function Profile() {
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
               <AvatarFallback className="text-lg font-semibold">
-                {getInitials(userProfile.name)}
+                {getInitials(userProfile.user.name)}
               </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <h3 className="text-lg font-semibold">{userProfile.name}</h3>
-              <p className="text-sm text-muted-foreground">{userProfile.email}</p>
+              <h3 className="text-lg font-semibold">{userProfile.user.name}</h3>
+              <p className="text-sm text-muted-foreground">{userProfile.user.email}</p>
               <div className="flex items-center gap-2">
-                <Badge variant={userProfile.subscriptionStatus === 'trial' ? "secondary" : "default"}>
+                <Badge variant={userProfile.user.subscriptionStatus === 'trial' ? "secondary" : "default"}>
                   <Crown className="h-3 w-3 mr-1" />
                   {userProfile.plan?.name || 'Trial'}
                 </Badge>
@@ -251,28 +253,28 @@ export default function Profile() {
                 <Label className="text-sm font-medium text-muted-foreground">Full Name</Label>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-muted-foreground" />
-                  <span>{userProfile.name}</span>
+                  <span>{userProfile.user.name}</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground">Email Address</Label>
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{userProfile.email}</span>
+                  <span>{userProfile.user.email}</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground">Member Since</Label>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{formatDate(userProfile.createdAt)}</span>
+                  <span>{formatDate(userProfile.user.createdAt)}</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground">Account Status</Label>
                 <div className="flex items-center gap-2">
                   <Crown className="h-4 w-4 text-muted-foreground" />
-                  <span className="capitalize">{userProfile.subscriptionStatus}</span>
+                  <span className="capitalize">{userProfile.user.subscriptionStatus}</span>
                 </div>
               </div>
             </div>
@@ -299,7 +301,7 @@ export default function Profile() {
                 {userProfile.plan?.name || "Free Trial"}
               </p>
             </div>
-            <Badge variant={userProfile.subscriptionStatus === 'trial' ? "secondary" : "default"}>
+            <Badge variant={userProfile.user.subscriptionStatus === 'trial' ? "secondary" : "default"}>
               {userProfile.plan?.name || "Trial"}
             </Badge>
           </div>
