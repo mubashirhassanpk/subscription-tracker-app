@@ -18,17 +18,19 @@ async function trySessionOrApiKey(req: any, res: any, next: any) {
 
     // Development fallback - create a stub user
     if (process.env.NODE_ENV === 'development') {
-      const user = await storage.getUser('1') || {
-        id: '1',
-        email: 'test@example.com',
-        name: 'Test User',
-        subscriptionStatus: 'trial' as const,
-        planId: null,
-        trialEndsAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        password: ''
-      };
+      let user = await storage.getUser('1');
+      if (!user) {
+        // Create the development user in the database
+        user = await storage.createUser({
+          email: 'test@example.com',
+          name: 'Test User',
+          password: 'dev-password-hash',
+          subscriptionStatus: 'trial',
+          planId: null,
+          trialEndsAt: null
+        });
+        console.log('Created development user:', user.id);
+      }
       req.user = user;
       return next();
     }
@@ -112,15 +114,21 @@ plansRouter.post('/upgrade', trySessionOrApiKey, async (req: AuthenticatedReques
     
     // Update user's plan
     console.log('Updating user plan...');
-    const updatedUser = await storage.updateUser(req.user.id, {
-      planId: planId,
-      subscriptionStatus: 'active'
-    });
-    console.log('Update result:', updatedUser ? 'Success' : 'Failed');
-    
-    if (!updatedUser) {
-      console.log('Failed to update user - user not found or update failed');
-      return res.status(500).json({ error: 'Failed to update user plan' });
+    let updatedUser;
+    try {
+      updatedUser = await storage.updateUser(req.user.id, {
+        planId: planId,
+        subscriptionStatus: 'active'
+      });
+      console.log('Update result:', updatedUser ? 'Success' : 'Failed');
+      
+      if (!updatedUser) {
+        console.log('Failed to update user - user not found or update failed');
+        return res.status(500).json({ error: 'Failed to update user plan' });
+      }
+    } catch (updateError) {
+      console.error('Error during user update:', updateError);
+      return res.status(500).json({ error: 'Database error during update' });
     }
     
     res.json({

@@ -16,17 +16,19 @@ async function trySessionOrApiKey(req: any, res: any, next: any) {
 
     // Development fallback - create a stub user
     if (process.env.NODE_ENV === 'development') {
-      const user = await storage.getUser('1') || {
-        id: '1',
-        email: 'test@example.com',
-        name: 'Test User',
-        subscriptionStatus: 'trial' as const,
-        planId: null,
-        trialEndsAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        password: ''
-      };
+      let user = await storage.getUser('1');
+      if (!user) {
+        // Create the development user in the database
+        user = await storage.createUser({
+          email: 'test@example.com',
+          name: 'Test User',
+          password: 'dev-password-hash',
+          subscriptionStatus: 'trial',
+          planId: null,
+          trialEndsAt: null
+        });
+        console.log('Created development user:', user.id);
+      }
       req.user = user;
       return next();
     }
@@ -42,7 +44,7 @@ async function trySessionOrApiKey(req: any, res: any, next: any) {
 const accountRouter = Router();
 
 // Get user account information (session-based for web frontend)
-accountRouter.get('/account', trySessionOrApiKey, async (req: AuthenticatedRequest, res) => {
+accountRouter.get('/', trySessionOrApiKey, async (req: AuthenticatedRequest, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });

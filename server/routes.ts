@@ -21,7 +21,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/notifications', notificationsRouter);
   app.use('/api/subscriptions', subscriptionsRouter);
   app.use('/api/plans', plansRouter);
-  app.use('/api', accountRouter);
+  app.use('/api/account', accountRouter);
   app.use('/api/v1', apiRouter);
 
   // API Keys management page
