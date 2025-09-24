@@ -92,26 +92,34 @@ plansRouter.post('/upgrade', trySessionOrApiKey, async (req: AuthenticatedReques
       return res.status(401).json({ error: 'Authentication required' });
     }
 
+    console.log('Upgrade request - User:', req.user.id, 'Email:', req.user.email);
     const { planId } = updatePlanSchema.parse(req.body);
+    console.log('Requested plan ID:', planId);
     
     // Verify the plan exists and is active
     const plan = await storage.getPlan(planId);
     if (!plan || !plan.isActive) {
+      console.log('Plan not found or inactive:', planId);
       return res.status(400).json({ error: 'Invalid or inactive plan' });
     }
+    console.log('Plan found:', plan.name);
     
     // Check if user is already on this plan
     if (req.user.planId === planId) {
+      console.log('User already on plan:', planId);
       return res.status(400).json({ error: 'User is already on this plan' });
     }
     
     // Update user's plan
+    console.log('Updating user plan...');
     const updatedUser = await storage.updateUser(req.user.id, {
       planId: planId,
       subscriptionStatus: 'active'
     });
+    console.log('Update result:', updatedUser ? 'Success' : 'Failed');
     
     if (!updatedUser) {
+      console.log('Failed to update user - user not found or update failed');
       return res.status(500).json({ error: 'Failed to update user plan' });
     }
     
