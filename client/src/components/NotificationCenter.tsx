@@ -139,8 +139,10 @@ export function NotificationCenter() {
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-80 p-0" 
+        className="w-96 p-0" 
         align="end"
+        side="bottom"
+        sideOffset={8}
         data-testid="popover-notifications"
       >
         <Card className="border-0 shadow-none">
@@ -187,14 +189,14 @@ export function NotificationCenter() {
                         {getNotificationIcon(notification.type, notification.priority)}
                       </div>
                       <div className="flex-1 space-y-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <h4 className="text-sm font-medium leading-none truncate">
+                        <div className="flex items-start justify-between gap-3">
+                          <h4 className="text-sm font-medium leading-tight flex-1 pr-2">
                             {notification.title}
                           </h4>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1 flex-shrink-0">
                             <Badge
                               variant={getPriorityBadgeVariant(notification.priority)}
-                              className="text-xs"
+                              className="text-xs whitespace-nowrap"
                             >
                               {notification.priority}
                             </Badge>
@@ -202,10 +204,11 @@ export function NotificationCenter() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6"
+                                className="h-6 w-6 flex-shrink-0"
                                 onClick={(e) => handleMarkAsRead(notification.id, e)}
                                 disabled={markAsReadMutation.isPending}
                                 data-testid={`button-mark-read-${notification.id}`}
+                                title="Mark as read"
                               >
                                 <Check className="h-3 w-3" />
                               </Button>
@@ -213,21 +216,22 @@ export function NotificationCenter() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6"
+                              className="h-6 w-6 flex-shrink-0"
                               onClick={(e) => handleDelete(notification.id, e)}
                               disabled={deleteNotificationMutation.isPending}
                               data-testid={`button-delete-${notification.id}`}
+                              title="Delete notification"
                             >
                               <X className="h-3 w-3" />
                             </Button>
                           </div>
                         </div>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
+                        <p className="text-xs text-muted-foreground leading-relaxed max-w-full break-words">
                           {notification.message}
                         </p>
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span className="capitalize">{notification.type.replace('_', ' ')}</span>
-                          <span>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
+                          <span className="capitalize flex-shrink-0">{notification.type.replace('_', ' ')}</span>
+                          <span className="text-right flex-shrink-0 ml-2">
                             {new Date(notification.createdAt).toLocaleDateString('en-US', {
                               month: 'short',
                               day: 'numeric',
