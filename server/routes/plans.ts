@@ -4,21 +4,41 @@ import { storage } from "../storage";
 import { authenticateApiKey } from "../middleware/auth";
 import type { AuthenticatedRequest } from "../middleware/auth";
 
+// Session authentication middleware that allows both session and API key auth
 async function trySessionOrApiKey(req: any, res: any, next: any) {
-  // In production: require either session/JWT or API key authentication
-  if (process.env.NODE_ENV === 'production') {
-    // TODO: Add real session/JWT authentication here
-    // For now, fall back to API key authentication only
+  try {
+    // First try session authentication
+    if (req.session?.userId) {
+      const user = await storage.getUser(req.session.userId);
+      if (user) {
+        req.user = user;
+        return next();
+      }
+    }
+
+    // Development fallback - create a stub user
+    if (process.env.NODE_ENV === 'development') {
+      const user = await storage.getUser('1') || {
+        id: '1',
+        email: 'test@example.com',
+        name: 'Test User',
+        subscriptionStatus: 'trial' as const,
+        planId: null,
+        trialEndsAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        password: ''
+      };
+      req.user = user;
+      return next();
+    }
+
+    // Fallback to API key authentication if session auth fails
     return authenticateApiKey(req, res, next);
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    return res.status(500).json({ error: 'Authentication error' });
   }
-  
-  // Development only: simulate a logged-in user for testing
-  req.user = {
-    id: '1',
-    email: 'test@example.com', 
-    name: 'Test User'
-  };
-  next();
 }
 
 const plansRouter = Router();

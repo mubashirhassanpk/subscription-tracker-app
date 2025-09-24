@@ -122,11 +122,13 @@ export function HeaderMenu() {
             <DropdownMenuSeparator />
             
             {/* Plan Status */}
-            <DropdownMenuItem className="flex items-center justify-between" data-testid="menu-plan-status">
-              <span>Plan Status</span>
-              <Badge variant={isTrialUser ? "secondary" : "default"} className="text-xs">
-                {planName}
-              </Badge>
+            <DropdownMenuItem data-testid="menu-plan-status">
+              <Link href="/plans" className="flex items-center justify-between w-full">
+                <span>Plan Status</span>
+                <Badge variant={isTrialUser ? "secondary" : "default"} className="text-xs">
+                  {planName}
+                </Badge>
+              </Link>
             </DropdownMenuItem>
             
             {isTrialUser && (
