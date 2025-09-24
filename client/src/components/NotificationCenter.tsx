@@ -139,14 +139,14 @@ export function NotificationCenter() {
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[65vw] sm:w-96 max-w-xs p-0 mx-8" 
+        className="w-[58vw] sm:w-96 max-w-xs p-0 mx-10" 
         align="end"
         side="bottom"
-        sideOffset={12}
+        sideOffset={14}
         data-testid="popover-notifications"
       >
         <Card className="border-0 shadow-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 px-2 py-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 px-1.5 py-0.5">
             <h3 className="font-semibold text-xs" data-testid="text-notifications-title">
               Notifications
             </h3>
@@ -154,18 +154,18 @@ export function NotificationCenter() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs h-6 px-2"
+                className="text-xs px-2"
                 onClick={handleMarkAllAsRead}
                 disabled={markAllAsReadMutation.isPending}
                 data-testid="button-mark-all-read"
               >
-                Mark all read
+                Mark all
               </Button>
             )}
           </CardHeader>
           <Separator />
           <CardContent className="p-0">
-            <ScrollArea className="h-[30vh] sm:h-80 max-h-80">
+            <ScrollArea className="h-[25vh] sm:h-80 max-h-80">
               {isLoading ? (
                 <div className="p-4 text-center text-sm text-muted-foreground">
                   Loading notifications...
@@ -180,65 +180,64 @@ export function NotificationCenter() {
                     <div
                       key={notification.id}
                       className={cn(
-                        "flex flex-col sm:flex-row items-start gap-1 p-1.5 hover-elevate transition-colors border-b border-border last:border-b-0",
+                        "flex flex-col sm:flex-row items-start gap-0.5 p-1 hover-elevate transition-colors border-b border-border last:border-b-0",
                         !notification.isRead && "bg-blue-50 dark:bg-blue-950/20"
                       )}
                       data-testid={`notification-${notification.id}`}
                     >
                       {/* Mobile layout - stacked */}
-                      <div className="flex items-start gap-1 w-full sm:hidden">
+                      <div className="flex items-start gap-0.5 w-full sm:hidden">
                         <div className="flex-shrink-0 mt-0.5">
                           {getNotificationIcon(notification.type, notification.priority)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-0.5 mb-0.5">
-                            <h4 className="text-xs font-medium leading-tight flex-1 pr-1 line-clamp-1">
+                            <h4 className="text-xs font-medium leading-tight flex-1 pr-0.5 line-clamp-1">
                               {notification.title}
                             </h4>
                             <Badge
                               variant={getPriorityBadgeVariant(notification.priority)}
-                              className="text-xs whitespace-nowrap flex-shrink-0"
+                              className="text-xs whitespace-nowrap flex-shrink-0 scale-75"
                             >
                               {notification.priority}
                             </Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground leading-snug mb-0.5 break-words line-clamp-2">
+                          <p className="text-xs text-muted-foreground leading-tight mb-0.5 break-words line-clamp-2">
                             {notification.message}
                           </p>
-                          <div className="flex items-center justify-between text-xs text-muted-foreground mb-0.5">
-                            <span className="capitalize flex-shrink-0 text-xs">{notification.type.replace('_', ' ')}</span>
-                            <span className="text-right flex-shrink-0 ml-1 text-xs">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <div className="flex items-center gap-0.5 flex-wrap">
+                              {!notification.isRead && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-xs px-2"
+                                  onClick={(e) => handleMarkAsRead(notification.id, e)}
+                                  disabled={markAsReadMutation.isPending}
+                                  data-testid={`button-mark-read-${notification.id}`}
+                                >
+                                  <Check className="h-3 w-3 mr-1" />
+                                  Read
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs px-2"
+                                onClick={(e) => handleDelete(notification.id, e)}
+                                disabled={deleteNotificationMutation.isPending}
+                                data-testid={`button-delete-${notification.id}`}
+                              >
+                                <X className="h-3 w-3 mr-1" />
+                                Delete
+                              </Button>
+                            </div>
+                            <span className="text-right flex-shrink-0 text-xs">
                               {new Date(notification.createdAt).toLocaleDateString('en-US', {
                                 month: 'short',
                                 day: 'numeric'
                               })}
                             </span>
-                          </div>
-                          <div className="flex items-center gap-1 flex-wrap">
-                            {!notification.isRead && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-xs h-6 px-1.5"
-                                onClick={(e) => handleMarkAsRead(notification.id, e)}
-                                disabled={markAsReadMutation.isPending}
-                                data-testid={`button-mark-read-${notification.id}`}
-                              >
-                                <Check className="h-2.5 w-2.5 mr-0.5" />
-                                Read
-                              </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-xs h-6 px-1.5"
-                              onClick={(e) => handleDelete(notification.id, e)}
-                              disabled={deleteNotificationMutation.isPending}
-                              data-testid={`button-delete-${notification.id}`}
-                            >
-                              <X className="h-2.5 w-2.5 mr-0.5" />
-                              Delete
-                            </Button>
                           </div>
                         </div>
                       </div>
