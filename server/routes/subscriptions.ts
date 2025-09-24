@@ -11,6 +11,8 @@ const webSubscriptionSchema = z.object({
   category: z.string().min(1),
   nextBillingDate: z.coerce.date(), // Coerce string to Date
   description: z.string().optional().default(''),
+  email: z.string().email().optional().or(z.literal('')),
+  paymentStatus: z.enum(['paid', 'pending', 'failed', 'overdue']).default('paid'),
   isActive: z.coerce.number().int().min(0).max(1).default(1), // Coerce to integer
   // Trial fields
   isTrial: z.coerce.boolean().optional().default(false),
@@ -168,6 +170,48 @@ subscriptionsRouter.delete('/:id', async (req: any, res) => {
     res.json({ message: 'Subscription deleted successfully' });
   } catch (error) {
     console.error('Delete subscription web error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get subscription history for a specific subscription
+subscriptionsRouter.get('/:id/history', async (req: any, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const subscriptionId = req.params.id;
+    
+    // Verify ownership
+    const existingSubscription = await storage.getSubscription(subscriptionId);
+    if (!existingSubscription) {
+      return res.status(404).json({ error: 'Subscription not found' });
+    }
+
+    if (existingSubscription.userId !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const history = await storage.getSubscriptionHistory(subscriptionId);
+    res.json(history);
+  } catch (error) {
+    console.error('Get subscription history error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get all subscription history for a user
+subscriptionsRouter.get('/history/all', async (req: any, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const history = await storage.getSubscriptionHistoryByUserId(req.user.id);
+    res.json(history);
+  } catch (error) {
+    console.error('Get user subscription history error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

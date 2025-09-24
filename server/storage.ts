@@ -1,11 +1,12 @@
 import { 
-  subscriptions, users, apiKeys, plans, notifications, userExternalApiKeys,
+  subscriptions, users, apiKeys, plans, notifications, userExternalApiKeys, subscriptionHistory,
   type Subscription, type InsertSubscription,
   type User, type InsertUser,
   type ApiKey, type InsertApiKey, type UpdateApiKey,
   type Plan, type InsertPlan,
   type Notification, type InsertNotification, type UpdateNotification,
-  type UserExternalApiKey, type InsertUserExternalApiKey, type UpdateUserExternalApiKey
+  type UserExternalApiKey, type InsertUserExternalApiKey, type UpdateUserExternalApiKey,
+  type SubscriptionHistory, type InsertSubscriptionHistory
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -60,6 +61,11 @@ export interface IStorage {
   createUserExternalApiKey(apiKey: InsertUserExternalApiKey): Promise<UserExternalApiKey>;
   updateUserExternalApiKey(userId: string, service: string, keyValue: string): Promise<UserExternalApiKey | undefined>;
   deleteUserExternalApiKey(userId: string, service: string): Promise<boolean>;
+
+  // Subscription History
+  getSubscriptionHistory(subscriptionId: string): Promise<SubscriptionHistory[]>;
+  getSubscriptionHistoryByUserId(userId: string): Promise<SubscriptionHistory[]>;
+  createSubscriptionHistoryEntry(historyEntry: InsertSubscriptionHistory): Promise<SubscriptionHistory>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -332,6 +338,31 @@ export class DatabaseStorage implements IStorage {
       .delete(userExternalApiKeys)
       .where(and(eq(userExternalApiKeys.userId, userId), eq(userExternalApiKeys.service, service)));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  // Subscription History methods
+  async getSubscriptionHistory(subscriptionId: string): Promise<SubscriptionHistory[]> {
+    return await db
+      .select()
+      .from(subscriptionHistory)
+      .where(eq(subscriptionHistory.subscriptionId, subscriptionId))
+      .orderBy(desc(subscriptionHistory.createdAt));
+  }
+
+  async getSubscriptionHistoryByUserId(userId: string): Promise<SubscriptionHistory[]> {
+    return await db
+      .select()
+      .from(subscriptionHistory)
+      .where(eq(subscriptionHistory.userId, userId))
+      .orderBy(desc(subscriptionHistory.createdAt));
+  }
+
+  async createSubscriptionHistoryEntry(historyEntry: InsertSubscriptionHistory): Promise<SubscriptionHistory> {
+    const [entry] = await db
+      .insert(subscriptionHistory)
+      .values(historyEntry)
+      .returning();
+    return entry;
   }
 }
 

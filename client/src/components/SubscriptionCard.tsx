@@ -2,10 +2,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Calendar, DollarSign, Crown, Copy, Heart, Pause, Play, FileText, ExternalLink } from "lucide-react";
+import { MoreHorizontal, Calendar, DollarSign, Crown, Copy, Heart, Pause, Play, FileText, ExternalLink, History } from "lucide-react";
 import { type Subscription } from "@shared/schema";
 import { format } from "date-fns";
 import CountdownTimer from "./CountdownTimer";
+import SubscriptionHistoryDialog from "./SubscriptionHistoryDialog";
+import { useState } from "react";
 
 interface SubscriptionCardProps {
   subscription: Subscription;
@@ -28,6 +30,7 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function SubscriptionCard({ subscription, onEdit, onDelete, onViewDetails, onDuplicate, onTogglePause, onExport }: SubscriptionCardProps) {
+  const [showHistory, setShowHistory] = useState(false);
   const nextBilling = new Date(subscription.nextBillingDate);
   const isUpcomingSoon = nextBilling.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000; // 7 days
   const paymentStatus = (subscription as any).paymentStatus || 'paid';
@@ -140,6 +143,11 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
               <ExternalLink className="mr-2 h-4 w-4" />
               <span>Find website</span>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setShowHistory(true); }} data-testid={`menu-history-${subscription.id}`}>
+              <History className="mr-2 h-4 w-4" />
+              <span>View history</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
@@ -203,6 +211,12 @@ export default function SubscriptionCard({ subscription, onEdit, onDelete, onVie
           </Button>
         </div>
       </CardContent>
+
+      <SubscriptionHistoryDialog
+        subscription={subscription}
+        open={showHistory}
+        onOpenChange={setShowHistory}
+      />
     </Card>
   );
 }
