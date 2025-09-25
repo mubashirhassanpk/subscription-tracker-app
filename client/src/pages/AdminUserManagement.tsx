@@ -820,7 +820,9 @@ export default function AdminUserManagement() {
                     
                     {userDetailsData?.data?.user?.trialEndsAt && (
                       <div className="flex justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded">
-                        <span className="text-sm">Trial ends:</span>
+                        <span className="text-sm">
+                          {userDetailsData.data.user.subscriptionStatus === 'trial' ? 'Trial ends:' : 'Plan expiry:'}
+                        </span>
                         <span className="text-sm font-medium">
                           {new Date(userDetailsData.data.user.trialEndsAt).toLocaleDateString()}
                         </span>
