@@ -721,7 +721,7 @@ export default function AdminDashboard() {
           </DialogHeader>
           
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-1 h-auto p-1">
+            <TabsList className="grid w-full grid-cols-6 gap-1 h-auto p-1">
               <TabsTrigger 
                 value="overview" 
                 className="flex items-center space-x-2 px-3 py-2.5 text-sm font-medium transition-all duration-200"
