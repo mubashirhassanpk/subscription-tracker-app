@@ -270,6 +270,69 @@ router.delete('/users/:userId', trySessionOrApiKey, requireSuperAdmin, logAdminA
 });
 
 /**
+ * POST /api/admin/users/:userId/extend-trial
+ * Extend user's trial period by 7 days
+ */
+router.post('/users/:userId/extend-trial', trySessionOrApiKey, requireAdmin, logAdminActivity('extend_trial', 'user'), async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Get the current user to check their trial status
+    const currentUser = await adminService.getUserById(userId);
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Calculate new trial end date (current trial end date + 7 days, or if no trial date exists, current date + 7 days)
+    const now = new Date();
+    let newTrialEndDate: Date;
+    
+    if (currentUser.trialEndsAt) {
+      newTrialEndDate = new Date(currentUser.trialEndsAt);
+      newTrialEndDate.setDate(newTrialEndDate.getDate() + 7);
+    } else {
+      newTrialEndDate = new Date(now);
+      newTrialEndDate.setDate(newTrialEndDate.getDate() + 7);
+    }
+
+    // Update the user with the new trial end date
+    const updatedUser = await storage.updateUser(userId, {
+      trialEndsAt: newTrialEndDate,
+      subscriptionStatus: 'trial' // Ensure user is in trial status
+    });
+
+    if (!updatedUser) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to extend trial period'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        user: updatedUser,
+        previousTrialEndDate: currentUser.trialEndsAt,
+        newTrialEndDate: newTrialEndDate.toISOString(),
+        daysExtended: 7
+      },
+      message: 'Trial period extended by 7 days successfully'
+    });
+  } catch (error) {
+    console.error('Extend trial error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to extend trial period';
+    
+    res.status(500).json({
+      success: false,
+      message
+    });
+  }
+});
+
+/**
  * GET /api/admin/subscriptions
  * Get all subscriptions (admin view)
  */

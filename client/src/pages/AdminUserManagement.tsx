@@ -337,12 +337,39 @@ export default function AdminUserManagement() {
   };
 
   // Handle billing actions
-  const handleExtendTrial = () => {
+  const handleExtendTrial = async () => {
     if (selectedUserForDetails) {
-      toast({
-        title: 'Success',
-        description: 'Trial period extended by 7 days'
-      });
+      try {
+        const response = await fetch(`/api/admin/users/${selectedUserForDetails.id}/extend-trial`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to extend trial');
+        }
+
+        const result = await response.json();
+        
+        // Invalidate queries to refresh user data
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users', selectedUserForDetails.id, 'details'] });
+        
+        toast({
+          title: 'Success',
+          description: `Trial period extended by 7 days. New end date: ${new Date(result.data.newTrialEndDate).toLocaleDateString()}`
+        });
+      } catch (error) {
+        console.error('Error extending trial:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to extend trial period. Please try again.',
+          variant: 'destructive'
+        });
+      }
     }
   };
 
