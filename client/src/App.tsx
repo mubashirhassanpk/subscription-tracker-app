@@ -8,6 +8,7 @@ import { SearchProvider } from "./contexts/SearchContext";
 import { HeaderMenu } from "./components/HeaderMenu";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import Features from "./pages/Features";
 import Documentation from "./pages/Documentation";
 import ApiKeys from "./pages/ApiKeys";
 import Settings from "./pages/Settings";
@@ -22,12 +23,14 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/features" component={Features} />
       <Route path="/calendar" component={Calendar} />
       <Route path="/history" component={History} />
       <Route path="/docs" component={Documentation} />
       <Route path="/api-keys" component={ApiKeys} />
       <Route path="/profile" component={Profile} />
       <Route path="/plans" component={Plans} />
+      <Route path="/pricing" component={Plans} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
