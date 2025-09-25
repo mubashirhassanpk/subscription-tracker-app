@@ -477,26 +477,24 @@ export default function AdminDashboard() {
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end space-x-2">
-                                  <Button 
-                                    size="sm" 
-                                    variant="ghost" 
-                                    onClick={() => {
-                                      setSelectedUserForDetails(user);
-                                      setIsUserDetailsOpen(true);
-                                    }}
-                                    data-testid={`button-view-${user.id}`}
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => impersonateMutation.mutate(user.id)}
-                                    disabled={impersonateMutation.isPending}
-                                    data-testid={`button-impersonate-${user.id}`}
-                                  >
-                                    <UserCheck className="h-4 w-4" />
-                                  </Button>
+                                  <Link href="/admin/users">
+                                    <Button 
+                                      size="sm" 
+                                      variant="ghost" 
+                                      data-testid={`button-view-${user.id}`}
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                  </Link>
+                                  <Link href="/admin/users">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      data-testid={`button-edit-${user.id}`}
+                                    >
+                                      <Settings className="h-4 w-4" />
+                                    </Button>
+                                  </Link>
                                 </div>
                               </TableCell>
                             </TableRow>
