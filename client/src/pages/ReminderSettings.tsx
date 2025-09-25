@@ -41,8 +41,9 @@ const reminderSettingsSchema = z.object({
   // Email settings
   emailEnabled: z.boolean(),
   emailAddress: z.string().email().optional().or(z.literal('')),
-  emailProvider: z.enum(['gmail', 'outlook', 'smtp']),
+  emailProvider: z.enum(['resend', 'gmail', 'outlook', 'smtp']),
   emailTemplate: z.enum(['professional', 'casual', 'minimal']),
+  resendApiKey: z.string().optional(),
   smtpHost: z.string().optional(),
   smtpPort: z.number().optional(),
   smtpUsername: z.string().optional(),
@@ -99,8 +100,9 @@ export default function ReminderSettings() {
     resolver: zodResolver(reminderSettingsSchema),
     defaultValues: {
       emailEnabled: true,
-      emailProvider: 'gmail',
+      emailProvider: 'resend',
       emailTemplate: 'professional',
+      resendApiKey: '',
       googleCalendarEnabled: false,
       whatsappEnabled: false,
       reminderDaysBefore: [7, 3, 1],
@@ -118,8 +120,9 @@ export default function ReminderSettings() {
       form.reset({
         emailEnabled: prefs.emailEnabled || false,
         emailAddress: prefs.emailAddress || '',
-        emailProvider: prefs.emailProvider || 'gmail',
+        emailProvider: prefs.emailProvider || 'resend',
         emailTemplate: prefs.emailTemplate || 'professional',
+        resendApiKey: '', // Don't populate encrypted API key for security
         smtpHost: prefs.smtpHost || '',
         smtpPort: prefs.smtpPort || 587,
         smtpUsername: prefs.smtpUsername || '',
@@ -428,9 +431,9 @@ export default function ReminderSettings() {
                                     </div>
                                     
                                     <div>
-                                      <p><strong>Step 3: Add to Replit Secrets</strong></p>
-                                      <p>→ Replit project → Secrets tab (🔒)</p>
-                                      <p>→ Add: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">RESEND_API_KEY</code> = your_api_key</p>
+                                      <p><strong>Step 3: Enter API Key Below</strong></p>
+                                      <p>→ Paste your API key in the field below</p>
+                                      <p>→ Your key will be securely encrypted and stored</p>
                                     </div>
                                     
                                     <div className="bg-blue-50 dark:bg-blue-950/30 p-2 rounded">
@@ -444,11 +447,6 @@ export default function ReminderSettings() {
                               </div>
                             </div>
                           </div>
-                          
-                          <p className="text-sm text-muted-foreground">
-                            After adding <code className="bg-muted px-1 rounded text-xs">RESEND_API_KEY</code> to secrets, 
-                            test the email connection below.
-                          </p>
                           
                           <div className="flex gap-2">
                             <Button
@@ -497,12 +495,30 @@ export default function ReminderSettings() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="resend">Resend (Recommended)</SelectItem>
                           <SelectItem value="gmail">Gmail</SelectItem>
                           <SelectItem value="outlook">Outlook</SelectItem>
                           <SelectItem value="smtp">Custom SMTP</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {form.watch('emailProvider') === 'resend' && (
+                      <div>
+                        <Label htmlFor="resendApiKey">Resend API Key</Label>
+                        <Input
+                          id="resendApiKey"
+                          type="password"
+                          placeholder="Enter your Resend API key (starts with re_...)"
+                          value={form.watch('resendApiKey') || ''}
+                          onChange={(e) => form.setValue('resendApiKey', e.target.value)}
+                          data-testid="input-resend-api-key"
+                        />
+                        <p className="text-sm text-muted-foreground mt-1">
+                          🔒 Your API key will be encrypted and stored securely
+                        </p>
+                      </div>
+                    )}
 
                     {form.watch('emailProvider') === 'smtp' && (
                       <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">

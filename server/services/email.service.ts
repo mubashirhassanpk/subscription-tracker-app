@@ -318,12 +318,25 @@ Manage all your subscriptions in one place`;
         return { success: false, message: 'Email not enabled or address missing' };
       }
 
-      if (!this.resend) {
-        return { success: false, message: 'Resend API key not configured. Please add RESEND_API_KEY to your environment variables.' };
+      // Get API key from preferences or environment
+      let apiKey = process.env.RESEND_API_KEY;
+      if (preferences.resendApiKeyEncrypted) {
+        try {
+          apiKey = this.decrypt(preferences.resendApiKeyEncrypted);
+        } catch (error) {
+          return { success: false, message: 'Failed to decrypt Resend API key. Please re-enter your API key.' };
+        }
       }
 
+      if (!apiKey) {
+        return { success: false, message: 'Resend API key not configured. Please enter your API key in the settings.' };
+      }
+
+      // Create temporary Resend instance with the API key
+      const resend = new Resend(apiKey);
+
       // Send test email using Resend
-      const { data, error } = await this.resend.emails.send({
+      const { data, error } = await resend.emails.send({
         from: 'Subscription Tracker <onboarding@yourdomain.com>', // You'll need to use a verified domain
         to: [preferences.emailAddress],
         subject: '✅ Email Connection Test Successful - Subscription Tracker',
