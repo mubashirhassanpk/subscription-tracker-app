@@ -459,10 +459,15 @@ export default function AdminDashboard() {
                                 </Badge>
                               </TableCell>
                               <TableCell data-testid={`text-subscription-count-${user.id}`}>
-                                <div className="flex items-center">
-                                  <CreditCard className="h-4 w-4 mr-1" />
-                                  {user.subscriptionCount || 0}
-                                </div>
+                                {user.planId ? (
+                                  <Badge variant="default" className="text-xs">
+                                    Plan Assigned
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary" className="text-xs">
+                                    No Plan
+                                  </Badge>
+                                )}
                               </TableCell>
                               <TableCell data-testid={`text-last-login-${user.id}`}>
                                 {user.lastLoginAt 
