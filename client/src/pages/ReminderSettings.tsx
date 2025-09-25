@@ -265,8 +265,10 @@ export default function ReminderSettings() {
     switch (service) {
       case 'Email':
         settings = {
+          emailEnabled: true,
           emailAddress: formData.emailAddress,
           emailProvider: formData.emailProvider,
+          resendApiKey: formData.resendApiKey,
           smtpHost: formData.smtpHost,
           smtpPort: formData.smtpPort,
           smtpUsername: formData.smtpUsername,
@@ -729,7 +731,7 @@ export default function ReminderSettings() {
 
                 {form.watch('googleCalendarEnabled') && (
                   <div className="space-y-4 pl-6 border-l-2 border-green-200">
-                    {!preferences?.preferences?.googleAccessToken ? (
+                    {!(preferences as any)?.preferences?.googleAccessToken ? (
                       <Alert>
                         <Shield className="h-4 w-4" />
                         <AlertDescription className="flex items-center justify-between">

@@ -151,7 +151,8 @@ export class EmailService {
         break;
     }
 
-    return nodemailer.createTransporter(transportOptions);
+    // Note: This method is deprecated in favor of Resend API
+    return null; // Will be removed when SMTP support is fully deprecated
   }
 
   /**
@@ -312,15 +313,15 @@ Manage all your subscriptions in one place`;
   /**
    * Test email connection using Resend API
    */
-  async testConnection(preferences: UserNotificationPreferences) {
+  async testConnection(preferences: UserNotificationPreferences & { resendApiKey?: string }) {
     try {
       if (!preferences.emailEnabled || !preferences.emailAddress) {
         return { success: false, message: 'Email not enabled or address missing' };
       }
 
-      // Get API key from preferences or environment
-      let apiKey = process.env.RESEND_API_KEY;
-      if (preferences.resendApiKeyEncrypted) {
+      // Get API key from request body (for testing) or stored preferences or environment
+      let apiKey = preferences.resendApiKey || process.env.RESEND_API_KEY;
+      if (!apiKey && preferences.resendApiKeyEncrypted) {
         try {
           apiKey = this.decrypt(preferences.resendApiKeyEncrypted);
         } catch (error) {
