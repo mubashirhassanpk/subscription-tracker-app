@@ -35,6 +35,7 @@ export interface IStorage {
   getApiKeysByUserId(userId: string): Promise<ApiKey[]>;
   getApiKey(id: string): Promise<ApiKey | undefined>;
   getApiKeyByKeyHash(keyHash: string): Promise<ApiKey | undefined>;
+  getAllApiKeys(): Promise<ApiKey[]>;
   createApiKey(apiKey: InsertApiKey): Promise<ApiKey>;
   updateApiKey(id: string, apiKey: UpdateApiKey): Promise<ApiKey | undefined>;
   deleteApiKey(id: string): Promise<boolean>;
@@ -201,6 +202,10 @@ export class DatabaseStorage implements IStorage {
   async deleteApiKey(id: string): Promise<boolean> {
     const result = await db.delete(apiKeys).where(eq(apiKeys.id, id));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  async getAllApiKeys(): Promise<ApiKey[]> {
+    return await db.select().from(apiKeys);
   }
 
   // Plan methods

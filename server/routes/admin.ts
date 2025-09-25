@@ -345,4 +345,492 @@ router.get('/activity-logs', trySessionOrApiKey, requireAdmin, logAdminActivity(
   }
 });
 
+/**
+ * GET /api/admin/settings
+ * Get admin settings
+ */
+router.get('/settings', trySessionOrApiKey, requireAdmin, logAdminActivity('view_settings'), async (req, res) => {
+  try {
+    // In a real implementation, these would come from a database
+    const settings = {
+      siteName: 'Subscription Tracker',
+      siteDescription: 'Manage all your subscriptions in one place',
+      supportEmail: 'support@subscriptiontracker.com',
+      maintenanceMode: false,
+      registrationsEnabled: true,
+      emailNotificationsEnabled: true,
+      maxUsersPerPlan: 1000,
+      sessionTimeoutMinutes: 60,
+      apiRateLimit: 1000,
+      backupFrequencyHours: 24
+    };
+    
+    res.json({
+      success: true,
+      data: settings
+    });
+  } catch (error) {
+    console.error('Get admin settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch admin settings'
+    });
+  }
+});
+
+/**
+ * PUT /api/admin/settings
+ * Update admin settings
+ */
+router.put('/settings', trySessionOrApiKey, requireSuperAdmin, logAdminActivity('update_settings'), async (req, res) => {
+  try {
+    // In a real implementation, this would update the database
+    // For now, we'll just acknowledge the update
+    const updatedSettings = req.body;
+    
+    res.json({
+      success: true,
+      data: updatedSettings,
+      message: 'Settings updated successfully'
+    });
+  } catch (error) {
+    console.error('Update admin settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update admin settings'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/system-health
+ * Get system health information
+ */
+router.get('/system-health', trySessionOrApiKey, requireAdmin, async (req, res) => {
+  try {
+    // In a real implementation, these would be actual system checks
+    const health = {
+      databaseStatus: 'healthy' as const,
+      apiKeysStatus: 'configured' as const,
+      emailServiceStatus: 'active' as const,
+      diskUsagePercentage: Math.floor(Math.random() * 30) + 20, // 20-50%
+      memoryUsagePercentage: Math.floor(Math.random() * 40) + 30, // 30-70%
+      uptime: '5 days, 12 hours',
+      lastBackup: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // 24 hours ago
+    };
+    
+    res.json({
+      success: true,
+      data: health
+    });
+  } catch (error) {
+    console.error('Get system health error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch system health'
+    });
+  }
+});
+
+/**
+ * POST /api/admin/system/:action
+ * Perform system actions (backup, cleanup, etc.)
+ */
+router.post('/system/:action', trySessionOrApiKey, requireSuperAdmin, logAdminActivity('system_action'), async (req, res) => {
+  try {
+    const { action } = req.params;
+    
+    switch (action) {
+      case 'backup':
+        // In a real implementation, this would trigger a backup
+        res.json({
+          success: true,
+          message: 'Backup started successfully'
+        });
+        break;
+      case 'cleanup':
+        // In a real implementation, this would perform cleanup tasks
+        res.json({
+          success: true,
+          message: 'System cleanup completed successfully'
+        });
+        break;
+      default:
+        res.status(400).json({
+          success: false,
+          message: 'Invalid system action'
+        });
+    }
+  } catch (error) {
+    console.error('System action error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to perform system action'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/notifications
+ * Get admin notifications with pagination and filtering
+ */
+router.get('/notifications', trySessionOrApiKey, requireAdmin, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const type = req.query.type as string;
+    
+    // In a real implementation, these would come from a database
+    const notifications = [
+      {
+        id: '1',
+        type: 'announcement',
+        title: 'System Maintenance Scheduled',
+        message: 'We will be performing system maintenance on Sunday at 2 AM EST.',
+        targetType: 'all',
+        priority: 'medium',
+        isRead: false,
+        createdAt: new Date().toISOString(),
+        sentAt: new Date().toISOString(),
+        createdBy: req.user!.id,
+        createdByName: req.user!.name
+      },
+      {
+        id: '2',
+        type: 'warning',
+        title: 'Security Update Required',
+        message: 'Please update your password to maintain security.',
+        targetType: 'users',
+        priority: 'high',
+        isRead: true,
+        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        sentAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        createdBy: req.user!.id,
+        createdByName: req.user!.name
+      }
+    ].filter(n => !type || type === 'all' || n.type === type);
+    
+    const total = notifications.length;
+    const totalPages = Math.ceil(total / limit);
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedNotifications = notifications.slice(startIndex, endIndex);
+    
+    res.json({
+      success: true,
+      data: {
+        notifications: paginatedNotifications,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get notifications error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch notifications'
+    });
+  }
+});
+
+/**
+ * POST /api/admin/notifications
+ * Send a new notification
+ */
+router.post('/notifications', trySessionOrApiKey, requireAdmin, logAdminActivity('send_notification'), async (req, res) => {
+  try {
+    const { type, title, message, targetType, priority } = req.body;
+    
+    if (!title || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title and message are required'
+      });
+    }
+    
+    // In a real implementation, this would save to database and actually send the notification
+    const notification = {
+      id: Date.now().toString(),
+      type,
+      title,
+      message,
+      targetType,
+      priority,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      sentAt: new Date().toISOString(),
+      createdBy: req.user!.id,
+      createdByName: req.user!.name
+    };
+    
+    res.status(201).json({
+      success: true,
+      data: notification,
+      message: 'Notification sent successfully'
+    });
+  } catch (error) {
+    console.error('Send notification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send notification'
+    });
+  }
+});
+
+/**
+ * DELETE /api/admin/notifications/:notificationId
+ * Delete a notification
+ */
+router.delete('/notifications/:notificationId', trySessionOrApiKey, requireAdmin, logAdminActivity('delete_notification'), async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    
+    // In a real implementation, this would delete from database
+    res.json({
+      success: true,
+      message: 'Notification deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete notification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete notification'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/notification-templates
+ * Get notification templates
+ */
+router.get('/notification-templates', trySessionOrApiKey, requireAdmin, async (req, res) => {
+  try {
+    // In a real implementation, these would come from a database
+    const templates = [
+      {
+        id: '1',
+        name: 'Maintenance Announcement',
+        type: 'maintenance',
+        title: 'Scheduled Maintenance',
+        message: 'We will be performing scheduled maintenance on {date} at {time}. The system will be unavailable for approximately {duration}.'
+      },
+      {
+        id: '2',
+        name: 'Security Alert',
+        type: 'warning',
+        title: 'Security Update Required',
+        message: 'We have identified a security issue and require all users to update their passwords immediately.'
+      },
+      {
+        id: '3',
+        name: 'Feature Update',
+        type: 'update',
+        title: 'New Features Available',
+        message: 'We are excited to announce new features that will improve your experience. Check them out in your dashboard!'
+      },
+      {
+        id: '4',
+        name: 'Welcome Message',
+        type: 'announcement',
+        title: 'Welcome to Subscription Tracker',
+        message: 'Thank you for joining our platform. Get started by adding your first subscription!'
+      }
+    ];
+    
+    res.json({
+      success: true,
+      data: templates
+    });
+  } catch (error) {
+    console.error('Get notification templates error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch notification templates'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/api-keys
+ * Get all API keys with user information
+ */
+router.get('/api-keys', trySessionOrApiKey, requireAdmin, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
+
+    // Get all API keys with user information
+    const allApiKeys = await storage.getAllApiKeys();
+    let apiKeysWithUsers = [];
+
+    for (const apiKey of allApiKeys) {
+      const user = await storage.getUser(apiKey.userId);
+      if (user && (!search || 
+        user.name.toLowerCase().includes(search.toLowerCase()) ||
+        user.email.toLowerCase().includes(search.toLowerCase()) ||
+        apiKey.name.toLowerCase().includes(search.toLowerCase())
+      )) {
+        apiKeysWithUsers.push({
+          ...apiKey,
+          userName: user.name,
+          userEmail: user.email
+        });
+      }
+    }
+
+    const total = apiKeysWithUsers.length;
+    const totalPages = Math.ceil(total / limit);
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedApiKeys = apiKeysWithUsers.slice(startIndex, endIndex);
+
+    res.json({
+      success: true,
+      data: {
+        apiKeys: paginatedApiKeys,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get admin API keys error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch API keys'
+    });
+  }
+});
+
+/**
+ * POST /api/admin/api-keys
+ * Create API key for a user (admin only)
+ */
+router.post('/api-keys', trySessionOrApiKey, requireSuperAdmin, logAdminActivity('create_api_key'), async (req, res) => {
+  try {
+    const { userId, name } = req.body;
+
+    if (!userId || !name) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID and key name are required'
+      });
+    }
+
+    // Verify user exists
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Create API key using the same logic as regular API key creation
+    const apiKey = Date.now().toString() + Math.random().toString(36);
+    const keyPrefix = apiKey.substring(0, 12) + '...';
+    const keyHash = require('crypto').createHmac('sha256', process.env.API_KEY_SECRET || 'dev-fallback').update(apiKey).digest('hex');
+
+    const newApiKey = await storage.createApiKey({
+      userId,
+      name,
+      keyHash,
+      keyPrefix,
+      isActive: true,
+      expiresAt: null
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        ...newApiKey,
+        userName: user.name,
+        userEmail: user.email,
+        fullApiKey: apiKey // Only show full key once during creation
+      },
+      message: 'API key created successfully'
+    });
+  } catch (error) {
+    console.error('Create admin API key error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create API key'
+    });
+  }
+});
+
+/**
+ * PUT /api/admin/api-keys/:keyId
+ * Update API key status
+ */
+router.put('/api-keys/:keyId', trySessionOrApiKey, requireAdmin, logAdminActivity('update_api_key'), async (req, res) => {
+  try {
+    const { keyId } = req.params;
+    const { isActive } = req.body;
+
+    const updatedApiKey = await storage.updateApiKey(keyId, { isActive });
+    
+    if (!updatedApiKey) {
+      return res.status(404).json({
+        success: false,
+        message: 'API key not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: updatedApiKey,
+      message: 'API key updated successfully'
+    });
+  } catch (error) {
+    console.error('Update admin API key error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update API key'
+    });
+  }
+});
+
+/**
+ * DELETE /api/admin/api-keys/:keyId
+ * Delete API key
+ */
+router.delete('/api-keys/:keyId', trySessionOrApiKey, requireSuperAdmin, logAdminActivity('delete_api_key'), async (req, res) => {
+  try {
+    const { keyId } = req.params;
+
+    const deleted = await storage.deleteApiKey(keyId);
+    
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'API key not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'API key deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete admin API key error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete API key'
+    });
+  }
+});
+
 export { router as adminRouter };

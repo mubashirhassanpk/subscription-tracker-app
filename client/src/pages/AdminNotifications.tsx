@@ -74,10 +74,11 @@ export default function AdminNotifications() {
 
   // Send notification mutation
   const sendNotificationMutation = useMutation({
-    mutationFn: (notificationData: any) => apiRequest('/api/admin/notifications', {
+    mutationFn: (notificationData: any) => fetch('/api/admin/notifications', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(notificationData)
-    }),
+    }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/notifications'] });
       setIsCreateDialogOpen(false);
@@ -98,9 +99,10 @@ export default function AdminNotifications() {
 
   // Delete notification mutation
   const deleteNotificationMutation = useMutation({
-    mutationFn: (notificationId: string) => apiRequest(`/api/admin/notifications/${notificationId}`, {
-      method: 'DELETE'
-    }),
+    mutationFn: (notificationId: string) => fetch(`/api/admin/notifications/${notificationId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/notifications'] });
       toast({

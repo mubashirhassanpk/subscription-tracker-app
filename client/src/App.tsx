@@ -25,6 +25,7 @@ import AdminUserManagement from "./pages/AdminUserManagement";
 import AdminSubscriptionManagement from "./pages/AdminSubscriptionManagement";
 import AdminSettings from "./pages/AdminSettings";
 import AdminNotifications from "./pages/AdminNotifications";
+import AdminApiKeys from "./pages/AdminApiKeys";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -49,6 +50,7 @@ function Router() {
       <Route path="/admin/subscriptions" component={AdminSubscriptionManagement} />
       <Route path="/admin/settings" component={AdminSettings} />
       <Route path="/admin/notifications" component={AdminNotifications} />
+      <Route path="/admin/api-keys" component={AdminApiKeys} />
       <Route component={NotFound} />
     </Switch>
   );

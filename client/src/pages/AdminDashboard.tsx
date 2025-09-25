@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, CreditCard, Activity, Settings, UserCheck, AlertCircle, Bell } from 'lucide-react';
+import { Users, CreditCard, Activity, Settings, UserCheck, AlertCircle, Bell, Key } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
 
@@ -141,6 +141,12 @@ export default function AdminDashboard() {
                     <Button className="w-full justify-start" variant="outline" data-testid="button-notifications">
                       <Bell className="mr-2 h-4 w-4" />
                       Send Notifications
+                    </Button>
+                  </Link>
+                  <Link href="/admin/api-keys">
+                    <Button className="w-full justify-start" variant="outline" data-testid="button-api-keys">
+                      <Key className="mr-2 h-4 w-4" />
+                      Manage API Keys
                     </Button>
                   </Link>
                   <Button className="w-full justify-start" variant="outline" data-testid="button-impersonate">

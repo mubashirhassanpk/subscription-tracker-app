@@ -75,10 +75,11 @@ export default function AdminSettings() {
 
   // Update settings mutation
   const updateSettingsMutation = useMutation({
-    mutationFn: (settings: AdminSettings) => apiRequest('/api/admin/settings', {
+    mutationFn: (settings: AdminSettings) => fetch('/api/admin/settings', {
       method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(settings)
-    }),
+    }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/settings'] });
       toast({
@@ -97,9 +98,10 @@ export default function AdminSettings() {
 
   // System actions
   const performSystemAction = useMutation({
-    mutationFn: (action: string) => apiRequest(`/api/admin/system/${action}`, {
-      method: 'POST'
-    }),
+    mutationFn: (action: string) => fetch(`/api/admin/system/${action}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }).then(res => res.json()),
     onSuccess: (data, action) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/system-health'] });
       toast({
