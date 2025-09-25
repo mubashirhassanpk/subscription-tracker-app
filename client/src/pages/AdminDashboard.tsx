@@ -5,7 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Users, CreditCard, Activity, Settings, UserCheck, AlertCircle, Bell, Key, Search, Edit, UserPlus, Eye } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Users, CreditCard, Activity, Settings, UserCheck, AlertCircle, Bell, Key, Search, Edit, UserPlus, Eye, Plus } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
@@ -53,6 +56,16 @@ interface UsersResponse {
 
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isCreateSubscriptionOpen, setIsCreateSubscriptionOpen] = useState(false);
+  const [subscriptionFormData, setSubscriptionFormData] = useState({
+    userId: '',
+    name: '',
+    cost: '',
+    billingCycle: 'monthly',
+    category: '',
+    description: '',
+    nextBilling: ''
+  });
   const { toast } = useToast();
 
   const { data: stats, isLoading } = useQuery<{ success: boolean; data: DashboardStats }>({
@@ -102,6 +115,69 @@ export default function AdminDashboard() {
       });
     }
   });
+
+  // Create subscription mutation
+  const createSubscriptionMutation = useMutation({
+    mutationFn: (subscriptionData: typeof subscriptionFormData) =>
+      fetch('/api/subscriptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: subscriptionData.name,
+          cost: parseFloat(subscriptionData.cost),
+          billingCycle: subscriptionData.billingCycle,
+          category: subscriptionData.category,
+          description: subscriptionData.description,
+          nextBilling: subscriptionData.nextBilling ? new Date(subscriptionData.nextBilling).toISOString() : undefined
+        })
+      }).then(res => res.json()),
+    onSuccess: (data) => {
+      if (data.success) {
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/dashboard'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/subscriptions'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/subscriptions'] });
+        setIsCreateSubscriptionOpen(false);
+        setSubscriptionFormData({
+          userId: '',
+          name: '',
+          cost: '',
+          billingCycle: 'monthly',
+          category: '',
+          description: '',
+          nextBilling: ''
+        });
+        toast({
+          title: 'Success',
+          description: 'Subscription created successfully'
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: data.message || 'Failed to create subscription',
+          variant: 'destructive'
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to create subscription',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  const handleCreateSubscription = () => {
+    if (!subscriptionFormData.name || !subscriptionFormData.cost) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in all required fields',
+        variant: 'destructive'
+      });
+      return;
+    }
+    createSubscriptionMutation.mutate(subscriptionFormData);
+  };
 
   if (isLoading) {
     return (
@@ -401,19 +477,110 @@ export default function AdminDashboard() {
           <TabsContent value="subscriptions">
             <Card>
               <CardHeader>
-                <CardTitle>Subscription Management</CardTitle>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Subscription Management</span>
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      size="sm" 
+                      onClick={() => setIsCreateSubscriptionOpen(true)}
+                      data-testid="button-create-subscription"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Subscription
+                    </Button>
+                    <Link href="/admin/subscriptions">
+                      <Button size="sm" variant="outline" data-testid="button-full-subscription-management">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Full Management
+                      </Button>
+                    </Link>
+                  </div>
+                </CardTitle>
                 <CardDescription>View and manage all user subscriptions</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <CreditCard className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <h3 className="mt-4 text-lg font-semibold">Subscription Management</h3>
-                  <p className="text-muted-foreground">Complete subscription oversight and management...</p>
-                  <Link href="/admin/subscriptions">
-                    <Button className="mt-4" data-testid="button-manage-subscriptions">
-                      Go to Subscription Management
-                    </Button>
-                  </Link>
+                {/* Subscription Stats */}
+                <div className="grid gap-4 md:grid-cols-3 mb-6">
+                  <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-lg">
+                    <CreditCard className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <div className="text-sm font-medium">Total Subscriptions</div>
+                      <div className="text-2xl font-bold" data-testid="stat-total-subscriptions">
+                        {dashboardData?.totalSubscriptions || 0}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-lg">
+                    <UserCheck className="h-5 w-5 text-green-600" />
+                    <div>
+                      <div className="text-sm font-medium">Active</div>
+                      <div className="text-2xl font-bold" data-testid="stat-active-subscriptions">
+                        {dashboardData?.activeSubscriptions || 0}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-lg">
+                    <Activity className="h-5 w-5 text-purple-600" />
+                    <div>
+                      <div className="text-sm font-medium">Monthly Revenue</div>
+                      <div className="text-2xl font-bold">$0.00</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Subscriptions */}
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold">Recent Subscriptions</h4>
+                  
+                  {dashboardData?.totalSubscriptions && dashboardData.totalSubscriptions > 0 ? (
+                    <div className="rounded-md border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>User</TableHead>
+                            <TableHead>Service</TableHead>
+                            <TableHead>Cost</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Next Billing</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center py-8">
+                              <div className="text-muted-foreground">
+                                No subscriptions found. Click "Add Subscription" to create one.
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 border border-dashed rounded-lg">
+                      <CreditCard className="mx-auto h-12 w-12 text-muted-foreground" />
+                      <h3 className="mt-4 text-lg font-semibold">No Subscriptions Yet</h3>
+                      <p className="text-muted-foreground mb-4">Start by adding the first subscription to track.</p>
+                      <Button 
+                        onClick={() => setIsCreateSubscriptionOpen(true)}
+                        data-testid="button-add-first-subscription"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Subscription
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Link to full management if there are subscriptions */}
+                  {dashboardData?.totalSubscriptions && dashboardData.totalSubscriptions > 0 && (
+                    <div className="text-center">
+                      <Link href="/admin/subscriptions">
+                        <Button variant="ghost" className="text-sm underline">
+                          View all {dashboardData.totalSubscriptions} subscriptions
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -449,6 +616,105 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Create Subscription Dialog */}
+      <Dialog open={isCreateSubscriptionOpen} onOpenChange={setIsCreateSubscriptionOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Subscription</DialogTitle>
+            <DialogDescription>
+              Create a new subscription to track for a user
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <Label htmlFor="name">Service Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="e.g., Netflix, Spotify, Adobe Creative Suite"
+                  value={subscriptionFormData.name}
+                  onChange={(e) => setSubscriptionFormData(prev => ({ ...prev, name: e.target.value }))}
+                  data-testid="input-subscription-name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="cost">Monthly Cost *</Label>
+                <Input
+                  id="cost"
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={subscriptionFormData.cost}
+                  onChange={(e) => setSubscriptionFormData(prev => ({ ...prev, cost: e.target.value }))}
+                  data-testid="input-subscription-cost"
+                />
+              </div>
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select 
+                  value={subscriptionFormData.category} 
+                  onValueChange={(value) => setSubscriptionFormData(prev => ({ ...prev, category: value }))}
+                >
+                  <SelectTrigger data-testid="select-subscription-category">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="entertainment">Entertainment</SelectItem>
+                    <SelectItem value="productivity">Productivity</SelectItem>
+                    <SelectItem value="software">Software</SelectItem>
+                    <SelectItem value="streaming">Streaming</SelectItem>
+                    <SelectItem value="utilities">Utilities</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="billing-cycle">Billing Cycle</Label>
+                <Select 
+                  value={subscriptionFormData.billingCycle} 
+                  onValueChange={(value) => setSubscriptionFormData(prev => ({ ...prev, billingCycle: value }))}
+                >
+                  <SelectTrigger data-testid="select-billing-cycle">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="next-billing">Next Billing Date</Label>
+                <Input
+                  id="next-billing"
+                  type="date"
+                  value={subscriptionFormData.nextBilling}
+                  onChange={(e) => setSubscriptionFormData(prev => ({ ...prev, nextBilling: e.target.value }))}
+                  data-testid="input-next-billing"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateSubscriptionOpen(false)}
+              data-testid="button-cancel-subscription"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateSubscription}
+              disabled={createSubscriptionMutation.isPending}
+              data-testid="button-save-subscription"
+            >
+              {createSubscriptionMutation.isPending ? 'Creating...' : 'Create Subscription'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
