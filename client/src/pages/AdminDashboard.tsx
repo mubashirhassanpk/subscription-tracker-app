@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, CreditCard, Activity, Settings, UserCheck, AlertCircle, Bell, Key, Search, Edit, UserPlus, Eye, Plus, ExternalLink } from 'lucide-react';
+import { Users, CreditCard, Activity, Settings, UserCheck, AlertCircle, Bell, Key, Search, Edit, UserPlus, Eye, Plus, ExternalLink, User, Copy } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
@@ -730,102 +730,145 @@ export default function AdminDashboard() {
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview" className="space-y-4">
-              <div className="grid grid-cols-2 gap-6">
-                {/* Account Information */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Account Information</h3>
-                  {userDetailsData?.data?.user && (
-                    <div className="space-y-3">
-                      <div>
-                        <Label className="text-sm font-medium">User ID:</Label>
-                        <div className="mt-1 text-sm font-mono bg-muted px-2 py-1 rounded">
-                          {userDetailsData.data.user.id}
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Account Information Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <User className="h-5 w-5" />
+                      <span>Account Information</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {userDetailsData?.data?.user && (
+                      <div className="space-y-4">
+                        <div className="flex items-start justify-between p-3 bg-muted/50 rounded-lg">
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground uppercase tracking-wide">User ID</Label>
+                            <div className="text-sm font-mono text-foreground">
+                              {userDetailsData.data.user.id}
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="sm" onClick={() => navigator.clipboard.writeText(userDetailsData.data.user.id)}>
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label className="text-xs text-muted-foreground uppercase tracking-wide">Email</Label>
+                              <div className="text-sm font-medium">{userDetailsData.data.user.email}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label className="text-xs text-muted-foreground uppercase tracking-wide">Role</Label>
+                              <div className="mt-1">
+                                <Badge variant={userDetailsData.data.user.role === 'admin' ? 'default' : 'secondary'}>
+                                  {userDetailsData.data.user.role}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground uppercase tracking-wide">Status</Label>
+                              <div className="mt-1">
+                                <Badge variant={userDetailsData.data.user.isActive ? 'default' : 'destructive'}>
+                                  {userDetailsData.data.user.isActive ? 'Active' : 'Inactive'}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                            <div>
+                              <Label className="text-xs text-muted-foreground uppercase tracking-wide">Created</Label>
+                              <div className="text-sm">
+                                {new Date(userDetailsData.data.user.createdAt).toLocaleDateString('en-US', { 
+                                  month: 'short', 
+                                  day: 'numeric', 
+                                  year: 'numeric' 
+                                })}
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground uppercase tracking-wide">Last Login</Label>
+                              <div className="text-sm">
+                                {userDetailsData.data.user.lastLoginAt 
+                                  ? new Date(userDetailsData.data.user.lastLoginAt).toLocaleDateString('en-US', { 
+                                      month: 'short', 
+                                      day: 'numeric' 
+                                    })
+                                  : 'Never'
+                                }
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div>
-                        <Label className="text-sm font-medium">Email:</Label>
-                        <div className="mt-1 text-sm">{userDetailsData.data.user.email}</div>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">Role:</Label>
-                        <div className="mt-1">
-                          <Badge variant={userDetailsData.data.user.role === 'admin' ? 'default' : 'secondary'}>
-                            {userDetailsData.data.user.role}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">Status:</Label>
-                        <div className="mt-1">
-                          <Badge variant={userDetailsData.data.user.isActive ? 'default' : 'destructive'}>
-                            {userDetailsData.data.user.isActive ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">Created:</Label>
-                        <div className="mt-1 text-sm">
-                          {new Date(userDetailsData.data.user.createdAt).toLocaleDateString('en-US', { 
-                            month: 'numeric', 
-                            day: 'numeric', 
-                            year: 'numeric' 
-                          })}
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">Last Login:</Label>
-                        <div className="mt-1 text-sm">
-                          {userDetailsData.data.user.lastLoginAt 
-                            ? new Date(userDetailsData.data.user.lastLoginAt).toLocaleString()
-                            : 'Never'
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </CardContent>
+                </Card>
 
-                {/* Quick Actions */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Quick Actions</h3>
-                  <div className="space-y-3">
-                    <div 
-                      className="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
-                      data-testid="action-edit-user"
-                    >
-                      <Edit className="mr-3 h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Edit User Details</span>
+                {/* Quick Actions Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Settings className="h-5 w-5" />
+                      <span>Quick Actions</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start h-12"
+                        data-testid="action-edit-user"
+                      >
+                        <Edit className="mr-3 h-4 w-4" />
+                        <span>Edit User Details</span>
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start h-12"
+                        onClick={() => {
+                          if (selectedUserForDetails) {
+                            impersonateMutation.mutate(selectedUserForDetails.id);
+                            setIsUserDetailsOpen(false);
+                          }
+                        }}
+                        disabled={impersonateMutation.isPending}
+                        data-testid="action-impersonate"
+                      >
+                        <UserCheck className="mr-3 h-4 w-4" />
+                        <span>Impersonate User</span>
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start h-12"
+                        data-testid="action-view-logs"
+                      >
+                        <Activity className="mr-3 h-4 w-4" />
+                        <span>View Activity Logs</span>
+                      </Button>
+                      
+                      <div className="pt-2 border-t">
+                        <Button 
+                          variant="destructive" 
+                          className="w-full justify-start h-12"
+                          data-testid="action-delete-user"
+                        >
+                          <AlertCircle className="mr-3 h-4 w-4" />
+                          <span>Delete User</span>
+                        </Button>
+                      </div>
                     </div>
-                    <div 
-                      className="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
-                      onClick={() => {
-                        if (selectedUserForDetails) {
-                          impersonateMutation.mutate(selectedUserForDetails.id);
-                          setIsUserDetailsOpen(false);
-                        }
-                      }}
-                      data-testid="action-impersonate"
-                    >
-                      <UserCheck className="mr-3 h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Impersonate User</span>
-                    </div>
-                    <div 
-                      className="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
-                      data-testid="action-view-logs"
-                    >
-                      <Activity className="mr-3 h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">View Activity Logs</span>
-                    </div>
-                    <div 
-                      className="flex items-center p-3 border border-red-200 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer text-red-600"
-                      data-testid="action-delete-user"
-                    >
-                      <AlertCircle className="mr-3 h-4 w-4" />
-                      <span className="font-medium">Delete User</span>
-                    </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
 
