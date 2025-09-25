@@ -4,6 +4,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { type Subscription } from "@shared/schema";
 import Dashboard from "@/components/Dashboard";
 import EditSubscriptionForm from "@/components/EditSubscriptionForm";
+import { MobileFAB } from "@/components/MobileFAB";
 import { useToast } from "@/hooks/use-toast";
 import { useAutoInsights } from "@/hooks/useAutoInsights";
 
@@ -116,6 +117,11 @@ export default function DashboardPage() {
         onEditSubscription={handleEditSubscription}
         onDeleteSubscription={handleDeleteSubscription}
         isLoading={isLoading || addMutation.isPending || editMutation.isPending || deleteMutation.isPending}
+      />
+      <MobileFAB
+        onAddSubscription={handleAddSubscription}
+        subscriptionCount={subscriptions.length}
+        isLoading={isLoading || addMutation.isPending}
       />
       <EditSubscriptionForm
         subscription={editingSubscription}

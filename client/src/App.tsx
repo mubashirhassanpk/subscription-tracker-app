@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SearchProvider } from "./contexts/SearchContext";
 import { HeaderMenu } from "./components/HeaderMenu";
+import { MobileBottomNav } from "./components/MobileBottomNav";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Features from "./pages/Features";
@@ -47,11 +48,12 @@ function App() {
       <ThemeProvider defaultTheme="light" storageKey="subscription-tracker-theme">
         <TooltipProvider>
           <SearchProvider>
-            <div className="min-h-screen w-full">
+            <div className="min-h-screen w-full pb-16 md:pb-0">
               <HeaderMenu />
               <main className="flex-1">
                 <Router />
               </main>
+              <MobileBottomNav />
             </div>
             <Toaster />
           </SearchProvider>
