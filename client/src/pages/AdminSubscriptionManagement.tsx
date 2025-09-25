@@ -87,7 +87,7 @@ export default function AdminSubscriptionManagement() {
           <Link href="/admin">
             <Button variant="ghost" size="sm">← Back to Dashboard</Button>
           </Link>
-          <h1 className="ml-4 text-2xl font-semibold text-foreground">Subscription Management</h1>
+          <h1 className="ml-4 text-2xl font-semibold text-foreground">Plan Management</h1>
         </div>
       </div>
 
