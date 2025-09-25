@@ -1,12 +1,15 @@
 import { 
   subscriptions, users, apiKeys, plans, notifications, userExternalApiKeys, subscriptionHistory,
+  userNotificationPreferences, subscriptionReminders,
   type Subscription, type InsertSubscription,
   type User, type InsertUser,
   type ApiKey, type InsertApiKey, type UpdateApiKey,
   type Plan, type InsertPlan,
   type Notification, type InsertNotification, type UpdateNotification,
   type UserExternalApiKey, type InsertUserExternalApiKey, type UpdateUserExternalApiKey,
-  type SubscriptionHistory, type InsertSubscriptionHistory
+  type SubscriptionHistory, type InsertSubscriptionHistory,
+  type UserNotificationPreferences, type InsertUserNotificationPreferences, type UpdateUserNotificationPreferences,
+  type SubscriptionReminder, type InsertSubscriptionReminder
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -66,6 +69,19 @@ export interface IStorage {
   getSubscriptionHistory(subscriptionId: string): Promise<SubscriptionHistory[]>;
   getSubscriptionHistoryByUserId(userId: string): Promise<SubscriptionHistory[]>;
   createSubscriptionHistoryEntry(historyEntry: InsertSubscriptionHistory): Promise<SubscriptionHistory>;
+
+  // User Subscriptions (alias for consistency)
+  getUserSubscriptions(userId: string): Promise<Subscription[]>;
+
+  // User Notification Preferences
+  getUserNotificationPreferences(userId: string): Promise<UserNotificationPreferences | undefined>;
+  createUserNotificationPreferences(preferences: InsertUserNotificationPreferences): Promise<UserNotificationPreferences>;
+  updateUserNotificationPreferences(userId: string, preferences: UpdateUserNotificationPreferences): Promise<UserNotificationPreferences | undefined>;
+
+  // Subscription Reminders
+  getUpcomingReminders(userId: string): Promise<SubscriptionReminder[]>;
+  createSubscriptionReminder(reminder: InsertSubscriptionReminder): Promise<SubscriptionReminder>;
+  deleteSubscriptionReminder(reminderId: string, userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -363,6 +379,89 @@ export class DatabaseStorage implements IStorage {
       .values(historyEntry)
       .returning();
     return entry;
+  }
+
+  // User Subscriptions (alias method)
+  async getUserSubscriptions(userId: string): Promise<Subscription[]> {
+    return await this.getSubscriptionsByUserId(userId);
+  }
+
+  // User Notification Preferences methods
+  async getUserNotificationPreferences(userId: string): Promise<UserNotificationPreferences | undefined> {
+    const [preferences] = await db
+      .select()
+      .from(userNotificationPreferences)
+      .where(eq(userNotificationPreferences.userId, userId))
+      .limit(1);
+    return preferences || undefined;
+  }
+
+  async createUserNotificationPreferences(preferences: InsertUserNotificationPreferences): Promise<UserNotificationPreferences> {
+    const [created] = await db
+      .insert(userNotificationPreferences)
+      .values(preferences)
+      .returning();
+    return created;
+  }
+
+  async updateUserNotificationPreferences(userId: string, preferences: UpdateUserNotificationPreferences): Promise<UserNotificationPreferences | undefined> {
+    // First check if preferences exist
+    const existing = await this.getUserNotificationPreferences(userId);
+    
+    if (!existing) {
+      // Create new preferences if they don't exist
+      const newPreferences: InsertUserNotificationPreferences = {
+        userId,
+        ...preferences
+      };
+      return await this.createUserNotificationPreferences(newPreferences);
+    }
+    
+    // Update existing preferences
+    const [updated] = await db
+      .update(userNotificationPreferences)
+      .set({
+        ...preferences,
+        updatedAt: new Date()
+      })
+      .where(eq(userNotificationPreferences.userId, userId))
+      .returning();
+    return updated || undefined;
+  }
+
+  // Subscription Reminders methods
+  async getUpcomingReminders(userId: string): Promise<SubscriptionReminder[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(subscriptionReminders)
+      .where(
+        and(
+          eq(subscriptionReminders.userId, userId),
+          eq(subscriptionReminders.status, 'pending')
+        )
+      )
+      .orderBy(subscriptionReminders.scheduledFor);
+  }
+
+  async createSubscriptionReminder(reminder: InsertSubscriptionReminder): Promise<SubscriptionReminder> {
+    const [created] = await db
+      .insert(subscriptionReminders)
+      .values(reminder)
+      .returning();
+    return created;
+  }
+
+  async deleteSubscriptionReminder(reminderId: string, userId: string): Promise<boolean> {
+    const result = await db
+      .delete(subscriptionReminders)
+      .where(
+        and(
+          eq(subscriptionReminders.id, reminderId),
+          eq(subscriptionReminders.userId, userId)
+        )
+      );
+    return (result.rowCount ?? 0) > 0;
   }
 }
 
