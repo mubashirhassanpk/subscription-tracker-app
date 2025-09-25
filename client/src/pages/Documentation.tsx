@@ -207,7 +207,7 @@ export default function Documentation() {
     "cost": "15.99",
     "billingCycle": "monthly",
     "category": "Entertainment",
-    "nextBillingDate": "2024-01-15T00:00:00.000Z",
+    "nextBillingDate": "2025-01-15T00:00:00.000Z",
     "description": "Streaming service",
     "isActive": 1
   }'`)}
@@ -241,7 +241,7 @@ export default function Documentation() {
         "cost": "9.99",
         "billingCycle": "monthly",
         "category": "Entertainment",
-        "nextBillingDate": "2024-02-01T00:00:00.000Z",
+        "nextBillingDate": "2025-02-01T00:00:00.000Z",
         "isActive": 1
       }
     ]

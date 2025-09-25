@@ -146,7 +146,7 @@ export default function Features() {
       icon: <Brain className="h-8 w-8" />,
       title: "AI-Powered Insights",
       description: "Advanced AI recommendations for subscription optimization",
-      status: "Coming Q2 2024",
+      status: "Coming Q2 2025",
       features: [
         "Personalized saving recommendations",
         "Usage pattern analysis",
@@ -158,7 +158,7 @@ export default function Features() {
       icon: <Users className="h-8 w-8" />,
       title: "Team Collaboration",
       description: "Manage family and business subscriptions together",
-      status: "Coming Q3 2024", 
+      status: "Coming Q3 2025", 
       features: [
         "Shared subscription dashboards",
         "Role-based access control",
@@ -169,13 +169,13 @@ export default function Features() {
     {
       icon: <Smartphone className="h-8 w-8" />,
       title: "Mobile App",
-      description: "Full-featured iOS and Android applications",
-      status: "Coming Q4 2024",
+      description: "Full-featured mobile-optimized experience",
+      status: "Available Now",
       features: [
-        "Native mobile experience",
-        "Offline capability",
-        "Push notifications",
-        "Mobile-optimized analytics"
+        "Mobile-optimized interface",
+        "Bottom navigation bar",
+        "Floating action button", 
+        "Touch-friendly design"
       ]
     }
   ];
