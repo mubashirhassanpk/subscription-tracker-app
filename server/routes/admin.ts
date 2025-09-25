@@ -994,4 +994,167 @@ router.put('/users/:userId/plan', trySessionOrApiKey, requireAdmin, logAdminActi
   }
 });
 
+/**
+ * GET /api/admin/subscriptions
+ * Get all user subscriptions with pagination and search
+ */
+router.get('/subscriptions', trySessionOrApiKey, requireAdmin, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
+
+    const offset = (page - 1) * limit;
+
+    // Get all subscriptions (use existing method)
+    const allSubscriptions = await storage.getAllSubscriptions();
+    
+    // Filter and paginate
+    let filteredSubscriptions = allSubscriptions;
+    if (search) {
+      filteredSubscriptions = allSubscriptions.filter(sub => 
+        sub.name?.toLowerCase().includes(search.toLowerCase()) ||
+        sub.category?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    
+    const totalSubscriptions = filteredSubscriptions.length;
+    const subscriptions = filteredSubscriptions.slice(offset, offset + limit);
+
+    // Get user info for each subscription
+    const subscriptionsWithUsers = await Promise.all(
+      subscriptions.map(async (sub: any) => {
+        const user = sub.userId ? await storage.getUser(sub.userId) : null;
+        return {
+          ...sub,
+          userName: user?.name || 'Unknown',
+          userEmail: user?.email || 'Unknown'
+        };
+      })
+    );
+
+    const totalPages = Math.ceil(totalSubscriptions / limit);
+
+    res.json({
+      success: true,
+      data: {
+        subscriptions: subscriptionsWithUsers,
+        pagination: {
+          page,
+          limit,
+          total: totalSubscriptions,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get admin subscriptions error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch subscriptions'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/subscriptions/stats
+ * Get subscription analytics and statistics
+ */
+router.get('/subscriptions/stats', trySessionOrApiKey, requireAdmin, async (req, res) => {
+  try {
+    const subscriptions = await storage.getAllSubscriptions();
+    
+    const stats = {
+      totalSubscriptions: subscriptions.length,
+      activeSubscriptions: subscriptions.filter(s => s.isActive).length,
+      categories: subscriptions.reduce((acc: any, sub: any) => {
+        acc[sub.category] = (acc[sub.category] || 0) + 1;
+        return acc;
+      }, {}),
+      billingCycles: subscriptions.reduce((acc: any, sub: any) => {
+        acc[sub.billingCycle] = (acc[sub.billingCycle] || 0) + 1;
+        return acc;
+      }, {}),
+      totalRevenue: subscriptions
+        .filter(s => s.isActive)
+        .reduce((sum: number, sub: any) => sum + parseFloat(sub.cost || '0'), 0)
+    };
+    
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Get subscription stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch subscription statistics'
+    });
+  }
+});
+
+/**
+ * PUT /api/admin/subscriptions/:subscriptionId
+ * Update subscription details
+ */
+router.put('/subscriptions/:subscriptionId', trySessionOrApiKey, requireAdmin, logAdminActivity('update_subscription'), async (req, res) => {
+  try {
+    const { subscriptionId } = req.params;
+    const updates = req.body;
+
+    const updatedSubscription = await storage.updateSubscription(subscriptionId, updates);
+    
+    if (!updatedSubscription) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subscription not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: updatedSubscription,
+      message: 'Subscription updated successfully'
+    });
+  } catch (error) {
+    console.error('Update subscription error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update subscription'
+    });
+  }
+});
+
+/**
+ * DELETE /api/admin/subscriptions/:subscriptionId
+ * Delete a subscription (admin only)
+ */
+router.delete('/subscriptions/:subscriptionId', trySessionOrApiKey, requireSuperAdmin, logAdminActivity('delete_subscription'), async (req, res) => {
+  try {
+    const { subscriptionId } = req.params;
+
+    const deleted = await storage.deleteSubscription(subscriptionId);
+    
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subscription not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Subscription deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete subscription error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete subscription'
+    });
+  }
+});
+
 export { router as adminRouter };
