@@ -411,6 +411,7 @@ export default function AdminUserManagement() {
                     <TableHead>Role</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Subscriptions</TableHead>
+                    <TableHead>Plan Expiry</TableHead>
                     <TableHead>Last Login</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -460,6 +461,35 @@ export default function AdminUserManagement() {
                             </Badge>
                           );
                         })()}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {user.trialEndsAt ? (
+                          <div className="text-center">
+                            <div className="font-medium text-foreground">
+                              {new Date(user.trialEndsAt).toLocaleDateString()}
+                            </div>
+                            <div className="text-xs">
+                              {(() => {
+                                const today = new Date();
+                                const expiryDate = new Date(user.trialEndsAt);
+                                const diffTime = expiryDate.getTime() - today.getTime();
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                
+                                if (diffDays < 0) {
+                                  return <span className="text-red-500">Expired</span>;
+                                } else if (diffDays === 0) {
+                                  return <span className="text-orange-500">Today</span>;
+                                } else if (diffDays <= 7) {
+                                  return <span className="text-orange-500">{diffDays} days left</span>;
+                                } else {
+                                  return <span className="text-green-600">{diffDays} days left</span>;
+                                }
+                              })()}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">No expiry</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
