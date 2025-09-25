@@ -59,7 +59,6 @@ export default function AdminUserManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { toast } = useToast();
 
   // Form state for create/edit
@@ -111,31 +110,6 @@ export default function AdminUserManagement() {
     }
   }, [selectedUserForDetails, userDetailsData]);
 
-  // Create user mutation
-  const createUserMutation = useMutation({
-    mutationFn: (userData: any) => 
-      fetch('/api/admin/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      }).then(res => res.json()),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      setIsCreateDialogOpen(false);
-      resetForm();
-      toast({
-        title: 'Success',
-        description: 'User created successfully'
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to create user',
-        variant: 'destructive'
-      });
-    }
-  });
 
   // Update user mutation
   const updateUserMutation = useMutation({
@@ -236,18 +210,6 @@ export default function AdminUserManagement() {
     setIsUserDetailsOpen(true);
   };
 
-  const handleCreateUser = () => {
-    const { password, ...userData } = formData;
-    if (!password) {
-      toast({
-        title: 'Error',
-        description: 'Password is required',
-        variant: 'destructive'
-      });
-      return;
-    }
-    createUserMutation.mutate({ ...userData, password });
-  };
 
   const handleUpdateUser = () => {
     if (!selectedUser) return;
@@ -421,87 +383,12 @@ export default function AdminUserManagement() {
               />
             </div>
           </div>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button data-testid="button-add-user" onClick={resetForm}>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add User
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New User</DialogTitle>
-                <DialogDescription>Add a new user to the system</DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="col-span-3"
-                    data-testid="input-user-name"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="email" className="text-right">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="col-span-3"
-                    data-testid="input-user-email"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="password" className="text-right">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    className="col-span-3"
-                    data-testid="input-user-password"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="role" className="text-right">Role</Label>
-                  <Select
-                    value={formData.role}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}
-                  >
-                    <SelectTrigger className="col-span-3" data-testid="select-user-role">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="isActive" className="text-right">Active</Label>
-                  <Switch
-                    id="isActive"
-                    checked={formData.isActive}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
-                    data-testid="switch-user-active"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  onClick={handleCreateUser}
-                  disabled={createUserMutation.isPending}
-                  data-testid="button-create-user"
-                >
-                  {createUserMutation.isPending ? 'Creating...' : 'Create User'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Link href="/admin/users/create">
+            <Button data-testid="button-add-user">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add User
+            </Button>
+          </Link>
         </div>
 
         {/* Users Table */}
