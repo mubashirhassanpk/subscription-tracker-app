@@ -1086,6 +1086,92 @@ Track your subscriptions too! 💡`;
       year: 'numeric'
     });
   }
+
+  // Reminders functionality
+  async loadRemindersData() {
+    try {
+      // Fetch reminder preferences
+      const preferences = await this.apiRequest('/api/reminders/preferences');
+      this.updateReminderStatus(preferences);
+    } catch (error) {
+      console.error('Error loading reminder data:', error);
+      this.updateReminderStatus(null);
+    }
+  }
+
+  updateReminderStatus(preferences) {
+    const emailIndicator = document.getElementById('emailIndicator');
+    const calendarIndicator = document.getElementById('calendarIndicator');
+    const whatsappIndicator = document.getElementById('whatsappIndicator');
+
+    if (preferences) {
+      // Update email status
+      if (emailIndicator) {
+        emailIndicator.textContent = preferences.emailEnabled && preferences.emailAddress 
+          ? 'Connected' 
+          : 'Not connected';
+        emailIndicator.className = preferences.emailEnabled && preferences.emailAddress 
+          ? 'status-indicator connected' 
+          : 'status-indicator';
+      }
+
+      // Update calendar status
+      if (calendarIndicator) {
+        calendarIndicator.textContent = preferences.googleCalendarEnabled && preferences.googleAccessToken
+          ? 'Connected'
+          : 'Not connected';
+        calendarIndicator.className = preferences.googleCalendarEnabled && preferences.googleAccessToken
+          ? 'status-indicator connected'
+          : 'status-indicator';
+      }
+
+      // Update whatsapp status
+      if (whatsappIndicator) {
+        whatsappIndicator.textContent = preferences.whatsappEnabled && preferences.whatsappNumber
+          ? 'Connected'
+          : 'Not connected';
+        whatsappIndicator.className = preferences.whatsappEnabled && preferences.whatsappNumber
+          ? 'status-indicator connected'
+          : 'status-indicator';
+      }
+    } else {
+      // Set all to not connected if no preferences
+      [emailIndicator, calendarIndicator, whatsappIndicator].forEach(indicator => {
+        if (indicator) {
+          indicator.textContent = 'Not connected';
+          indicator.className = 'status-indicator';
+        }
+      });
+    }
+  }
+
+  openReminderSettings() {
+    if (this.apiUrl) {
+      chrome.tabs.create({
+        url: `${this.apiUrl}/reminder-settings`
+      });
+    } else {
+      this.showError('Please connect to your account first');
+    }
+  }
+
+  async testNotifications() {
+    try {
+      const result = await this.apiRequest('/api/reminders/test', {
+        method: 'POST'
+      });
+      
+      this.showSuccess('Test notifications sent! Check your configured channels.');
+      
+      // Refresh reminder status after test
+      setTimeout(() => {
+        this.loadRemindersData();
+      }, 1000);
+    } catch (error) {
+      console.error('Error testing notifications:', error);
+      this.showError('Failed to send test notifications. Please check your settings.');
+    }
+  }
 }
 
 // Add CSS animations
@@ -1105,3 +1191,21 @@ document.head.appendChild(style);
 
 // Initialize popup
 const popup = new SubscriptionTrackerPopup();
+
+// Initialize reminder tab event handlers once DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  const openReminderSettingsBtn = document.getElementById('openReminderSettings');
+  const testNotificationsBtn = document.getElementById('testNotifications');
+  
+  if (openReminderSettingsBtn) {
+    openReminderSettingsBtn.addEventListener('click', () => {
+      popup.openReminderSettings();
+    });
+  }
+  
+  if (testNotificationsBtn) {
+    testNotificationsBtn.addEventListener('click', () => {
+      popup.testNotifications();
+    });
+  }
+});
