@@ -544,15 +544,35 @@ export default function AdminUserManagement() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {user.planId ? (
-                          <Badge variant="default" className="text-xs">
-                            Plan Assigned
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="text-xs">
-                            No Plan
-                          </Badge>
-                        )}
+                        {(() => {
+                          // If user has a planId, find the plan name
+                          if (user.planId && plansData) {
+                            const plan = plansData.find((plan: Plan) => plan.id === user.planId);
+                            if (plan) {
+                              return (
+                                <Badge variant="default" className="text-xs">
+                                  {plan.name}
+                                </Badge>
+                              );
+                            }
+                          }
+                          
+                          // If user is on trial (even without a specific plan), show Trial status
+                          if (user.subscriptionStatus === 'trial') {
+                            return (
+                              <Badge variant="outline" className="text-xs">
+                                Trial
+                              </Badge>
+                            );
+                          }
+                          
+                          // Default case - no plan assigned
+                          return (
+                            <Badge variant="secondary" className="text-xs">
+                              No Plan
+                            </Badge>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
