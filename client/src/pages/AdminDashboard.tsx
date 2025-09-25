@@ -82,13 +82,28 @@ export default function AdminDashboard() {
   const { data: usersData, isLoading: isUsersLoading } = useQuery<UsersResponse>({
     queryKey: ['/api/admin/users', { search: searchTerm, limit: 10 }],
     queryFn: () => 
-      fetch(`/api/admin/users?limit=10${searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ''}`).then(res => res.json())
+      fetch(`/api/admin/users?limit=10${searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ''}`, {
+        credentials: 'include'
+      }).then(res => {
+        if (!res.ok) {
+          throw new Error(`${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      })
   });
 
   // Fetch user details when selected
   const { data: userDetailsData } = useQuery({
     queryKey: ['/api/admin/users', selectedUserForDetails?.id, 'details'],
-    queryFn: () => fetch(`/api/admin/users/${selectedUserForDetails?.id}/details`).then(res => res.json()),
+    queryFn: () => 
+      fetch(`/api/admin/users/${selectedUserForDetails?.id}/details`, {
+        credentials: 'include'
+      }).then(res => {
+        if (!res.ok) {
+          throw new Error(`${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      }),
     enabled: !!selectedUserForDetails
   });
 
@@ -96,8 +111,14 @@ export default function AdminDashboard() {
   const impersonateMutation = useMutation({
     mutationFn: (userId: string) => 
       fetch(`/api/admin/users/${userId}/impersonate`, {
-        method: 'POST'
-      }).then(res => res.json()),
+        method: 'POST',
+        credentials: 'include'
+      }).then(res => {
+        if (!res.ok) {
+          throw new Error(`${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      }),
     onSuccess: (data: any) => {
       if (data.success && data.data?.impersonationToken) {
         // Open impersonation in new tab
