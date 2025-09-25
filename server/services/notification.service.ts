@@ -2,7 +2,7 @@ import { UserNotificationPreferences, Subscription, SubscriptionReminder, Insert
 import { googleCalendarService } from './google-calendar.service';
 import { whatsappService } from './whatsapp.service';
 import { emailService } from './email.service';
-import { dbService } from '../storage';
+import { storage } from '../storage';
 
 export class NotificationService {
   
@@ -165,7 +165,7 @@ export class NotificationService {
     
     try {
       // Get all users with notification preferences
-      const users = await dbService.getAllUsersWithPreferences();
+      const users = await storage.getAllUsersWithPreferences();
       
       for (const user of users) {
         await this.processUserReminders(user);
@@ -182,7 +182,7 @@ export class NotificationService {
    */
   private async processUserReminders(user: { id: string; preferences: UserNotificationPreferences }) {
     try {
-      const subscriptions = await dbService.getUserSubscriptions(user.id);
+      const subscriptions = await storage.getUserSubscriptions(user.id);
       const now = new Date();
       
       for (const subscription of subscriptions) {
@@ -198,7 +198,7 @@ export class NotificationService {
         for (const daysBefore of reminderDays) {
           if (daysUntilRenewal === daysBefore) {
             // Check if we've already sent a reminder for this day
-            const existingReminder = await dbService.getReminderForSubscriptionAndDay(
+            const existingReminder = await storage.getReminderForSubscriptionAndDay(
               subscription.id, 
               daysBefore
             );
@@ -227,7 +227,7 @@ export class NotificationService {
    */
   private async logReminder(reminderData: InsertSubscriptionReminder) {
     try {
-      await dbService.createSubscriptionReminder(reminderData);
+      await storage.createSubscriptionReminder(reminderData);
     } catch (error) {
       console.error('Error logging reminder:', error);
     }
@@ -350,7 +350,7 @@ export class NotificationService {
   ) {
     try {
       // Delete from database
-      await dbService.deleteSubscriptionReminders(subscriptionId);
+      await storage.deleteSubscriptionReminders(subscriptionId);
 
       // Delete from Google Calendar if enabled
       if (preferences.googleCalendarEnabled && preferences.googleAccessToken) {
@@ -374,7 +374,7 @@ export class NotificationService {
    * Get reminder statistics for a user
    */
   async getUserReminderStats(userId: string) {
-    const stats = await dbService.getUserReminderStats(userId);
+    const stats = await storage.getUserReminderStats(userId);
     
     return {
       totalSent: stats.filter(s => s.status === 'sent').length,

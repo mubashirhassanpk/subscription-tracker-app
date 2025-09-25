@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hey! Your {{subscription.name}} subscription is renewing</title>
+    <style>
+        body { font-family: 'Comic Sans MS', cursive, sans-serif; background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 100%); margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .emoji { font-size: 3em; text-align: center; margin-bottom: 20px; }
+        h1 { color: #e91e63; text-align: center; font-size: 24px; margin-bottom: 10px; }
+        .cost { font-size: 2em; color: #e91e63; text-align: center; font-weight: bold; }
+        .button { display: inline-block; background: linear-gradient(45deg, #e91e63, #ff4081); color: white; padding: 15px 30px; border-radius: 50px; text-decoration: none; margin: 10px 5px; font-weight: bold; box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3); }
+        .fun-fact { background: #fff8e1; border-radius: 15px; padding: 15px; margin: 20px 0; border-left: 5px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji">{{urgencyEmoji daysBefore}}</div>
+        <h1>Heads up! {{subscription.name}} is renewing {{timeframe daysBefore}}</h1>
+        
+        <div class="cost">{{formatCurrency subscription.cost}}</div>
+        <p style="text-align: center; color: #666;">Due: {{formatDate subscription.nextBillingDate}}</p>
+
+        <div class="fun-fact">
+            <strong>💡 Quick reminder:</strong> Make sure you're still loving this service! 
+            If not, now's a great time to cancel or switch to a better plan.
+        </div>
+
+        {{#if includeActionButtons}}
+        <div style="text-align: center;">
+            <a href="{{appUrl}}/dashboard" class="button">Check it out!</a>
+        </div>
+        {{/if}}
+
+        <p style="text-align: center; color: #999; font-size: 12px; margin-top: 30px;">
+            You're getting this because you asked us to remind you. 
+            <a href="{{unsubscribeUrl}}" style="color: #e91e63;">Change your mind?</a>
+        </p>
+    </div>
+</body>
+</html>

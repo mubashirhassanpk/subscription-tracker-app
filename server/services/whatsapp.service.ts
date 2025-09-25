@@ -3,13 +3,21 @@ import crypto from 'crypto';
 import { UserNotificationPreferences } from '@shared/schema';
 
 export class WhatsAppService {
-  private wa: WhatsApp;
+  private wa: WhatsApp | null = null;
   private encryptionKey: string;
   
   constructor() {
-    // Initialize WhatsApp SDK
-    this.wa = new WhatsApp();
     this.encryptionKey = process.env.ENCRYPTION_KEY || 'fallback-key-change-in-production';
+  }
+
+  /**
+   * Initialize WhatsApp client on demand
+   */
+  private initializeWhatsApp(): WhatsApp {
+    if (!this.wa) {
+      this.wa = new WhatsApp();
+    }
+    return this.wa;
   }
 
   /**
@@ -51,7 +59,8 @@ export class WhatsAppService {
    * Initialize WhatsApp webhook for receiving message statuses
    */
   initializeWebhook(port: number = 3000) {
-    this.wa.webhooks.start((statusCode: number, headers: any, body: any, resp: any, err: any) => {
+    const wa = this.initializeWhatsApp();
+    wa.webhooks.start((statusCode: number, headers: any, body: any, resp: any, err: any) => {
       console.log(`WhatsApp Webhook: ${statusCode}`);
       
       if (body && body.object === 'whatsapp_business_account') {
@@ -140,7 +149,8 @@ export class WhatsAppService {
    */
   private async sendMessage(to: string, message: any) {
     try {
-      const result = await this.wa.messages.send({
+      const wa = this.initializeWhatsApp();
+      const result = await wa.messages.send({
         recipient_type: 'individual',
         to: to,
         type: message.type,
