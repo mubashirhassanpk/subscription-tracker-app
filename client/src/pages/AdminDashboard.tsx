@@ -728,13 +728,13 @@ export default function AdminDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Create Subscription Dialog */}
+      {/* Create User Plan Dialog */}
       <Dialog open={isCreateSubscriptionOpen} onOpenChange={setIsCreateSubscriptionOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add New Subscription</DialogTitle>
+            <DialogTitle>Add User Plan</DialogTitle>
             <DialogDescription>
-              Create a new subscription to track for a user
+              Assign a plan to a user (purchased subscription or trial)
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -821,7 +821,7 @@ export default function AdminDashboard() {
               disabled={createSubscriptionMutation.isPending}
               data-testid="button-save-subscription"
             >
-              {createSubscriptionMutation.isPending ? 'Creating...' : 'Create Subscription'}
+              {createSubscriptionMutation.isPending ? 'Assigning...' : 'Assign Plan'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -221,17 +221,8 @@ export default function AdminUserManagement() {
   };
 
   const handleEditUser = (user: User) => {
-    setSelectedUser(user);
-    setFormData({
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      isActive: user.isActive,
-      password: '',
-      planId: user.planId || '',
-      subscriptionStatus: user.subscriptionStatus || 'active'
-    });
-    setIsEditDialogOpen(true);
+    setSelectedUserForDetails(user);
+    setIsUserDetailsOpen(true);
   };
 
   const handleCreateUser = () => {
@@ -541,72 +532,6 @@ export default function AdminUserManagement() {
         </Card>
       </div>
 
-      {/* Edit User Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>Update user information and permissions</DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-name" className="text-right">Name</Label>
-              <Input
-                id="edit-name"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                className="col-span-3"
-                data-testid="input-edit-user-name"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-email" className="text-right">Email</Label>
-              <Input
-                id="edit-email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="col-span-3"
-                data-testid="input-edit-user-email"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-role" className="text-right">Role</Label>
-              <Select
-                value={formData.role}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}
-              >
-                <SelectTrigger className="col-span-3" data-testid="select-edit-user-role">
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="super_admin">Super Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-isActive" className="text-right">Active</Label>
-              <Switch
-                id="edit-isActive"
-                checked={formData.isActive}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
-                data-testid="switch-edit-user-active"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              onClick={handleUpdateUser}
-              disabled={updateUserMutation.isPending}
-              data-testid="button-update-user"
-            >
-              {updateUserMutation.isPending ? 'Updating...' : 'Update User'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* User Details Dialog - Comprehensive Feature Management */}
       <Dialog open={isUserDetailsOpen} onOpenChange={setIsUserDetailsOpen}>
@@ -746,7 +671,7 @@ export default function AdminUserManagement() {
                             <SelectValue placeholder="Select plan" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">No Plan</SelectItem>
+                            <SelectItem value="none">No Plan</SelectItem>
                             {Array.isArray(plansData) && plansData.map((plan: Plan) => (
                               <SelectItem key={plan.id} value={plan.id}>
                                 {plan.name} - ${plan.price}/{plan.currency}
