@@ -9,9 +9,12 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   password: text("password").notNull(), // hashed password
+  role: text("role").default("user").notNull(), // 'user', 'admin', 'super_admin'
   planId: varchar("plan_id"),
   trialEndsAt: timestamp("trial_ends_at"),
   subscriptionStatus: text("subscription_status").default("trial").notNull(), // 'trial', 'active', 'expired', 'cancelled'
+  isActive: boolean("is_active").default(true).notNull(),
+  lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
   updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
 });
@@ -243,6 +246,62 @@ export const updateNotificationSchema = createInsertSchema(notifications).omit({
   userId: true,
 }).partial();
 
+// Admin activity logs for auditing admin actions
+export const adminActivityLogs = pgTable("admin_activity_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  adminUserId: varchar("admin_user_id").notNull(),
+  action: text("action").notNull(), // 'login_as_user', 'create_user', 'update_user', 'delete_user', 'update_subscription', etc.
+  targetUserId: varchar("target_user_id"), // user being acted upon (null for general admin actions)
+  targetResourceId: varchar("target_resource_id"), // subscription, plan, etc. being acted upon
+  resourceType: text("resource_type"), // 'user', 'subscription', 'plan', 'setting'
+  details: text("details"), // JSON string with action details
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+});
+
+// Admin settings/configuration
+export const adminSettings = pgTable("admin_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  settingKey: text("setting_key").notNull().unique(),
+  settingValue: text("setting_value").notNull(),
+  category: text("category").default("general").notNull(), // 'general', 'email', 'security', 'billing'
+  description: text("description"),
+  isPublic: boolean("is_public").default(false).notNull(), // whether setting is visible to regular users
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+});
+
+// User sessions for admin impersonation tracking
+export const userSessions = pgTable("user_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  adminUserId: varchar("admin_user_id"), // if session was created through admin impersonation
+  sessionToken: text("session_token").notNull().unique(),
+  isImpersonation: boolean("is_impersonation").default(false).notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+});
+
+// Insert schemas for admin tables
+export const insertAdminActivityLogSchema = createInsertSchema(adminActivityLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAdminSettingSchema = createInsertSchema(adminSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types for TypeScript
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -274,3 +333,12 @@ export type InsertSubscriptionReminder = z.infer<typeof insertSubscriptionRemind
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type UpdateNotification = z.infer<typeof updateNotificationSchema>;
+
+export type AdminActivityLog = typeof adminActivityLogs.$inferSelect;
+export type InsertAdminActivityLog = z.infer<typeof insertAdminActivityLogSchema>;
+
+export type AdminSetting = typeof adminSettings.$inferSelect;
+export type InsertAdminSetting = z.infer<typeof insertAdminSettingSchema>;
+
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
