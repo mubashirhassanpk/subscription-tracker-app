@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -80,6 +80,17 @@ export default function AdminUserManagement() {
     planId: '',
     subscriptionStatus: ''
   });
+
+  // Initialize user plan changes when user is selected
+  useEffect(() => {
+    if (selectedUserForDetails && userDetailsData?.data?.user) {
+      const userData = userDetailsData.data.user;
+      setUserPlanChanges({
+        planId: userData.planId || '',
+        subscriptionStatus: userData.subscriptionStatus || 'active'
+      });
+    }
+  }, [selectedUserForDetails, userDetailsData]);
 
   // Fetch users
   const { data: usersData, isLoading } = useQuery({
@@ -710,9 +721,25 @@ export default function AdminUserManagement() {
                         Manage plans that the user has purchased or is on trial for
                       </p>
                       <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
-                        <div className="text-sm text-muted-foreground py-4 text-center">
-                          Loading user plans...
-                        </div>
+                        {userDetailsData?.data?.user?.planId ? (
+                          <div className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-950/20 rounded">
+                            <div>
+                              <div className="font-medium text-sm">
+                                {plansData?.find((plan: Plan) => plan.id === userDetailsData.data.user.planId)?.name || 'Unknown Plan'}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Status: {userDetailsData.data.user.subscriptionStatus || 'Unknown'}
+                              </div>
+                            </div>
+                            <Badge variant={userDetailsData.data.user.subscriptionStatus === 'active' ? 'default' : 'secondary'}>
+                              {userDetailsData.data.user.subscriptionStatus}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground py-4 text-center">
+                            No plan assigned
+                          </div>
+                        )}
                       </div>
                       <div className="flex space-x-2">
                         <div className="flex items-center px-2 py-1 text-xs border rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
