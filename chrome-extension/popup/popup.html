@@ -34,13 +34,13 @@
         
         <div class="form-group">
           <label for="apiUrl">App URL:</label>
-          <input type="url" id="apiUrl" placeholder="https://your-app.replit.dev" />
+          <input type="url" id="apiUrl" placeholder="https://3b09af3c-f605-44fe-8597-73a8f24d40cc-00-2xkffllmc9j6n.kirk.replit.dev" />
         </div>
         
         <div class="form-group">
           <label for="apiKey">API Key:</label>
-          <input type="password" id="apiKey" placeholder="Enter your API key" />
-          <small>Get your API key from the app settings</small>
+          <input type="password" id="apiKey" placeholder="dev-api-key" />
+          <small><strong>Demo:</strong> Use "dev-api-key" for testing</small>
         </div>
         
         <button id="connectBtn" class="connect-btn">Connect Account</button>
@@ -95,7 +95,7 @@
         <h3>Add New Subscription</h3>
         <div class="form-row">
           <input type="text" id="subName" placeholder="Service name" required />
-          <input type="number" id="subCost" placeholder="Monthly cost" step="0.01" required />
+          <input type="number" id="subCost" placeholder="Cost" step="0.01" min="0" required />
         </div>
         <div class="form-row">
           <select id="subCategory">
@@ -115,6 +115,10 @@
             <option value="yearly">Yearly</option>
             <option value="weekly">Weekly</option>
           </select>
+        </div>
+        <div class="form-row">
+          <input type="email" id="subEmail" placeholder="Email (optional)" />
+          <input type="text" id="subDescription" placeholder="Description (optional)" />
         </div>
         <div class="form-actions">
           <button id="saveSubBtn" class="save-btn">Save</button>

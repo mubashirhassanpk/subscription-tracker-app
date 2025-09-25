@@ -246,7 +246,8 @@ class SubscriptionTrackerBackground {
         throw new Error(`API request failed: ${response.status}`);
       }
 
-      const subscriptions = await response.json();
+      const data = await response.json();
+      const subscriptions = data.subscriptions || [];
       
       // Store subscriptions in local storage for offline access
       await chrome.storage.local.set({
@@ -330,7 +331,7 @@ class SubscriptionTrackerBackground {
     if (!this.apiUrl || !this.apiKey) return false;
 
     try {
-      const response = await fetch(`${this.apiUrl}/api/subscriptions/${id}`, {
+      const response = await fetch(`${this.apiUrl}/api/v1/subscriptions/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -355,7 +356,7 @@ class SubscriptionTrackerBackground {
     if (!this.apiUrl || !this.apiKey) return false;
 
     try {
-      const response = await fetch(`${this.apiUrl}/api/subscriptions/${id}`, {
+      const response = await fetch(`${this.apiUrl}/api/v1/subscriptions/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,

@@ -139,7 +139,9 @@ class SubscriptionTrackerPopup {
       const response = await this.makeAPIRequest(this.apiUrl, '/api/subscriptions');
       
       if (response.ok) {
-        this.subscriptions = await response.json();
+        const data = await response.json();
+        // API returns array directly, not wrapped in object
+        this.subscriptions = Array.isArray(data) ? data : (data.subscriptions || []);
         this.renderSubscriptions();
         this.updateStats();
       } else {
@@ -154,7 +156,7 @@ class SubscriptionTrackerPopup {
   renderSubscriptions() {
     const listContainer = document.getElementById('subscriptionsList');
     
-    if (this.subscriptions.length === 0) {
+    if (!Array.isArray(this.subscriptions) || this.subscriptions.length === 0) {
       listContainer.innerHTML = `
         <div class="empty-state">
           <h3>No subscriptions yet</h3>
@@ -171,14 +173,14 @@ class SubscriptionTrackerPopup {
       <div class="subscription-item" data-id="${sub.id}">
         <div class="subscription-info">
           <div class="subscription-name">
-            <span class="status-indicator ${sub.isActive ? 'active' : 'inactive'}"></span>
-            ${sub.name}
+            <span class="status-indicator ${(sub.isActive === 1 || sub.isActive === true) ? 'active' : 'inactive'}"></span>
+            ${this.escapeHtml(sub.name)}
           </div>
           <div class="subscription-details">
-            ${sub.category} • ${this.formatBillingCycle(sub.billingCycle)}
+            ${this.escapeHtml(sub.category || 'Other')} • ${this.formatBillingCycle(sub.billingCycle)}
           </div>
         </div>
-        <div class="subscription-cost">$${parseFloat(sub.cost).toFixed(2)}</div>
+        <div class="subscription-cost">$${parseFloat(sub.cost || 0).toFixed(2)}</div>
         <div class="subscription-actions">
           <button class="subscription-btn" onclick="popup.editSubscription('${sub.id}')" title="Edit">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
@@ -195,9 +197,21 @@ class SubscriptionTrackerPopup {
     `).join('');
   }
 
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   updateStats() {
+    if (!Array.isArray(this.subscriptions)) {
+      document.getElementById('totalCost').textContent = '$0.00';
+      document.getElementById('activeCount').textContent = '0';
+      return;
+    }
+
     const totalCost = this.subscriptions
-      .filter(sub => sub.isActive)
+      .filter(sub => sub.isActive === 1 || sub.isActive === true)
       .reduce((total, sub) => {
         const cost = parseFloat(sub.cost) || 0;
         // Convert to monthly for consistent calculation
@@ -206,7 +220,7 @@ class SubscriptionTrackerPopup {
         return total + monthlyCost;
       }, 0);
 
-    const activeCount = this.subscriptions.filter(sub => sub.isActive).length;
+    const activeCount = this.subscriptions.filter(sub => sub.isActive === 1 || sub.isActive === true).length;
 
     document.getElementById('totalCost').textContent = `$${totalCost.toFixed(2)}`;
     document.getElementById('activeCount').textContent = activeCount.toString();
@@ -217,9 +231,11 @@ class SubscriptionTrackerPopup {
     const cost = document.getElementById('subCost').value.trim();
     const category = document.getElementById('subCategory').value;
     const billingCycle = document.getElementById('subCycle').value;
+    const email = document.getElementById('subEmail').value.trim();
+    const description = document.getElementById('subDescription').value.trim();
 
-    if (!name || !cost) {
-      this.showError('Please fill in all required fields');
+    if (!name || !cost || isNaN(cost) || parseFloat(cost) <= 0) {
+      this.showError('Please enter a valid service name and cost');
       return;
     }
 
@@ -230,8 +246,11 @@ class SubscriptionTrackerPopup {
       billingCycle,
       nextBillingDate: this.calculateNextBillingDate(billingCycle),
       isActive: 1,
-      description: `Added via Chrome Extension`
+      description: description || 'Added via Chrome Extension',
+      email: email || ''
     };
+
+    console.log('Saving subscription:', subscriptionData);
 
     try {
       const response = await this.makeAPIRequest(this.apiUrl, '/api/subscriptions', {
@@ -242,23 +261,38 @@ class SubscriptionTrackerPopup {
         body: JSON.stringify(subscriptionData)
       });
 
+      console.log('Save response status:', response.status);
+      const responseText = await response.text();
+      console.log('Save response:', responseText);
+
       if (response.ok) {
         this.hideQuickAddForm();
         this.clearQuickAddForm();
-        this.loadSubscriptions();
+        await this.loadSubscriptions();
         this.showSuccess('Subscription added successfully!');
         
         // Notify background script
-        chrome.runtime.sendMessage({
-          type: 'SUBSCRIPTION_ADDED',
-          subscription: subscriptionData
-        });
+        try {
+          chrome.runtime.sendMessage({
+            type: 'SUBSCRIPTION_ADDED',
+            subscription: subscriptionData
+          });
+        } catch (msgError) {
+          console.log('Could not send message to background script:', msgError);
+        }
       } else {
-        throw new Error('Failed to save subscription');
+        let errorMessage = 'Failed to save subscription';
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch (e) {
+          // Use default error message
+        }
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error('Error saving subscription:', error);
-      this.showError('Failed to save subscription');
+      this.showError(`Failed to save subscription: ${error.message}`);
     }
   }
 
@@ -316,6 +350,12 @@ class SubscriptionTrackerPopup {
   async detectCurrentSiteSubscription() {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      if (!tab || !tab.url) {
+        console.log('No active tab or URL found');
+        return;
+      }
+      
       const url = new URL(tab.url);
       const hostname = url.hostname.toLowerCase();
 
@@ -333,7 +373,7 @@ class SubscriptionTrackerPopup {
         'disneyplus.com': { name: 'Disney+', category: 'Entertainment', cost: '7.99' }
       };
 
-      const serviceKey = Object.keys(knownServices).find(key => hostname.includes(key));
+      const serviceKey = Object.keys(knownServices).find(key => hostname.includes(key.replace('.com', '')));
       
       if (serviceKey) {
         const service = knownServices[serviceKey];
@@ -345,9 +385,13 @@ class SubscriptionTrackerPopup {
 
         if (!existingService) {
           // Pre-fill the form with detected service
-          document.getElementById('subName').value = service.name;
-          document.getElementById('subCost').value = service.cost;
-          document.getElementById('subCategory').value = service.category;
+          const nameInput = document.getElementById('subName');
+          const costInput = document.getElementById('subCost');
+          const categorySelect = document.getElementById('subCategory');
+          
+          if (nameInput) nameInput.value = service.name;
+          if (costInput) costInput.value = service.cost;
+          if (categorySelect) categorySelect.value = service.category;
           
           // Show a subtle notification
           this.showDetectedService(service.name);
@@ -427,7 +471,14 @@ class SubscriptionTrackerPopup {
       }
     };
 
-    return fetch(url, finalOptions);
+    try {
+      const response = await fetch(url, finalOptions);
+      console.log(`API Request: ${options.method || 'GET'} ${url} - Status: ${response.status}`);
+      return response;
+    } catch (error) {
+      console.error(`API Request failed: ${url}`, error);
+      throw error;
+    }
   }
 
   openFullApp() {
@@ -505,11 +556,15 @@ class SubscriptionTrackerPopup {
     document.getElementById('subCost').value = '';
     document.getElementById('subCategory').selectedIndex = 0;
     document.getElementById('subCycle').selectedIndex = 0;
+    const emailInput = document.getElementById('subEmail');
+    const descInput = document.getElementById('subDescription');
+    if (emailInput) emailInput.value = '';
+    if (descInput) descInput.value = '';
   }
 
   editSubscription(id) {
-    // For now, just open the full app to the specific subscription
-    chrome.tabs.create({ url: `${this.apiUrl}/dashboard?edit=${id}` });
+    // For now, just open the full app to the dashboard
+    chrome.tabs.create({ url: `${this.apiUrl}` });
   }
 }
 
