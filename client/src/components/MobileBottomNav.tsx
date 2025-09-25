@@ -7,7 +7,8 @@ import {
   Bell,
   User,
   Plus,
-  AlertCircle
+  AlertCircle,
+  Cog
 } from "lucide-react";
 
 export function MobileBottomNav() {
@@ -42,7 +43,7 @@ export function MobileBottomNav() {
       title: "Reminders", 
       url: "/reminders", 
       icon: AlertCircle, 
-      active: location === "/reminders" 
+      active: location === "/reminders" || location === "/reminder-settings"
     },
     { 
       title: "Profile", 
