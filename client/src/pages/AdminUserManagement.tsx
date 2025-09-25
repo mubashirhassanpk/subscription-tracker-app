@@ -9,10 +9,20 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Users, UserPlus, Edit, Trash2, UserCheck, Search } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { Users, UserPlus, Edit, Trash2, UserCheck, Search, Settings, CreditCard, Bell, Key, BarChart3, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Link } from 'wouter';
+
+interface Plan {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+  features: string[];
+}
 
 interface User {
   id: string;
@@ -24,6 +34,9 @@ interface User {
   lastLoginAt: string | null;
   createdAt: string;
   subscriptionCount?: number;
+  planId?: string;
+  planName?: string;
+  trialEndsAt?: string | null;
 }
 
 interface UsersResponse {
@@ -55,21 +68,42 @@ export default function AdminUserManagement() {
     email: '',
     role: 'user',
     isActive: true,
-    password: ''
+    password: '',
+    planId: '',
+    subscriptionStatus: 'active'
   });
 
+  // User details view state
+  const [selectedUserForDetails, setSelectedUserForDetails] = useState<User | null>(null);
+  const [isUserDetailsOpen, setIsUserDetailsOpen] = useState(false);
+
   // Fetch users
-  const { data: usersData, isLoading } = useQuery<UsersResponse>({
+  const { data: usersData, isLoading } = useQuery({
     queryKey: ['/api/admin/users', currentPage, searchTerm],
-    queryFn: () => apiRequest(`/api/admin/users?page=${currentPage}&limit=10&search=${searchTerm}`)
+    queryFn: () => fetch(`/api/admin/users?page=${currentPage}&limit=10&search=${searchTerm}`).then(res => res.json())
+  });
+
+  // Fetch plans for user assignment
+  const { data: plansData } = useQuery({
+    queryKey: ['/api/plans'],
+    queryFn: () => fetch('/api/plans').then(res => res.json())
+  });
+
+  // Fetch user details including subscriptions and usage
+  const { data: userDetailsData } = useQuery({
+    queryKey: ['/api/admin/users', selectedUserForDetails?.id, 'details'],
+    queryFn: () => fetch(`/api/admin/users/${selectedUserForDetails?.id}/details`).then(res => res.json()),
+    enabled: !!selectedUserForDetails
   });
 
   // Create user mutation
   const createUserMutation = useMutation({
-    mutationFn: (userData: any) => apiRequest('/api/admin/users', {
-      method: 'POST',
-      body: JSON.stringify(userData)
-    }),
+    mutationFn: (userData: any) => 
+      fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       setIsCreateDialogOpen(false);
@@ -91,10 +125,11 @@ export default function AdminUserManagement() {
   // Update user mutation
   const updateUserMutation = useMutation({
     mutationFn: ({ userId, userData }: { userId: string; userData: any }) =>
-      apiRequest(`/api/admin/users/${userId}`, {
+      fetch(`/api/admin/users/${userId}`, {
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
-      }),
+      }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       setIsEditDialogOpen(false);
@@ -116,9 +151,10 @@ export default function AdminUserManagement() {
 
   // Delete user mutation
   const deleteUserMutation = useMutation({
-    mutationFn: (userId: string) => apiRequest(`/api/admin/users/${userId}`, {
-      method: 'DELETE'
-    }),
+    mutationFn: (userId: string) => 
+      fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE'
+      }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       toast({
@@ -137,13 +173,14 @@ export default function AdminUserManagement() {
 
   // Impersonation mutation
   const impersonateMutation = useMutation({
-    mutationFn: (userId: string) => apiRequest(`/api/admin/impersonate/${userId}`, {
-      method: 'POST'
-    }),
-    onSuccess: (data) => {
+    mutationFn: (userId: string) => 
+      fetch(`/api/admin/impersonate/${userId}`, {
+        method: 'POST'
+      }).then(res => res.json()),
+    onSuccess: (data: any) => {
       toast({
         title: 'Success',
-        description: `Impersonation session created. You can now login as ${data.data.targetUser.email}`,
+        description: `Impersonation session created. You can now login as ${data.data?.targetUser?.email || 'the user'}`,
       });
       // You could redirect to the user's dashboard here
       // window.open(`/impersonate?token=${data.data.sessionToken}`, '_blank');
@@ -163,7 +200,9 @@ export default function AdminUserManagement() {
       email: '',
       role: 'user',
       isActive: true,
-      password: ''
+      password: '',
+      planId: '',
+      subscriptionStatus: 'active'
     });
   };
 
@@ -174,7 +213,9 @@ export default function AdminUserManagement() {
       email: user.email,
       role: user.role,
       isActive: user.isActive,
-      password: ''
+      password: '',
+      planId: user.planId || '',
+      subscriptionStatus: user.subscriptionStatus || 'active'
     });
     setIsEditDialogOpen(true);
   };
@@ -339,7 +380,7 @@ export default function AdminUserManagement() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => (
+                  {users.map((user: User) => (
                     <TableRow key={user.id} data-testid={`row-user-${user.id}`}>
                       <TableCell className="font-medium">{user.name}</TableCell>
                       <TableCell>{user.email}</TableCell>
@@ -366,6 +407,17 @@ export default function AdminUserManagement() {
                             data-testid={`button-edit-${user.id}`}
                           >
                             <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedUserForDetails(user);
+                              setIsUserDetailsOpen(true);
+                            }}
+                            data-testid={`button-details-${user.id}`}
+                          >
+                            <Settings className="h-4 w-4" />
                           </Button>
                           <Button
                             size="sm"
@@ -491,6 +543,449 @@ export default function AdminUserManagement() {
               {updateUserMutation.isPending ? 'Updating...' : 'Update User'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Details Dialog - Comprehensive Feature Management */}
+      <Dialog open={isUserDetailsOpen} onOpenChange={setIsUserDetailsOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Users className="h-5 w-5" />
+              <span>User Management: {selectedUserForDetails?.name}</span>
+            </DialogTitle>
+            <DialogDescription>
+              Comprehensive user feature and subscription management
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedUserForDetails && (
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-6">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="subscription">Subscription</TabsTrigger>
+                <TabsTrigger value="permissions">Permissions</TabsTrigger>
+                <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                <TabsTrigger value="api-keys">API Keys</TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              </TabsList>
+
+              {/* Overview Tab */}
+              <TabsContent value="overview" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm font-medium">Account Information</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">User ID:</span>
+                        <span className="text-sm font-mono">{selectedUserForDetails.id}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Email:</span>
+                        <span className="text-sm">{selectedUserForDetails.email}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Role:</span>
+                        <Badge variant={selectedUserForDetails.role === 'admin' ? 'default' : 'outline'}>
+                          {selectedUserForDetails.role}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Status:</span>
+                        <Badge variant={selectedUserForDetails.isActive ? 'default' : 'destructive'}>
+                          {selectedUserForDetails.isActive ? 'Active' : 'Disabled'}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Created:</span>
+                        <span className="text-sm">{new Date(selectedUserForDetails.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Last Login:</span>
+                        <span className="text-sm">
+                          {selectedUserForDetails.lastLoginAt 
+                            ? new Date(selectedUserForDetails.lastLoginAt).toLocaleDateString()
+                            : 'Never'
+                          }
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <Button 
+                        className="w-full justify-start" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditUser(selectedUserForDetails)}
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit User Details
+                      </Button>
+                      <Button 
+                        className="w-full justify-start" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => impersonateMutation.mutate(selectedUserForDetails.id)}
+                        disabled={impersonateMutation.isPending}
+                      >
+                        <UserCheck className="mr-2 h-4 w-4" />
+                        Impersonate User
+                      </Button>
+                      <Button 
+                        className="w-full justify-start" 
+                        variant="outline" 
+                        size="sm"
+                      >
+                        <BarChart3 className="mr-2 h-4 w-4" />
+                        View Activity Logs
+                      </Button>
+                      {selectedUserForDetails.role !== 'super_admin' && (
+                        <Button 
+                          className="w-full justify-start" 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => deleteUserMutation.mutate(selectedUserForDetails.id)}
+                          disabled={deleteUserMutation.isPending}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete User
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Subscription Management Tab */}
+              <TabsContent value="subscription" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <CreditCard className="h-4 w-4" />
+                      <span>Subscription & Billing</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Current Plan</Label>
+                        <Select value={selectedUserForDetails.planId || ''}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select plan" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {plansData?.data?.map((plan: Plan) => (
+                              <SelectItem key={plan.id} value={plan.id}>
+                                {plan.name} - ${plan.price}/{plan.currency}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Subscription Status</Label>
+                        <Select value={selectedUserForDetails.subscriptionStatus}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                            <SelectItem value="expired">Expired</SelectItem>
+                            <SelectItem value="trial">Trial</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    {selectedUserForDetails.trialEndsAt && (
+                      <div className="flex justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded">
+                        <span className="text-sm">Trial ends:</span>
+                        <span className="text-sm font-medium">
+                          {new Date(selectedUserForDetails.trialEndsAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label>Subscription Count</Label>
+                      <div className="text-2xl font-bold">{selectedUserForDetails.subscriptionCount || 0}</div>
+                      <p className="text-sm text-muted-foreground">Active subscriptions tracked</p>
+                    </div>
+
+                    <Separator />
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Billing Actions</h4>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline">
+                          Extend Trial
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          Apply Discount
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          Reset Billing
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Permissions Tab */}
+              <TabsContent value="permissions" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>User Permissions & Features</CardTitle>
+                    <CardDescription>Control what features this user can access</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-sm font-medium">API Access</Label>
+                          <p className="text-xs text-muted-foreground">Allow user to create and use API keys</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-sm font-medium">Export Data</Label>
+                          <p className="text-xs text-muted-foreground">Allow user to export their subscription data</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-sm font-medium">Premium Features</Label>
+                          <p className="text-xs text-muted-foreground">Access to advanced analytics and insights</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-sm font-medium">Third-party Integrations</Label>
+                          <p className="text-xs text-muted-foreground">Connect external services and APIs</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-sm font-medium">Multi-channel Notifications</Label>
+                          <p className="text-xs text-muted-foreground">WhatsApp, email, and calendar reminders</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+
+                    <Separator />
+                    
+                    <div className="space-y-2">
+                      <Label>Usage Limits</Label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-xs">Max Subscriptions</Label>
+                          <Input type="number" defaultValue="50" className="mt-1" />
+                        </div>
+                        <div>
+                          <Label className="text-xs">API Calls/Month</Label>
+                          <Input type="number" defaultValue="10000" className="mt-1" />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Notifications Tab */}
+              <TabsContent value="notifications" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Bell className="h-4 w-4" />
+                      <span>Notification Preferences</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Email Notifications</Label>
+                          <p className="text-xs text-muted-foreground">Receive reminders via email</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>WhatsApp Notifications</Label>
+                          <p className="text-xs text-muted-foreground">Receive reminders via WhatsApp</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Calendar Integration</Label>
+                          <p className="text-xs text-muted-foreground">Add reminders to Google Calendar</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Browser Push Notifications</Label>
+                          <p className="text-xs text-muted-foreground">In-browser notification alerts</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <Label>Notification Timing</Label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-xs">Days Before Due</Label>
+                          <Select defaultValue="3">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">1 day</SelectItem>
+                              <SelectItem value="3">3 days</SelectItem>
+                              <SelectItem value="7">1 week</SelectItem>
+                              <SelectItem value="14">2 weeks</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Reminder Time</Label>
+                          <Select defaultValue="09:00">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="08:00">8:00 AM</SelectItem>
+                              <SelectItem value="09:00">9:00 AM</SelectItem>
+                              <SelectItem value="12:00">12:00 PM</SelectItem>
+                              <SelectItem value="18:00">6:00 PM</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Button size="sm" className="w-full">
+                        Send Test Notification
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* API Keys Tab */}
+              <TabsContent value="api-keys" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Key className="h-4 w-4" />
+                      <span>User API Keys</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Manage API keys for this user
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Key className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                      <p>No API keys found for this user</p>
+                      <Button size="sm" className="mt-2">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create API Key
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Analytics Tab */}
+              <TabsContent value="analytics" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Usage Statistics</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Login Count:</span>
+                        <span className="text-sm font-medium">0</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">API Calls:</span>
+                        <span className="text-sm font-medium">0</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Data Export:</span>
+                        <span className="text-sm font-medium">Never</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Account Activity</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Last Active:</span>
+                        <span className="text-sm">
+                          {selectedUserForDetails.lastLoginAt 
+                            ? new Date(selectedUserForDetails.lastLoginAt).toLocaleDateString()
+                            : 'Never'
+                          }
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Sessions:</span>
+                        <span className="text-sm">0</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Failed Logins:</span>
+                        <span className="text-sm">0</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-8 text-muted-foreground">
+                      <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                      <p>No recent activity</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          )}
         </DialogContent>
       </Dialog>
     </div>

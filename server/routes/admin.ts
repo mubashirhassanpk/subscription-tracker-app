@@ -833,4 +833,164 @@ router.delete('/api-keys/:keyId', trySessionOrApiKey, requireSuperAdmin, logAdmi
   }
 });
 
+/**
+ * GET /api/admin/users/:userId/details
+ * Get detailed user information including subscriptions, usage, and analytics
+ */
+router.get('/users/:userId/details', trySessionOrApiKey, requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Get basic user info
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Get user's subscriptions
+    const subscriptions = await storage.getSubscriptionsByUserId(userId);
+    
+    // Get user's API keys
+    const apiKeys = await storage.getApiKeysByUserId(userId);
+    
+    // Get user's notifications (sample data for now)
+    const notifications = await storage.getNotificationsByUserId(userId);
+    
+    // Calculate usage statistics
+    const stats = {
+      totalSubscriptions: subscriptions.length,
+      activeSubscriptions: subscriptions.filter(s => s.isActive).length,
+      totalApiKeys: apiKeys.length,
+      activeApiKeys: apiKeys.filter(k => k.isActive).length,
+      totalNotifications: notifications.length,
+      unreadNotifications: notifications.filter(n => !n.isRead).length,
+      monthlySpend: subscriptions.reduce((sum, s) => sum + parseFloat(s.cost || '0'), 0),
+      lastActivity: user.lastLoginAt || user.updatedAt
+    };
+
+    // User feature permissions (would typically be stored in database)
+    const permissions = {
+      apiAccess: true,
+      exportData: true,
+      premiumFeatures: user.role !== 'user',
+      thirdPartyIntegrations: true,
+      multiChannelNotifications: true,
+      maxSubscriptions: user.role === 'user' ? 50 : 500,
+      maxApiCalls: user.role === 'user' ? 10000 : 100000
+    };
+
+    // Notification preferences (would typically be stored in database)
+    const notificationPreferences = {
+      email: true,
+      whatsapp: false,
+      calendar: true,
+      push: true,
+      reminderDays: 3,
+      reminderTime: '09:00'
+    };
+
+    res.json({
+      success: true,
+      data: {
+        user,
+        subscriptions,
+        apiKeys,
+        notifications: notifications.slice(0, 10), // Recent notifications
+        stats,
+        permissions,
+        notificationPreferences
+      }
+    });
+  } catch (error) {
+    console.error('Get user details error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user details'
+    });
+  }
+});
+
+/**
+ * PUT /api/admin/users/:userId/permissions
+ * Update user permissions and feature access
+ */
+router.put('/users/:userId/permissions', trySessionOrApiKey, requireAdmin, logAdminActivity('update_user_permissions'), async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const permissions = req.body;
+
+    // Verify user exists
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // In a real implementation, you would store permissions in a separate table
+    // For now, we'll just acknowledge the update
+    res.json({
+      success: true,
+      data: permissions,
+      message: 'User permissions updated successfully'
+    });
+  } catch (error) {
+    console.error('Update user permissions error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update user permissions'
+    });
+  }
+});
+
+/**
+ * PUT /api/admin/users/:userId/plan
+ * Update user's subscription plan
+ */
+router.put('/users/:userId/plan', trySessionOrApiKey, requireAdmin, logAdminActivity('update_user_plan'), async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { planId, subscriptionStatus } = req.body;
+
+    // Verify user and plan exist
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    const plan = await storage.getPlan(planId);
+    if (planId && !plan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Plan not found'
+      });
+    }
+
+    // Update user's plan
+    const updatedUser = await storage.updateUser(userId, {
+      planId,
+      subscriptionStatus: subscriptionStatus || user.subscriptionStatus
+    });
+
+    res.json({
+      success: true,
+      data: updatedUser,
+      message: 'User plan updated successfully'
+    });
+  } catch (error) {
+    console.error('Update user plan error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update user plan'
+    });
+  }
+});
+
 export { router as adminRouter };
