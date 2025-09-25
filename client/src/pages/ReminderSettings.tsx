@@ -28,7 +28,11 @@ import {
   ExternalLink,
   Smartphone,
   Globe,
-  Zap
+  Zap,
+  Info,
+  BookOpen,
+  Key,
+  Link2
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -380,6 +384,43 @@ export default function ReminderSettings() {
 
                 {form.watch('emailEnabled') && (
                   <div className="space-y-4 pl-6 border-l-2 border-blue-200">
+                    {/* Email Setup Guide */}
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertDescription>
+                        <div className="space-y-2">
+                          <p className="font-medium">📧 Quick Email Setup Guide:</p>
+                          <ul className="text-sm space-y-1 ml-4">
+                            <li>• <strong>Gmail:</strong> Use your Gmail address and enable 2-factor authentication</li>
+                            <li>• <strong>Outlook:</strong> Use your Outlook.com or Hotmail address</li>
+                            <li>• <strong>Custom SMTP:</strong> Use your business email server settings</li>
+                          </ul>
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open('https://support.google.com/accounts/answer/185833', '_blank')}
+                              className="flex items-center gap-1"
+                            >
+                              <Key className="h-3 w-3" />
+                              Gmail App Passwords
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open('https://support.microsoft.com/en-us/office/pop-imap-and-smtp-settings-for-outlook-com-d088b986-291d-42b8-9564-9c414e2aa040', '_blank')}
+                              className="flex items-center gap-1"
+                            >
+                              <Link2 className="h-3 w-3" />
+                              Outlook SMTP
+                            </Button>
+                          </div>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+
                     <div>
                       <Label htmlFor="emailAddress">Email Address</Label>
                       <Input
@@ -410,7 +451,19 @@ export default function ReminderSettings() {
 
                     {form.watch('emailProvider') === 'smtp' && (
                       <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                        <h4 className="font-medium">SMTP Configuration</h4>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium">SMTP Configuration</h4>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open('https://www.gmass.co/blog/gmail-smtp/', '_blank')}
+                            className="flex items-center gap-1 text-xs"
+                          >
+                            <BookOpen className="h-3 w-3" />
+                            SMTP Guide
+                          </Button>
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <Label htmlFor="smtpHost">SMTP Host</Label>
@@ -503,6 +556,44 @@ export default function ReminderSettings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Google Calendar Setup Guide */}
+                <Alert>
+                  <Calendar className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p className="font-medium">📅 Google Calendar Setup Guide:</p>
+                      <ol className="text-sm space-y-1 ml-4">
+                        <li>1. Enable Google Calendar sync below</li>
+                        <li>2. Click "Connect Google Calendar" to authorize access</li>
+                        <li>3. Choose which calendar to sync (optional)</li>
+                        <li>4. Test the connection to ensure it's working</li>
+                      </ol>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('https://support.google.com/calendar/answer/37100', '_blank')}
+                          className="flex items-center gap-1"
+                        >
+                          <BookOpen className="h-3 w-3" />
+                          Calendar Help
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('https://calendar.google.com/calendar/u/0/settings/export', '_blank')}
+                          className="flex items-center gap-1"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          Calendar Settings
+                        </Button>
+                      </div>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+
                 <div className="flex items-center justify-between">
                   <Label htmlFor="googleCalendarEnabled">Enable Google Calendar sync</Label>
                   <Switch 
@@ -547,9 +638,21 @@ export default function ReminderSettings() {
                         {...form.register('googleCalendarId')}
                         data-testid="input-calendar-id"
                       />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Specify a calendar ID to create events in a specific calendar
-                      </p>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-sm text-gray-500">
+                          Specify a calendar ID to create events in a specific calendar
+                        </p>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open('https://support.google.com/calendar/answer/37103', '_blank')}
+                          className="flex items-center gap-1 text-xs"
+                        >
+                          <Info className="h-3 w-3" />
+                          Find Calendar ID
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}
