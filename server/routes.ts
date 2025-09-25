@@ -15,10 +15,12 @@ import { remindersRouter } from "./routes/reminders";
 import { analyticsRouter } from "./routes/analytics";
 import { exportRouter } from "./routes/export";
 import { testConnectionsRouter } from "./routes/test-connections";
+import { googleAuthRouter } from "./routes/google-auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register API route modules
   app.use('/auth', authRouter);
+  app.use('/api/auth/google', googleAuthRouter);
   app.use('/api/api-keys', apiKeysRouter);
   app.use('/api/user-external-api-keys', userExternalApiKeysRouter);
   app.use('/api/config/status', configStatusRouter);
