@@ -721,13 +721,49 @@ export default function AdminDashboard() {
           </DialogHeader>
           
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="subscription">Subscription</TabsTrigger>
-              <TabsTrigger value="permissions">Permissions</TabsTrigger>
-              <TabsTrigger value="notifications">Notifications</TabsTrigger>
-              <TabsTrigger value="api-keys">API Keys</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-1 h-auto p-1">
+              <TabsTrigger 
+                value="overview" 
+                className="flex items-center space-x-2 px-3 py-2.5 text-sm font-medium transition-all duration-200"
+              >
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">Overview</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="subscription" 
+                className="flex items-center space-x-2 px-3 py-2.5 text-sm font-medium transition-all duration-200"
+              >
+                <CreditCard className="h-4 w-4" />
+                <span className="hidden sm:inline">Subscription</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="permissions" 
+                className="flex items-center space-x-2 px-3 py-2.5 text-sm font-medium transition-all duration-200"
+              >
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">Permissions</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="notifications" 
+                className="flex items-center space-x-2 px-3 py-2.5 text-sm font-medium transition-all duration-200"
+              >
+                <Bell className="h-4 w-4" />
+                <span className="hidden sm:inline">Notifications</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="api-keys" 
+                className="flex items-center space-x-2 px-3 py-2.5 text-sm font-medium transition-all duration-200"
+              >
+                <Key className="h-4 w-4" />
+                <span className="hidden sm:inline">API Keys</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="analytics" 
+                className="flex items-center space-x-2 px-3 py-2.5 text-sm font-medium transition-all duration-200"
+              >
+                <Activity className="h-4 w-4" />
+                <span className="hidden sm:inline">Analytics</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -872,90 +908,430 @@ export default function AdminDashboard() {
               </div>
             </TabsContent>
 
-            <TabsContent value="subscription" className="space-y-4">
-              <h3 className="text-lg font-semibold">Subscription Management</h3>
-              {userDetailsData?.data?.user && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Current Plan</Label>
-                      <div className="mt-1">
-                        {userDetailsData.data.user.planId ? (
-                          <Badge variant="default">Plan Assigned</Badge>
-                        ) : (
-                          <Badge variant="secondary">No Plan</Badge>
-                        )}
+            <TabsContent value="subscription" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <CreditCard className="h-5 w-5" />
+                    <span>Subscription Management</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Manage user's subscription plan and billing status
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {userDetailsData?.data?.user && (
+                    <div className="space-y-6">
+                      {/* Current Subscription Status */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium">Current Plan</Label>
+                          <div className="p-3 bg-muted/50 rounded-lg">
+                            {userDetailsData.data.user.planId ? (
+                              <div className="space-y-2">
+                                <Badge variant="default">Plan Assigned</Badge>
+                                <div className="text-sm text-muted-foreground">
+                                  Plan ID: {userDetailsData.data.user.planId}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <Badge variant="secondary">No Plan</Badge>
+                                <div className="text-sm text-muted-foreground">
+                                  User has no assigned plan
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium">Status</Label>
+                          <div className="p-3 bg-muted/50 rounded-lg">
+                            <Badge 
+                              variant={userDetailsData.data.user.subscriptionStatus === 'active' ? 'default' : 'secondary'}
+                              className="mb-2"
+                            >
+                              {userDetailsData.data.user.subscriptionStatus || 'active'}
+                            </Badge>
+                            <div className="text-sm text-muted-foreground">
+                              {userDetailsData.data.user.subscriptionStatus === 'active' ? 
+                                'Subscription is currently active' : 
+                                'Subscription requires attention'
+                              }
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Plan Management */}
+                      <div className="border-t pt-6">
+                        <h4 className="text-sm font-medium mb-4">Update Subscription</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Assign New Plan</Label>
+                            <Select value={userDetailsData.data.user.planId || 'no_plan'}>
+                              <SelectTrigger className="mt-1">
+                                <SelectValue placeholder="Select a plan" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="no_plan">No Plan</SelectItem>
+                                {plansData?.map((plan: any) => (
+                                  <SelectItem key={plan.id} value={plan.id}>
+                                    {plan.name} - ${plan.price}/{plan.billingInterval}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label>Subscription Status</Label>
+                            <Select value={userDetailsData.data.user.subscriptionStatus || 'active'}>
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="trial">Trial</SelectItem>
+                                <SelectItem value="inactive">Inactive</SelectItem>
+                                <SelectItem value="cancelled">Cancelled</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-2 mt-6">
+                          <Button variant="outline">Cancel</Button>
+                          <Button>Save Changes</Button>
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <Label>Subscription Status</Label>
-                      <div className="mt-1">
-                        <Badge variant={userDetailsData.data.user.subscriptionStatus === 'active' ? 'default' : 'secondary'}>
-                          {userDetailsData.data.user.subscriptionStatus}
-                        </Badge>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="permissions" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Settings className="h-5 w-5" />
+                    <span>User Permissions</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Manage user access permissions and feature access
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-semibold">Role & Access</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Admin Access</div>
+                              <div className="text-sm text-muted-foreground">Full system administration</div>
+                            </div>
+                            <Badge variant={userDetailsData?.data?.user?.role === 'admin' ? 'default' : 'secondary'}>
+                              {userDetailsData?.data?.user?.role === 'admin' ? 'Enabled' : 'Disabled'}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Dashboard Access</div>
+                              <div className="text-sm text-muted-foreground">User dashboard and analytics</div>
+                            </div>
+                            <Badge variant="default">Enabled</Badge>
+                          </div>
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <div className="font-medium">API Access</div>
+                              <div className="text-sm text-muted-foreground">REST API and integrations</div>
+                            </div>
+                            <Badge variant="default">Enabled</Badge>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-semibold">Feature Access</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Subscription Management</div>
+                              <div className="text-sm text-muted-foreground">Manage subscriptions</div>
+                            </div>
+                            <Badge variant="default">Enabled</Badge>
+                          </div>
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Notifications</div>
+                              <div className="text-sm text-muted-foreground">Email and app notifications</div>
+                            </div>
+                            <Badge variant="default">Enabled</Badge>
+                          </div>
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Calendar Integration</div>
+                              <div className="text-sm text-muted-foreground">Google Calendar sync</div>
+                            </div>
+                            <Badge variant="secondary">Limited</Badge>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Assign New Plan</Label>
-                      <Select value={userDetailsData.data.user.planId || ''}>
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Select a plan" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="no_plan">No Plan</SelectItem>
-                          {plansData?.map((plan: any) => (
-                            <SelectItem key={plan.id} value={plan.id}>
-                              {plan.name} - ${plan.price}/{plan.billingInterval}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="notifications" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Bell className="h-5 w-5" />
+                    <span>Notification Settings</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Configure notification preferences for this user
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-semibold">Email Notifications</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium">Subscription Reminders</div>
+                              <div className="text-sm text-muted-foreground">7 days before renewal</div>
+                            </div>
+                            <Badge variant="default">Enabled</Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium">Payment Notifications</div>
+                              <div className="text-sm text-muted-foreground">Success and failure alerts</div>
+                            </div>
+                            <Badge variant="default">Enabled</Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium">Weekly Summary</div>
+                              <div className="text-sm text-muted-foreground">Activity digest</div>
+                            </div>
+                            <Badge variant="secondary">Disabled</Badge>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-semibold">Other Channels</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium">WhatsApp Notifications</div>
+                              <div className="text-sm text-muted-foreground">Important updates only</div>
+                            </div>
+                            <Badge variant="secondary">Disabled</Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium">Calendar Events</div>
+                              <div className="text-sm text-muted-foreground">Google Calendar sync</div>
+                            </div>
+                            <Badge variant="default">Enabled</Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium">Browser Push</div>
+                              <div className="text-sm text-muted-foreground">Real-time alerts</div>
+                            </div>
+                            <Badge variant="default">Enabled</Badge>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    
-                    <div>
-                      <Label>Subscription Status</Label>
-                      <Select value={userDetailsData.data.user.subscriptionStatus || 'active'}>
-                        <SelectTrigger className="mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="trial">Trial</SelectItem>
-                          <SelectItem value="inactive">Inactive</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                      Save Subscription Changes
-                    </Button>
                   </div>
-                </div>
-              )}
+                </CardContent>
+              </Card>
             </TabsContent>
 
-            <TabsContent value="permissions" className="space-y-4">
-              <h3 className="text-lg font-semibold">User Permissions</h3>
-              <p className="text-sm text-muted-foreground">Manage user access permissions and feature access.</p>
+            <TabsContent value="api-keys" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Key className="h-5 w-5" />
+                    <span>API Keys</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Manage API keys for this user account
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-sm font-semibold">Active API Keys</h4>
+                        <p className="text-sm text-muted-foreground">API keys for external integrations</p>
+                      </div>
+                      <Button size="sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Generate New Key
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1">
+                          <div className="font-medium">Production API Key</div>
+                          <div className="text-sm text-muted-foreground font-mono">sk_prod_••••••••••••3a2f</div>
+                          <div className="text-xs text-muted-foreground">Created: Sep 15, 2025 • Last used: 2 hours ago</div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="default">Active</Badge>
+                          <Button variant="ghost" size="sm">
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1">
+                          <div className="font-medium">Development API Key</div>
+                          <div className="text-sm text-muted-foreground font-mono">sk_dev_••••••••••••8b4d</div>
+                          <div className="text-xs text-muted-foreground">Created: Sep 10, 2025 • Last used: Never</div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="secondary">Inactive</Badge>
+                          <Button variant="ghost" size="sm">
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t pt-4">
+                      <h4 className="text-sm font-semibold mb-3">API Usage Limits</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="text-center p-3 bg-muted/50 rounded-lg">
+                          <div className="text-2xl font-bold">1,245</div>
+                          <div className="text-sm text-muted-foreground">Requests Today</div>
+                        </div>
+                        <div className="text-center p-3 bg-muted/50 rounded-lg">
+                          <div className="text-2xl font-bold">5,000</div>
+                          <div className="text-sm text-muted-foreground">Daily Limit</div>
+                        </div>
+                        <div className="text-center p-3 bg-muted/50 rounded-lg">
+                          <div className="text-2xl font-bold">24.9%</div>
+                          <div className="text-sm text-muted-foreground">Usage</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
-            <TabsContent value="notifications" className="space-y-4">
-              <h3 className="text-lg font-semibold">Notification Settings</h3>
-              <p className="text-sm text-muted-foreground">Configure notification preferences for this user.</p>
-            </TabsContent>
-
-            <TabsContent value="api-keys" className="space-y-4">
-              <h3 className="text-lg font-semibold">API Keys</h3>
-              <p className="text-sm text-muted-foreground">Manage API keys for this user account.</p>
-            </TabsContent>
-
-            <TabsContent value="analytics" className="space-y-4">
-              <h3 className="text-lg font-semibold">User Analytics</h3>
-              <p className="text-sm text-muted-foreground">View usage statistics and analytics for this user.</p>
+            <TabsContent value="analytics" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Activity className="h-5 w-5" />
+                    <span>User Analytics</span>
+                  </CardTitle>
+                  <CardDescription>
+                    View usage statistics and analytics for this user
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="text-center p-4 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">42</div>
+                        <div className="text-sm text-muted-foreground">Total Logins</div>
+                      </div>
+                      <div className="text-center p-4 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">7</div>
+                        <div className="text-sm text-muted-foreground">Subscriptions</div>
+                      </div>
+                      <div className="text-center p-4 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">156</div>
+                        <div className="text-sm text-muted-foreground">API Calls</div>
+                      </div>
+                      <div className="text-center p-4 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">23d</div>
+                        <div className="text-sm text-muted-foreground">Account Age</div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-semibold">Recent Activity</h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Dashboard Login</div>
+                              <div className="text-sm text-muted-foreground">2 hours ago</div>
+                            </div>
+                            <Badge variant="outline">Login</Badge>
+                          </div>
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <div className="font-medium">Subscription Updated</div>
+                              <div className="text-sm text-muted-foreground">1 day ago</div>
+                            </div>
+                            <Badge variant="outline">Update</Badge>
+                          </div>
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <div className="font-medium">API Key Generated</div>
+                              <div className="text-sm text-muted-foreground">3 days ago</div>
+                            </div>
+                            <Badge variant="outline">API</Badge>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-semibold">Usage Trends</h4>
+                        <div className="space-y-3">
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>API Usage</span>
+                              <span>67%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-blue-500 h-2 rounded-full" style={{width: '67%'}}></div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>Dashboard Activity</span>
+                              <span>89%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-green-500 h-2 rounded-full" style={{width: '89%'}}></div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>Feature Usage</span>
+                              <span>34%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-orange-500 h-2 rounded-full" style={{width: '34%'}}></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
           
