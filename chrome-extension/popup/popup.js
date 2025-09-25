@@ -133,29 +133,22 @@ class SubscriptionTrackerPopup {
       }
     });
 
-    // Quick action buttons
-    document.getElementById('pauseAllBtn').addEventListener('click', () => {
-      this.pauseAllSubscriptions();
+    // Modal form event listeners
+    document.getElementById('addFormModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'addFormModal') {
+        this.hideQuickAddForm();
+      }
     });
 
-    document.getElementById('exportDataBtn').addEventListener('click', () => {
-      this.exportData();
+    document.getElementById('closeAddForm')?.addEventListener('click', () => {
+      this.hideQuickAddForm();
+    });
+    
+    document.getElementById('cancelSubBtn')?.addEventListener('click', () => {
+      this.hideQuickAddForm();
     });
 
-    document.getElementById('budgetAlertBtn').addEventListener('click', () => {
-      this.showBudgetModal();
-    });
 
-    document.getElementById('shareBtn').addEventListener('click', () => {
-      this.showShareModal();
-    });
-
-    // Enhanced form tabs
-    document.querySelectorAll('.form-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        this.switchFormTab(tab.dataset.formTab);
-      });
-    });
 
     // Quick add form
     document.getElementById('saveSubBtn').addEventListener('click', () => {
@@ -1010,12 +1003,29 @@ class SubscriptionTrackerPopup {
   }
 
   showQuickAddForm() {
-    document.getElementById('quickAddForm').classList.remove('hidden');
-    document.getElementById('subName').focus();
+    const modal = document.getElementById('addFormModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      const firstInput = modal.querySelector('input');
+      if (firstInput) firstInput.focus();
+      this.setupFormTabs();
+    }
   }
 
   hideQuickAddForm() {
-    document.getElementById('quickAddForm').classList.add('hidden');
+    const modal = document.getElementById('addFormModal');
+    if (modal) {
+      modal.classList.add('hidden');
+      // Reset form
+      const inputs = modal.querySelectorAll('input, select, textarea');
+      inputs.forEach(input => {
+        if (input.type === 'checkbox') {
+          input.checked = input.id === 'isActive' || input.id === 'sendReminders';
+        } else {
+          input.value = '';
+        }
+      });
+    }
   }
 
   clearQuickAddForm() {
@@ -1442,17 +1452,36 @@ Track your subscriptions too! 💡`;
   }
 
   // Enhanced form functionality
+  setupFormTabs() {
+    const modal = document.getElementById('addFormModal');
+    if (!modal) return;
+    
+    // Remove existing listeners to prevent duplicates
+    modal.querySelectorAll('.form-tab').forEach(tab => {
+      const newTab = tab.cloneNode(true);
+      tab.parentNode.replaceChild(newTab, tab);
+      
+      newTab.addEventListener('click', () => {
+        this.switchFormTab(newTab.dataset.formTab);
+      });
+    });
+  }
+
   switchFormTab(tabName) {
-    document.querySelectorAll('.form-tab').forEach(tab => {
+    const modal = document.getElementById('addFormModal');
+    if (!modal) return;
+    
+    // Update tabs within the modal only
+    modal.querySelectorAll('.form-tab').forEach(tab => {
       tab.classList.remove('active');
     });
-    const targetTab = document.querySelector(`[data-form-tab="${tabName}"]`);
+    const targetTab = modal.querySelector(`[data-form-tab="${tabName}"]`);
     if (targetTab) targetTab.classList.add('active');
 
-    document.querySelectorAll('.form-tab-content').forEach(content => {
+    modal.querySelectorAll('.form-tab-content').forEach(content => {
       content.classList.remove('active');
     });
-    const targetContent = document.getElementById(`${tabName}FormTab`);
+    const targetContent = modal.querySelector(`#${tabName}FormTab`);
     if (targetContent) targetContent.classList.add('active');
   }
 
