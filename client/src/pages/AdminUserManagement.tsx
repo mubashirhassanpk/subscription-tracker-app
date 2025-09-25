@@ -81,17 +81,6 @@ export default function AdminUserManagement() {
     subscriptionStatus: ''
   });
 
-  // Initialize user plan changes when user is selected
-  useEffect(() => {
-    if (selectedUserForDetails && userDetailsData?.data?.user) {
-      const userData = userDetailsData.data.user;
-      setUserPlanChanges({
-        planId: userData.planId || '',
-        subscriptionStatus: userData.subscriptionStatus || 'active'
-      });
-    }
-  }, [selectedUserForDetails, userDetailsData]);
-
   // Fetch users
   const { data: usersData, isLoading } = useQuery({
     queryKey: ['/api/admin/users', currentPage, searchTerm],
@@ -110,6 +99,17 @@ export default function AdminUserManagement() {
     queryFn: () => fetch(`/api/admin/users/${selectedUserForDetails?.id}/details`).then(res => res.json()),
     enabled: !!selectedUserForDetails
   });
+
+  // Initialize user plan changes when user is selected
+  useEffect(() => {
+    if (selectedUserForDetails && userDetailsData?.data?.user) {
+      const userData = userDetailsData.data.user;
+      setUserPlanChanges({
+        planId: userData.planId || '',
+        subscriptionStatus: userData.subscriptionStatus || 'active'
+      });
+    }
+  }, [selectedUserForDetails, userDetailsData]);
 
   // Create user mutation
   const createUserMutation = useMutation({
@@ -283,6 +283,30 @@ export default function AdminUserManagement() {
     }
   });
 
+  // Create API key mutation
+  const createApiKeyMutation = useMutation({
+    mutationFn: ({ userId, name }: { userId: string; name: string }) => 
+      fetch('/api/admin/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, name })
+      }).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users', selectedUserForDetails?.id, 'details'] });
+      toast({
+        title: 'Success',
+        description: 'API key created successfully'
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to create API key',
+        variant: 'destructive'
+      });
+    }
+  });
+
   // Handle plan changes
   const handlePlanChange = (field: string, value: string) => {
     setUserPlanChanges(prev => ({
@@ -297,6 +321,17 @@ export default function AdminUserManagement() {
       updateUserPlanMutation.mutate({
         userId: selectedUserForDetails.id,
         planData: userPlanChanges
+      });
+    }
+  };
+
+  // Handle create API key
+  const handleCreateApiKey = () => {
+    if (selectedUserForDetails) {
+      const keyName = `API Key ${new Date().toLocaleDateString()}`;
+      createApiKeyMutation.mutate({
+        userId: selectedUserForDetails.id,
+        name: keyName
       });
     }
   };
@@ -965,9 +1000,14 @@ export default function AdminUserManagement() {
                     <div className="text-center py-8 text-muted-foreground">
                       <Key className="h-12 w-12 mx-auto mb-2 opacity-50" />
                       <p>No API keys found for this user</p>
-                      <Button size="sm" className="mt-2">
+                      <Button 
+                        size="sm" 
+                        className="mt-2"
+                        onClick={handleCreateApiKey}
+                        disabled={createApiKeyMutation.isPending}
+                      >
                         <Plus className="h-4 w-4 mr-2" />
-                        Create API Key
+                        {createApiKeyMutation.isPending ? 'Creating...' : 'Create API Key'}
                       </Button>
                     </div>
                   </CardContent>
