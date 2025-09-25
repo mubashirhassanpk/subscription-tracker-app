@@ -567,11 +567,64 @@ export default function ReminderSettings() {
                 <Alert>
                   <Calendar className="h-4 w-4" />
                   <AlertDescription>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <p className="font-medium">📅 Google Calendar Setup Guide:</p>
+                      
+                      <div className="rounded-md bg-blue-50 dark:bg-blue-950/20 p-3">
+                        <div className="flex">
+                          <div className="flex-shrink-0">
+                            <Info className="h-4 w-4 text-blue-400" />
+                          </div>
+                          <div className="ml-2">
+                            <h5 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                              🔧 Administrator Setup Required
+                            </h5>
+                            <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                              The app administrator needs to configure Google OAuth credentials first.
+                            </p>
+                            <details className="mt-2">
+                              <summary className="cursor-pointer text-sm font-medium hover:text-blue-800 dark:hover:text-blue-200">
+                                📋 Administrator Setup Instructions
+                              </summary>
+                              <div className="mt-2 space-y-2 text-xs">
+                                <div>
+                                  <p><strong>Step 1: Go to Google Cloud Console</strong></p>
+                                  <p>→ <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800">https://console.cloud.google.com/apis/credentials</a></p>
+                                </div>
+                                
+                                <div>
+                                  <p><strong>Step 2: Create OAuth 2.0 Credentials</strong></p>
+                                  <p>→ Click "Create Credentials" → "OAuth 2.0 Client IDs"</p>
+                                  <p>→ Application type: "Web application"</p>
+                                </div>
+                                
+                                <div>
+                                  <p><strong>Step 3: Configure Redirect URIs</strong></p>
+                                  <p>→ Add: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">https://your-app.replit.dev/api/auth/google/callback</code></p>
+                                  <p>→ Add: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">http://localhost:5000/api/auth/google/callback</code></p>
+                                </div>
+                                
+                                <div>
+                                  <p><strong>Step 4: Add to Replit Secrets</strong></p>
+                                  <p>→ Go to Replit project → Secrets tab (🔒)</p>
+                                  <p>→ Add: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">GOOGLE_CLIENT_ID</code></p>
+                                  <p>→ Add: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">GOOGLE_CLIENT_SECRET</code></p>
+                                </div>
+                                
+                                <div>
+                                  <p><strong>Step 5: Enable Google Calendar API</strong></p>
+                                  <p>→ <a href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800">Enable Calendar API</a></p>
+                                </div>
+                              </div>
+                            </details>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm font-medium text-green-700 dark:text-green-300">👤 For Users:</p>
                       <ol className="text-sm space-y-1 ml-4">
                         <li>1. Enable Google Calendar sync below</li>
-                        <li>2. Click "Connect Google Calendar" to authorize access</li>
+                        <li>2. Click "Connect Google Calendar" to authorize your personal account</li>
                         <li>3. Choose which calendar to sync (optional)</li>
                         <li>4. Test the connection to ensure it's working</li>
                       </ol>
