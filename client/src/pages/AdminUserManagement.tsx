@@ -19,8 +19,8 @@ import { Link } from 'wouter';
 interface Plan {
   id: string;
   name: string;
-  price: number;
-  currency: string;
+  price: string;
+  billingInterval: string;
   features: string[];
 }
 
@@ -662,7 +662,7 @@ export default function AdminUserManagement() {
                             <SelectItem value="none">No Plan</SelectItem>
                             {Array.isArray(plansData) && plansData.map((plan: Plan) => (
                               <SelectItem key={plan.id} value={plan.id}>
-                                {plan.name} - ${plan.price}/{plan.currency}
+                                {plan.name} - ${plan.price}/{plan.billingInterval}
                               </SelectItem>
                             ))}
                           </SelectContent>
