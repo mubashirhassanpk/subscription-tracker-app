@@ -1,4 +1,4 @@
-// Enhanced Chrome Extension Popup Script
+// Clean Minimalist Chrome Extension Popup Script
 class SubscriptionTrackerPopup {
   constructor() {
     this.apiUrl = '';
@@ -9,7 +9,6 @@ class SubscriptionTrackerPopup {
     this.searchQuery = '';
     this.activeFilter = 'all';
     this.isLoading = false;
-    this.animationQueue = [];
     this.notifications = [];
     this.syncStatus = 'idle';
     this.retryCount = 0;
@@ -21,11 +20,9 @@ class SubscriptionTrackerPopup {
     await this.loadSettings();
     this.setupEventListeners();
     this.setupKeyboardShortcuts();
-    this.initializeAnimations();
     this.checkAuthenticationStatus();
     this.startPeriodicSync();
     this.loadNotifications();
-    this.addLoadingAnimations();
   }
 
   async loadSettings() {
@@ -70,9 +67,8 @@ class SubscriptionTrackerPopup {
   }
 
   setupEventListeners() {
-    // Settings button with enhanced animation
+    // Settings button
     document.getElementById('settingsBtn').addEventListener('click', () => {
-      this.animateClick(document.getElementById('settingsBtn'));
       this.showAuthSection();
     });
 
@@ -84,17 +80,16 @@ class SubscriptionTrackerPopup {
       this.hideButtonLoading(btn, 'Connect Account');
     });
 
-    // Navigation tabs with smooth transitions
+    // Navigation tabs
     document.querySelectorAll('.nav-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         if (!tab.classList.contains('active')) {
-          this.animateTabSwitch(tab);
           this.switchTab(tab.dataset.tab);
         }
       });
     });
 
-    // Enhanced search with debouncing
+    // Search with debouncing
     let searchTimeout;
     document.getElementById('searchInput')?.addEventListener('input', (e) => {
       clearTimeout(searchTimeout);
@@ -108,37 +103,33 @@ class SubscriptionTrackerPopup {
       this.handleSearch(searchInput?.value || '');
     });
 
-    // Enhanced filter chips with animations
+    // Filter chips
     document.querySelectorAll('.filter-chip').forEach(chip => {
       chip.addEventListener('click', () => {
-        this.animateFilterSelection(chip);
         this.handleFilter(chip.dataset.filter);
       });
     });
 
-    // Calendar navigation with smooth animations
+    // Calendar navigation
     document.getElementById('prevMonth')?.addEventListener('click', () => {
-      this.animateCalendarTransition(-1);
       this.navigateMonth(-1);
     });
 
     document.getElementById('nextMonth')?.addEventListener('click', () => {
-      this.animateCalendarTransition(1);
       this.navigateMonth(1);
     });
 
-    // Enhanced quick actions with loading states
+    // Quick actions with loading states
     document.getElementById('addSubBtn')?.addEventListener('click', () => {
-      this.animateClick(document.getElementById('addSubBtn'));
       this.showQuickAddForm();
     });
 
     document.getElementById('syncBtn')?.addEventListener('click', async () => {
       const btn = document.getElementById('syncBtn');
       if (this.syncStatus !== 'syncing') {
-        this.showSyncAnimation(btn);
+        this.showSyncLoading(btn);
         await this.syncData();
-        this.hideSyncAnimation(btn);
+        this.hideSyncLoading(btn);
       }
     });
 
@@ -258,37 +249,6 @@ class SubscriptionTrackerPopup {
     });
   }
 
-  initializeAnimations() {
-    // Add entrance animations to cards
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('fade-in');
-        }
-      });
-    }, { threshold: 0.1 });
-
-    // Observe all subscription cards
-    document.querySelectorAll('.subscription-card').forEach(card => {
-      observer.observe(card);
-    });
-  }
-
-  addLoadingAnimations() {
-    // Add skeleton loading states
-    this.skeletonTemplate = `
-      <div class="skeleton-card">
-        <div class="skeleton-header">
-          <div class="skeleton-title"></div>
-          <div class="skeleton-amount"></div>
-        </div>
-        <div class="skeleton-details">
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line short"></div>
-        </div>
-      </div>
-    `;
-  }
 
   startPeriodicSync() {
     if (this.autoSync && this.isAuthenticated) {
@@ -308,52 +268,6 @@ class SubscriptionTrackerPopup {
     }
   }
 
-  // Animation utilities
-  animateClick(element) {
-    if (!element) return;
-    element.style.transform = 'scale(0.95)';
-    setTimeout(() => {
-      element.style.transform = '';
-    }, 150);
-  }
-
-  animateTabSwitch(newTab) {
-    const currentTab = document.querySelector('.nav-tab.active');
-    if (currentTab) {
-      currentTab.style.transform = 'translateX(-10px)';
-      currentTab.style.opacity = '0.5';
-      setTimeout(() => {
-        currentTab.style.transform = '';
-        currentTab.style.opacity = '';
-      }, 200);
-    }
-    
-    newTab.style.transform = 'translateX(10px)';
-    newTab.style.opacity = '0.5';
-    setTimeout(() => {
-      newTab.style.transform = '';
-      newTab.style.opacity = '';
-    }, 200);
-  }
-
-  animateFilterSelection(chip) {
-    chip.style.transform = 'scale(1.1)';
-    setTimeout(() => {
-      chip.style.transform = '';
-    }, 150);
-  }
-
-  animateCalendarTransition(direction) {
-    const calendar = document.querySelector('.calendar-days');
-    if (calendar) {
-      calendar.style.transform = `translateX(${direction * 10}px)`;
-      calendar.style.opacity = '0.8';
-      setTimeout(() => {
-        calendar.style.transform = '';
-        calendar.style.opacity = '';
-      }, 200);
-    }
-  }
 
   showButtonLoading(button, loadingText) {
     if (!button) return;
@@ -362,7 +276,7 @@ class SubscriptionTrackerPopup {
       <svg class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 12a9 9 0 11-6.219-8.56"/>
       </svg>
-      ${loadingText}
+      <span style="margin-left: 6px;">${loadingText}</span>
     `;
     button.disabled = true;
   }
@@ -374,7 +288,7 @@ class SubscriptionTrackerPopup {
     delete button.dataset.originalText;
   }
 
-  showSyncAnimation(button) {
+  showSyncLoading(button) {
     this.syncStatus = 'syncing';
     if (!button) return;
     button.innerHTML = `
@@ -386,7 +300,7 @@ class SubscriptionTrackerPopup {
     button.disabled = true;
   }
 
-  hideSyncAnimation(button) {
+  hideSyncLoading(button) {
     this.syncStatus = 'idle';
     if (!button) return;
     button.innerHTML = `
@@ -398,7 +312,7 @@ class SubscriptionTrackerPopup {
     button.disabled = false;
   }
 
-  // Enhanced error handling and user feedback
+  // Clean error handling and user feedback
   showErrorToast(message, duration = 3000) {
     const toast = this.createToast(message, 'error');
     document.body.appendChild(toast);
@@ -427,7 +341,7 @@ class SubscriptionTrackerPopup {
       </div>
     `;
     
-    // Add toast styles if not already added
+    // Add clean toast styles if not already added
     if (!document.querySelector('#toast-styles')) {
       const styles = document.createElement('style');
       styles.id = 'toast-styles';
@@ -439,29 +353,28 @@ class SubscriptionTrackerPopup {
           z-index: 10000;
           max-width: 350px;
           padding: 12px 16px;
-          border-radius: 12px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-          backdrop-filter: blur(10px);
-          animation: slideIn 0.3s ease-out;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          font-size: 14px;
+          font-weight: 500;
         }
         .toast-error {
-          background: rgba(248, 113, 113, 0.9);
-          border: 1px solid rgba(220, 38, 38, 0.3);
-          color: white;
+          background: #fef2f2;
+          border: 1px solid #fca5a5;
+          color: #991b1b;
         }
         .toast-success {
-          background: rgba(52, 211, 153, 0.9);
-          border: 1px solid rgba(16, 185, 129, 0.3);
-          color: white;
+          background: #f0fdf4;
+          border: 1px solid #86efac;
+          color: #166534;
         }
         .toast-content {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 8px;
         }
-        @keyframes slideIn {
-          from { transform: translateX(100%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
+        .toast-message {
+          flex: 1;
         }
       `;
       document.head.appendChild(styles);
