@@ -94,6 +94,46 @@ export const subscriptionHistory = pgTable("subscription_history", {
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 });
 
+// User notification preferences for flexible reminders
+export const userNotificationPreferences = pgTable("user_notification_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().unique(),
+  // Email notifications
+  emailEnabled: boolean("email_enabled").default(true).notNull(),
+  emailAddress: text("email_address"),
+  // Calendar sync
+  googleCalendarEnabled: boolean("google_calendar_enabled").default(false).notNull(),
+  googleCalendarId: text("google_calendar_id"),
+  appleCalendarEnabled: boolean("apple_calendar_enabled").default(false).notNull(),
+  // Browser notifications
+  chromeExtensionEnabled: boolean("chrome_extension_enabled").default(false).notNull(),
+  browserNotificationEnabled: boolean("browser_notification_enabled").default(true).notNull(),
+  // WhatsApp notifications  
+  whatsappEnabled: boolean("whatsapp_enabled").default(false).notNull(),
+  whatsappNumber: text("whatsapp_number"),
+  // Reminder timing preferences
+  reminderDaysBefore: integer("reminder_days_before").array().default(sql`ARRAY[7,3,1]`), // remind 7, 3, 1 days before
+  reminderTime: text("reminder_time").default("09:00").notNull(), // HH:MM format
+  timezone: text("timezone").default("UTC").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+});
+
+// Subscription reminders - scheduled and sent reminders
+export const subscriptionReminders = pgTable("subscription_reminders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  subscriptionId: varchar("subscription_id").notNull(),
+  reminderType: text("reminder_type").notNull(), // 'email', 'calendar', 'whatsapp', 'browser', 'chrome_extension'
+  scheduledFor: timestamp("scheduled_for").notNull(),
+  sentAt: timestamp("sent_at"),
+  status: text("status").default("pending").notNull(), // 'pending', 'sent', 'failed'
+  daysBefore: integer("days_before").notNull(), // how many days before billing date
+  message: text("message").notNull(),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+});
+
 // Notifications for users (subscription alerts, AI insights, Chrome extension sync)
 export const notifications = pgTable("notifications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -157,6 +197,24 @@ export const insertSubscriptionHistorySchema = createInsertSchema(subscriptionHi
   createdAt: true,
 });
 
+export const insertUserNotificationPreferencesSchema = createInsertSchema(userNotificationPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateUserNotificationPreferencesSchema = createInsertSchema(userNotificationPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  userId: true,
+}).partial();
+
+export const insertSubscriptionReminderSchema = createInsertSchema(subscriptionReminders).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
   id: true,
   createdAt: true,
@@ -188,6 +246,13 @@ export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 
 export type SubscriptionHistory = typeof subscriptionHistory.$inferSelect;
 export type InsertSubscriptionHistory = z.infer<typeof insertSubscriptionHistorySchema>;
+
+export type UserNotificationPreferences = typeof userNotificationPreferences.$inferSelect;
+export type InsertUserNotificationPreferences = z.infer<typeof insertUserNotificationPreferencesSchema>;
+export type UpdateUserNotificationPreferences = z.infer<typeof updateUserNotificationPreferencesSchema>;
+
+export type SubscriptionReminder = typeof subscriptionReminders.$inferSelect;
+export type InsertSubscriptionReminder = z.infer<typeof insertSubscriptionReminderSchema>;
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;

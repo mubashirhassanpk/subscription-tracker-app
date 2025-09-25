@@ -39,8 +39,7 @@ import {
   Activity,
   Database,
   FileText,
-  Settings,
-  X
+  Settings
 } from "lucide-react";
 
 export default function Home() {
@@ -507,21 +506,21 @@ export default function Home() {
                           {item.us ? (
                             <CheckCircle2 className="h-6 w-6 text-green-500 mx-auto" />
                           ) : (
-                            <X className="h-6 w-6 text-gray-400 mx-auto" />
+                            <div className="h-6 w-6 mx-auto rounded-full border-2 border-gray-400"></div>
                           )}
                         </td>
                         <td className="px-6 py-4 text-center">
                           {item.competitor1 ? (
                             <CheckCircle2 className="h-6 w-6 text-green-500 mx-auto" />
                           ) : (
-                            <X className="h-6 w-6 text-gray-400 mx-auto" />
+                            <div className="h-6 w-6 mx-auto rounded-full border-2 border-gray-400"></div>
                           )}
                         </td>
                         <td className="px-6 py-4 text-center">
                           {item.competitor2 ? (
                             <CheckCircle2 className="h-6 w-6 text-green-500 mx-auto" />
                           ) : (
-                            <X className="h-6 w-6 text-gray-400 mx-auto" />
+                            <div className="h-6 w-6 mx-auto rounded-full border-2 border-gray-400"></div>
                           )}
                         </td>
                       </tr>
