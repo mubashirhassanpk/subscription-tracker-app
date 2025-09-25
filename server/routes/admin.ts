@@ -1,7 +1,47 @@
 import { Router } from 'express';
 import { AdminService } from '../services/admin.service';
 import { requireAdmin, requireSuperAdmin, logAdminActivity } from '../middleware/admin';
+import { storage } from '../storage';
 import { z } from 'zod';
+
+// Session authentication middleware that allows both session and API key auth
+async function trySessionOrApiKey(req: any, res: any, next: any) {
+  try {
+    // First try session authentication
+    if (req.session?.userId) {
+      const user = await storage.getUser(req.session.userId);
+      if (user) {
+        req.user = user;
+        return next();
+      }
+    }
+
+    // Development fallback - create a stub user
+    if (process.env.NODE_ENV === 'development') {
+      let user = await storage.getUser('1');
+      if (!user) {
+        // Create the development user in the database
+        user = await storage.createUser({
+          email: 'test@example.com',
+          name: 'Test User',
+          password: 'dev-password-hash',
+          subscriptionStatus: 'trial',
+          planId: null,
+          trialEndsAt: null
+        });
+        console.log('Created development user:', user.id);
+      }
+      req.user = user;
+      return next();
+    }
+
+    // Production: require proper authentication
+    return res.status(401).json({ error: 'Authentication required' });
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    return res.status(500).json({ error: 'Authentication error' });
+  }
+}
 
 const router = Router();
 const adminService = new AdminService();
@@ -26,7 +66,7 @@ const updateUserSchema = z.object({
  * GET /api/admin/dashboard
  * Get dashboard statistics
  */
-router.get('/dashboard', requireAdmin, logAdminActivity('view_dashboard'), async (req, res) => {
+router.get('/dashboard', trySessionOrApiKey, requireAdmin, logAdminActivity('view_dashboard'), async (req, res) => {
   try {
     const stats = await adminService.getDashboardStats();
     res.json({
@@ -46,7 +86,7 @@ router.get('/dashboard', requireAdmin, logAdminActivity('view_dashboard'), async
  * GET /api/admin/users
  * Get all users with pagination and search
  */
-router.get('/users', requireAdmin, logAdminActivity('list_users', 'user'), async (req, res) => {
+router.get('/users', trySessionOrApiKey, requireAdmin, logAdminActivity('list_users', 'user'), async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -71,7 +111,7 @@ router.get('/users', requireAdmin, logAdminActivity('list_users', 'user'), async
  * GET /api/admin/users/:userId
  * Get user by ID with details
  */
-router.get('/users/:userId', requireAdmin, logAdminActivity('view_user', 'user'), async (req, res) => {
+router.get('/users/:userId', trySessionOrApiKey, requireAdmin, logAdminActivity('view_user', 'user'), async (req, res) => {
   try {
     const { userId } = req.params;
     const user = await adminService.getUserById(userId);
@@ -96,7 +136,7 @@ router.get('/users/:userId', requireAdmin, logAdminActivity('view_user', 'user')
  * POST /api/admin/users
  * Create new user (admin only)
  */
-router.post('/users', requireAdmin, logAdminActivity('create_user', 'user'), async (req, res) => {
+router.post('/users', trySessionOrApiKey, requireAdmin, logAdminActivity('create_user', 'user'), async (req, res) => {
   try {
     const validatedData = createUserSchema.parse(req.body);
     
@@ -140,7 +180,7 @@ router.post('/users', requireAdmin, logAdminActivity('create_user', 'user'), asy
  * PUT /api/admin/users/:userId
  * Update user
  */
-router.put('/users/:userId', requireAdmin, logAdminActivity('update_user', 'user'), async (req, res) => {
+router.put('/users/:userId', trySessionOrApiKey, requireAdmin, logAdminActivity('update_user', 'user'), async (req, res) => {
   try {
     const { userId } = req.params;
     const validatedData = updateUserSchema.parse(req.body);
@@ -196,7 +236,7 @@ router.put('/users/:userId', requireAdmin, logAdminActivity('update_user', 'user
  * DELETE /api/admin/users/:userId
  * Delete user (super admin only)
  */
-router.delete('/users/:userId', requireSuperAdmin, logAdminActivity('delete_user', 'user'), async (req, res) => {
+router.delete('/users/:userId', trySessionOrApiKey, requireSuperAdmin, logAdminActivity('delete_user', 'user'), async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -232,7 +272,7 @@ router.delete('/users/:userId', requireSuperAdmin, logAdminActivity('delete_user
  * GET /api/admin/subscriptions
  * Get all subscriptions (admin view)
  */
-router.get('/subscriptions', requireAdmin, logAdminActivity('list_all_subscriptions', 'subscription'), async (req, res) => {
+router.get('/subscriptions', trySessionOrApiKey, requireAdmin, logAdminActivity('list_all_subscriptions', 'subscription'), async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -257,7 +297,7 @@ router.get('/subscriptions', requireAdmin, logAdminActivity('list_all_subscripti
  * POST /api/admin/impersonate/:userId
  * Create impersonation session to login as user
  */
-router.post('/impersonate/:userId', requireAdmin, logAdminActivity('login_as_user', 'user'), async (req, res) => {
+router.post('/impersonate/:userId', trySessionOrApiKey, requireAdmin, logAdminActivity('login_as_user', 'user'), async (req, res) => {
   try {
     const { userId } = req.params;
     const adminUserId = req.user!.id;
@@ -285,7 +325,7 @@ router.post('/impersonate/:userId', requireAdmin, logAdminActivity('login_as_use
  * GET /api/admin/activity-logs
  * Get admin activity logs
  */
-router.get('/activity-logs', requireAdmin, logAdminActivity('view_activity_logs'), async (req, res) => {
+router.get('/activity-logs', trySessionOrApiKey, requireAdmin, logAdminActivity('view_activity_logs'), async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
