@@ -190,7 +190,14 @@ export default function ReminderSettings() {
   // Test connection mutation
   const testConnectionMutation = useMutation({
     mutationFn: async ({ service, settings }: { service: string; settings: any }) => {
-      return apiRequest('POST', `/api/test-connection/${service.toLowerCase()}`, settings);
+      const response = await apiRequest('POST', `/api/test-connection/${service.toLowerCase()}`, settings);
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Connection test failed');
+      }
+      
+      return data;
     },
     onSuccess: (data, { service }) => {
       toast({
