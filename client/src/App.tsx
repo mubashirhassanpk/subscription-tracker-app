@@ -23,6 +23,8 @@ import ReminderSettings from "./pages/ReminderSettings";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUserManagement from "./pages/AdminUserManagement";
 import AdminSubscriptionManagement from "./pages/AdminSubscriptionManagement";
+import AdminSettings from "./pages/AdminSettings";
+import AdminNotifications from "./pages/AdminNotifications";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -45,6 +47,8 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/users" component={AdminUserManagement} />
       <Route path="/admin/subscriptions" component={AdminSubscriptionManagement} />
+      <Route path="/admin/settings" component={AdminSettings} />
+      <Route path="/admin/notifications" component={AdminNotifications} />
       <Route component={NotFound} />
     </Switch>
   );
