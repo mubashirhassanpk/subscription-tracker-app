@@ -59,14 +59,10 @@ export default function AdminDashboard() {
   const [isCreateSubscriptionOpen, setIsCreateSubscriptionOpen] = useState(false);
   const [selectedUserForDetails, setSelectedUserForDetails] = useState<User | null>(null);
   const [isUserDetailsOpen, setIsUserDetailsOpen] = useState(false);
-  const [subscriptionFormData, setSubscriptionFormData] = useState({
+  const [userPlanFormData, setUserPlanFormData] = useState({
     userId: '',
-    name: '',
-    cost: '',
-    billingCycle: 'monthly',
-    category: '',
-    description: '',
-    nextBilling: ''
+    planId: '',
+    subscriptionStatus: 'active'
   });
   const { toast } = useToast();
 
@@ -76,6 +72,20 @@ export default function AdminDashboard() {
 
   const { data: activityLogs } = useQuery<{ success: boolean; data: any }>({
     queryKey: ['/api/admin/activity-logs'],
+  });
+
+  // Fetch available plans for assignment
+  const { data: plansData } = useQuery({
+    queryKey: ['/api/plans'],
+    queryFn: () => 
+      fetch('/api/plans', {
+        credentials: 'include'
+      }).then(res => {
+        if (!res.ok) {
+          throw new Error(`${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      })
   });
 
   // Fetch users for the users tab
@@ -146,44 +156,42 @@ export default function AdminDashboard() {
     }
   });
 
-  // Create subscription mutation
-  const createSubscriptionMutation = useMutation({
-    mutationFn: (subscriptionData: typeof subscriptionFormData) =>
-      fetch('/api/subscriptions', {
-        method: 'POST',
+  // Assign user plan mutation
+  const assignUserPlanMutation = useMutation({
+    mutationFn: (planData: typeof userPlanFormData) =>
+      fetch(`/api/admin/users/${planData.userId}/plan`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
-          name: subscriptionData.name,
-          cost: parseFloat(subscriptionData.cost),
-          billingCycle: subscriptionData.billingCycle,
-          category: subscriptionData.category,
-          description: subscriptionData.description,
-          nextBilling: subscriptionData.nextBilling ? new Date(subscriptionData.nextBilling).toISOString() : undefined
+          planId: planData.planId,
+          subscriptionStatus: planData.subscriptionStatus
         })
-      }).then(res => res.json()),
+      }).then(res => {
+        if (!res.ok) {
+          throw new Error(`${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      }),
     onSuccess: (data) => {
       if (data.success) {
         queryClient.invalidateQueries({ queryKey: ['/api/admin/dashboard'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/subscriptions'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/subscriptions'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users', userPlanFormData.userId, 'details'] });
         setIsCreateSubscriptionOpen(false);
-        setSubscriptionFormData({
+        setUserPlanFormData({
           userId: '',
-          name: '',
-          cost: '',
-          billingCycle: 'monthly',
-          category: '',
-          description: '',
-          nextBilling: ''
+          planId: '',
+          subscriptionStatus: 'active'
         });
         toast({
           title: 'Success',
-          description: 'Subscription created successfully'
+          description: 'User plan assigned successfully'
         });
       } else {
         toast({
           title: 'Error',
-          description: data.message || 'Failed to create subscription',
+          description: data.message || 'Failed to assign user plan',
           variant: 'destructive'
         });
       }
@@ -191,22 +199,22 @@ export default function AdminDashboard() {
     onError: (error: any) => {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to create subscription',
+        description: error.message || 'Failed to assign user plan',
         variant: 'destructive'
       });
     }
   });
 
-  const handleCreateSubscription = () => {
-    if (!subscriptionFormData.name || !subscriptionFormData.cost) {
+  const handleAssignUserPlan = () => {
+    if (!userPlanFormData.userId || !userPlanFormData.planId) {
       toast({
         title: 'Error',
-        description: 'Please fill in all required fields',
+        description: 'Please select both a user and a plan',
         variant: 'destructive'
       });
       return;
     }
-    createSubscriptionMutation.mutate(subscriptionFormData);
+    assignUserPlanMutation.mutate(userPlanFormData);
   };
 
   if (isLoading) {
@@ -761,71 +769,57 @@ export default function AdminDashboard() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <Label htmlFor="name">Service Name *</Label>
-                <Input
-                  id="name"
-                  placeholder="e.g., Netflix, Spotify, Adobe Creative Suite"
-                  value={subscriptionFormData.name}
-                  onChange={(e) => setSubscriptionFormData(prev => ({ ...prev, name: e.target.value }))}
-                  data-testid="input-subscription-name"
-                />
-              </div>
-              <div>
-                <Label htmlFor="cost">Monthly Cost *</Label>
-                <Input
-                  id="cost"
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={subscriptionFormData.cost}
-                  onChange={(e) => setSubscriptionFormData(prev => ({ ...prev, cost: e.target.value }))}
-                  data-testid="input-subscription-cost"
-                />
-              </div>
-              <div>
-                <Label htmlFor="category">Category</Label>
+                <Label htmlFor="user">Select User *</Label>
                 <Select 
-                  value={subscriptionFormData.category} 
-                  onValueChange={(value) => setSubscriptionFormData(prev => ({ ...prev, category: value }))}
+                  value={userPlanFormData.userId} 
+                  onValueChange={(value) => setUserPlanFormData(prev => ({ ...prev, userId: value }))}
                 >
-                  <SelectTrigger data-testid="select-subscription-category">
-                    <SelectValue placeholder="Select a category" />
+                  <SelectTrigger data-testid="select-user">
+                    <SelectValue placeholder="Choose a user to assign plan to" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="entertainment">Entertainment</SelectItem>
-                    <SelectItem value="productivity">Productivity</SelectItem>
-                    <SelectItem value="software">Software</SelectItem>
-                    <SelectItem value="streaming">Streaming</SelectItem>
-                    <SelectItem value="utilities">Utilities</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    {usersData?.data?.users?.map((user: User) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="billing-cycle">Billing Cycle</Label>
+                <Label htmlFor="plan">Select Plan *</Label>
                 <Select 
-                  value={subscriptionFormData.billingCycle} 
-                  onValueChange={(value) => setSubscriptionFormData(prev => ({ ...prev, billingCycle: value }))}
+                  value={userPlanFormData.planId} 
+                  onValueChange={(value) => setUserPlanFormData(prev => ({ ...prev, planId: value }))}
                 >
-                  <SelectTrigger data-testid="select-billing-cycle">
+                  <SelectTrigger data-testid="select-plan">
+                    <SelectValue placeholder="Choose a plan to assign" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {plansData?.map((plan: any) => (
+                      <SelectItem key={plan.id} value={plan.id}>
+                        {plan.name} - ${plan.price}/{plan.billingInterval}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="status">Subscription Status</Label>
+                <Select 
+                  value={userPlanFormData.subscriptionStatus} 
+                  onValueChange={(value) => setUserPlanFormData(prev => ({ ...prev, subscriptionStatus: value }))}
+                >
+                  <SelectTrigger data-testid="select-subscription-status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="yearly">Yearly</SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="trial">Trial</SelectItem>
+                    <SelectItem value="expired">Expired</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div>
-                <Label htmlFor="next-billing">Next Billing Date</Label>
-                <Input
-                  id="next-billing"
-                  type="date"
-                  value={subscriptionFormData.nextBilling}
-                  onChange={(e) => setSubscriptionFormData(prev => ({ ...prev, nextBilling: e.target.value }))}
-                  data-testid="input-next-billing"
-                />
               </div>
             </div>
           </div>
@@ -838,11 +832,11 @@ export default function AdminDashboard() {
               Cancel
             </Button>
             <Button
-              onClick={handleCreateSubscription}
-              disabled={createSubscriptionMutation.isPending}
-              data-testid="button-save-subscription"
+              onClick={handleAssignUserPlan}
+              disabled={assignUserPlanMutation.isPending}
+              data-testid="button-assign-plan"
             >
-              {createSubscriptionMutation.isPending ? 'Assigning...' : 'Assign Plan'}
+              {assignUserPlanMutation.isPending ? 'Assigning...' : 'Assign Plan'}
             </Button>
           </DialogFooter>
         </DialogContent>
