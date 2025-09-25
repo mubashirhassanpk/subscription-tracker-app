@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { SearchProvider } from "./contexts/SearchContext";
 import { HeaderMenu } from "./components/HeaderMenu";
 import { MobileBottomNav } from "./components/MobileBottomNav";
+import { ImpersonationBanner } from "./components/ImpersonationBanner";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Features from "./pages/Features";
@@ -22,6 +23,7 @@ import Reminders from "./pages/Reminders";
 import ReminderSettings from "./pages/ReminderSettings";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUserManagement from "./pages/AdminUserManagement";
+import AdminCreateUser from "./pages/AdminCreateUser";
 import AdminSubscriptionManagement from "./pages/AdminSubscriptionManagement";
 import AdminSettings from "./pages/AdminSettings";
 import AdminNotifications from "./pages/AdminNotifications";
@@ -47,6 +49,7 @@ function Router() {
       <Route path="/settings" component={Settings} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/users" component={AdminUserManagement} />
+      <Route path="/admin/users/create" component={AdminCreateUser} />
       <Route path="/admin/subscriptions" component={AdminSubscriptionManagement} />
       <Route path="/admin/settings" component={AdminSettings} />
       <Route path="/admin/notifications" component={AdminNotifications} />
@@ -64,6 +67,7 @@ function App() {
           <SearchProvider>
             <div className="min-h-screen w-full pb-16 md:pb-0">
               <HeaderMenu />
+              <ImpersonationBanner />
               <main className="flex-1">
                 <Router />
               </main>

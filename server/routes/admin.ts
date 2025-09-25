@@ -3,6 +3,7 @@ import { AdminService } from '../services/admin.service';
 import { requireAdmin, requireSuperAdmin, logAdminActivity } from '../middleware/admin';
 import { storage } from '../storage';
 import { z } from 'zod';
+import { createHmac } from 'crypto';
 
 // Session authentication middleware that allows both session and API key auth
 async function trySessionOrApiKey(req: any, res: any, next: any) {
@@ -741,7 +742,7 @@ router.post('/api-keys', trySessionOrApiKey, requireSuperAdmin, logAdminActivity
     // Create API key using the same logic as regular API key creation
     const apiKey = Date.now().toString() + Math.random().toString(36);
     const keyPrefix = apiKey.substring(0, 12) + '...';
-    const keyHash = require('crypto').createHmac('sha256', process.env.API_KEY_SECRET || 'dev-fallback').update(apiKey).digest('hex');
+    const keyHash = createHmac('sha256', process.env.API_KEY_SECRET || 'dev-fallback').update(apiKey).digest('hex');
 
     const newApiKey = await storage.createApiKey({
       userId,
