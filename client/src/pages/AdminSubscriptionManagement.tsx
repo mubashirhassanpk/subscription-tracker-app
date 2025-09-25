@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CreditCard, Search, Eye, DollarSign, Calendar } from 'lucide-react';
+import { CreditCard, Search, Eye, DollarSign, Calendar, Plus } from 'lucide-react';
 import { Link } from 'wouter';
 
 interface Subscription {
@@ -153,8 +153,19 @@ export default function AdminSubscriptionManagement() {
         {/* Subscriptions Table */}
         <Card>
           <CardHeader>
-            <CardTitle>All Subscriptions ({pagination?.total || 0})</CardTitle>
-            <CardDescription>View and manage all user subscriptions</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>All Subscriptions ({pagination?.total || 0})</CardTitle>
+                <CardDescription>View and manage all user subscriptions</CardDescription>
+              </div>
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700"
+                data-testid="button-new-subscription"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Subscription
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
