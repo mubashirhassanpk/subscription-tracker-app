@@ -673,6 +673,55 @@ export default function ReminderSettings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* WhatsApp Setup Guide */}
+                <Alert>
+                  <MessageSquare className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p className="font-medium">📱 WhatsApp Business API Setup Guide:</p>
+                      <ol className="text-sm space-y-1 ml-4">
+                        <li>1. Create a Meta Business account at <strong>business.facebook.com</strong></li>
+                        <li>2. Set up WhatsApp Business API in Meta Business Manager</li>
+                        <li>3. Get your Phone Number ID and Access Token from the dashboard</li>
+                        <li>4. Add your phone number and credentials below</li>
+                        <li>5. Test the connection to ensure messages can be sent</li>
+                      </ol>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('https://business.whatsapp.com/products/business-api', '_blank')}
+                          className="flex items-center gap-1"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          WhatsApp Business API
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('https://developers.facebook.com/docs/whatsapp/getting-started', '_blank')}
+                          className="flex items-center gap-1"
+                        >
+                          <BookOpen className="h-3 w-3" />
+                          Developer Guide
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('https://business.facebook.com/', '_blank')}
+                          className="flex items-center gap-1"
+                        >
+                          <Key className="h-3 w-3" />
+                          Meta Business
+                        </Button>
+                      </div>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+
                 <div className="flex items-center justify-between">
                   <Label htmlFor="whatsappEnabled">Enable WhatsApp notifications</Label>
                   <Switch 
@@ -684,20 +733,6 @@ export default function ReminderSettings() {
 
                 {form.watch('whatsappEnabled') && (
                   <div className="space-y-4 pl-6 border-l-2 border-green-200">
-                    <Alert>
-                      <Smartphone className="h-4 w-4" />
-                      <AlertDescription>
-                        WhatsApp Business API requires a Meta Business account. 
-                        <a 
-                          href="https://business.whatsapp.com/" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline ml-1"
-                        >
-                          Set up here <ExternalLink className="h-3 w-3 inline" />
-                        </a>
-                      </AlertDescription>
-                    </Alert>
 
                     <div>
                       <Label htmlFor="whatsappNumber">Your WhatsApp Number</Label>
@@ -765,6 +800,77 @@ export default function ReminderSettings() {
 
           {/* General Settings Tab */}
           <TabsContent value="general" className="space-y-6">
+            {/* Browser & Mobile Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Smartphone className="h-5 w-5" />
+                  Browser & Mobile
+                </CardTitle>
+                <CardDescription>
+                  Push notifications and browser extensions
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Chrome Extension Setup Guide */}
+                <Alert>
+                  <Globe className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p className="font-medium">🧩 Chrome Extension Setup Guide:</p>
+                      <ol className="text-sm space-y-1 ml-4">
+                        <li>1. Download the Subscription Tracker extension from the Chrome Web Store</li>
+                        <li>2. Install and pin the extension to your browser toolbar</li>
+                        <li>3. Click the extension icon and enter your app URL and API key</li>
+                        <li>4. Enable sync to see your subscriptions in the extension popup</li>
+                        <li>5. Test the connection to ensure data syncs properly</li>
+                      </ol>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('chrome-extension://popup/popup.html', '_blank')}
+                          className="flex items-center gap-1"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          Open Extension
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('/api-keys', '_blank')}
+                          className="flex items-center gap-1"
+                        >
+                          <Key className="h-3 w-3" />
+                          Get API Key
+                        </Button>
+                      </div>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="browserNotifications">Browser Notifications</Label>
+                  <Switch 
+                    id="browserNotifications"
+                    checked={true}
+                    onCheckedChange={() => {}}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="chromeExtensionSync">Chrome Extension Sync</Label>
+                  <Switch 
+                    id="chromeExtensionSync"
+                    checked={true}
+                    onCheckedChange={() => {}}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -776,6 +882,33 @@ export default function ReminderSettings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Timing Settings Guide */}
+                <Alert>
+                  <Clock className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p className="font-medium">⏰ Timing Settings Guide:</p>
+                      <ul className="text-sm space-y-1 ml-4">
+                        <li>• <strong>Reminder Time:</strong> Daily time for notifications (e.g., 9:00 AM)</li>
+                        <li>• <strong>Timezone:</strong> Your local timezone for accurate timing</li>
+                        <li>• <strong>Days Before:</strong> How many days before renewal to remind you</li>
+                        <li>• <strong>Multiple Alerts:</strong> Get reminded 7, 3, and 1 day before renewal</li>
+                      </ul>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('https://www.timeanddate.com/worldclock/', '_blank')}
+                          className="flex items-center gap-1"
+                        >
+                          <Globe className="h-3 w-3" />
+                          World Clock
+                        </Button>
+                      </div>
+                    </div>
+                  </AlertDescription>
+                </Alert>
                 <div>
                   <Label htmlFor="reminderTime">Reminder Time</Label>
                   <Input
