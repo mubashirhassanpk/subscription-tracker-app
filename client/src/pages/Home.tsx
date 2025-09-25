@@ -98,15 +98,27 @@ export default function Home() {
     },
     {
       icon: <Bell className="h-12 w-12" />,
-      title: "Intelligent Alerts",
-      description: "Never miss important renewals, price changes, or cancellation deadlines with our smart notification system.",
+      title: "Multi-Channel Notifications",
+      description: "Advanced alert system with email, calendar integration, WhatsApp, browser notifications, and Chrome extension sync.",
       gradient: "from-purple-500 to-pink-500"
     },
     {
-      icon: <Brain className="h-12 w-12" />,
-      title: "AI Insights",
-      description: "Get personalized recommendations to optimize your subscriptions and save money based on your usage patterns.",
+      icon: <BarChart3 className="h-12 w-12" />,
+      title: "Advanced Analytics Dashboard",
+      description: "Comprehensive insights with category breakdowns, peak payment analysis, spending trends, and CSV export capabilities.",
       gradient: "from-green-500 to-emerald-500"
+    },
+    {
+      icon: <Smartphone className="h-12 w-12" />,
+      title: "Mobile-Optimized Experience",
+      description: "Beautiful mobile interface with bottom navigation, floating action button, and touch-friendly responsive design.",
+      gradient: "from-indigo-500 to-purple-500"
+    },
+    {
+      icon: <FileText className="h-12 w-12" />,
+      title: "Data Export & Management",
+      description: "Export your subscription data and analytics to CSV format. Complete control over your subscription information.",
+      gradient: "from-teal-500 to-cyan-500"
     },
     {
       icon: <Shield className="h-12 w-12" />,
@@ -145,11 +157,14 @@ export default function Home() {
 
   const comparisonFeatures = [
     { feature: "Automatic Discovery", us: true, competitor1: false, competitor2: true },
-    { feature: "AI-Powered Insights", us: true, competitor1: false, competitor2: false },
+    { feature: "Multi-Channel Notifications", us: true, competitor1: false, competitor2: false },
+    { feature: "Advanced Analytics Dashboard", us: true, competitor1: false, competitor2: false },
+    { feature: "Mobile-Optimized Interface", us: true, competitor1: false, competitor2: true },
+    { feature: "CSV Data Export", us: true, competitor1: false, competitor2: false },
+    { feature: "Calendar Integration", us: true, competitor1: false, competitor2: false },
+    { feature: "WhatsApp Notifications", us: true, competitor1: false, competitor2: false },
     { feature: "Bank-Level Security", us: true, competitor1: true, competitor2: false },
-    { feature: "Smart Notifications", us: true, competitor1: true, competitor2: true },
-    { feature: "Unlimited Tracking", us: true, competitor1: false, competitor2: false },
-    { feature: "Email Integration", us: true, competitor1: false, competitor2: true },
+    { feature: "AI-Powered Insights", us: true, competitor1: false, competitor2: false },
     { feature: "24/7 Support", us: true, competitor1: false, competitor2: false },
   ];
 
@@ -161,11 +176,13 @@ export default function Home() {
   ];
 
   const benefits = [
-    "Save money by identifying unused subscriptions",
-    "Avoid unexpected charges and price increases",
-    "Track spending patterns and budget better",
-    "Manage family and team subscriptions easily",
-    "Get insights to optimize your digital expenses"
+    "Multi-channel notifications across email, calendar, WhatsApp, and browser",
+    "Advanced analytics with category breakdowns and spending trends",
+    "Mobile-optimized interface with bottom navigation and floating action button",
+    "Complete data control with CSV export capabilities",
+    "Save money by identifying unused subscriptions and optimizing spending",
+    "Never miss renewals with intelligent reminder scheduling",
+    "Comprehensive insights to make data-driven subscription decisions"
   ];
 
   const testimonials = [
@@ -173,7 +190,7 @@ export default function Home() {
       name: "Sarah Johnson",
       role: "Small Business Owner",
       company: "Creative Studio LLC",
-      content: "I discovered I was paying for 12 subscriptions I'd completely forgotten about. This tool saved me over $300 monthly and gave me complete visibility into our company's software spending.",
+      content: "The multi-channel notifications are amazing! I get WhatsApp alerts, calendar reminders, and email notifications. Never missed a renewal since switching. The mobile app is perfect for managing on-the-go.",
       rating: 5,
       avatar: "SJ",
       savings: "$300/month"
@@ -182,7 +199,7 @@ export default function Home() {
       name: "Michael Chen",
       role: "Finance Manager",
       company: "Tech Innovations Inc",
-      content: "The AI insights are game-changing. We identified $50K in annual savings and optimized our entire SaaS portfolio. The analytics dashboard is incredibly comprehensive.",
+      content: "The analytics dashboard is incredible! Category breakdowns, peak payment analysis, and CSV exports make financial reporting effortless. Best subscription management tool we've used.",
       rating: 5,
       avatar: "MC",
       savings: "$50K/year"
@@ -191,7 +208,7 @@ export default function Home() {
       name: "Emma Rodriguez",
       role: "Freelance Designer",
       company: "Independent",
-      content: "As a freelancer, every dollar matters. The smart notifications ensure I never get surprised by renewal charges, and I've saved $150 monthly by canceling unused services.",
+      content: "The mobile experience is outstanding. The floating action button and bottom navigation make it so easy to track subscriptions anywhere. Export features help with client billing too.",
       rating: 5,
       avatar: "ER",
       savings: "$150/month"
@@ -200,7 +217,7 @@ export default function Home() {
       name: "David Park",
       role: "Startup Founder",
       company: "InnovateLab",
-      content: "We were bleeding money on forgotten subscriptions. This platform helped us streamline our tools, save $2K monthly, and make data-driven decisions about our software stack.",
+      content: "Advanced features like calendar integration and comprehensive analytics give us complete control. The export capabilities are perfect for board reports. Game-changing platform.",
       rating: 5,
       avatar: "DP",
       savings: "$2K/month"
@@ -236,8 +253,8 @@ export default function Home() {
               </h1>
               
               <p className="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-                Our AI-powered platform automatically discovers, tracks, and optimizes all your recurring subscriptions. 
-                <span className="font-semibold text-gray-800 dark:text-gray-200"> Save thousands annually</span> and never get surprised by hidden charges.
+                Advanced subscription management with multi-channel notifications, comprehensive analytics, mobile optimization, and data export. 
+                <span className="font-semibold text-gray-800 dark:text-gray-200"> Complete control over your subscriptions</span> with enterprise-level features.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
@@ -437,7 +454,7 @@ export default function Home() {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
               {features.map((feature, index) => (
                 <Card 
                   key={index}
