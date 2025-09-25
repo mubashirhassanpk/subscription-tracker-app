@@ -606,44 +606,32 @@ export default function AdminUserManagement() {
                       <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <Button 
-                        className="w-full justify-start" 
-                        variant="outline" 
-                        size="sm"
+                      <div 
+                        className="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                         onClick={() => handleEditUser(selectedUserForDetails)}
                       >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit User Details
-                      </Button>
-                      <Button 
-                        className="w-full justify-start" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => impersonateMutation.mutate(selectedUserForDetails.id)}
-                        disabled={impersonateMutation.isPending}
+                        <Edit className="mr-3 h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Edit User Details</span>
+                      </div>
+                      <div 
+                        className={`flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer ${impersonateMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={() => !impersonateMutation.isPending && impersonateMutation.mutate(selectedUserForDetails.id)}
                       >
-                        <UserCheck className="mr-2 h-4 w-4" />
-                        Impersonate User
-                      </Button>
-                      <Button 
-                        className="w-full justify-start" 
-                        variant="outline" 
-                        size="sm"
-                      >
-                        <BarChart3 className="mr-2 h-4 w-4" />
-                        View Activity Logs
-                      </Button>
+                        <UserCheck className="mr-3 h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Impersonate User</span>
+                      </div>
+                      <div className="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                        <BarChart3 className="mr-3 h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">View Activity Logs</span>
+                      </div>
                       {selectedUserForDetails.role !== 'super_admin' && (
-                        <Button 
-                          className="w-full justify-start" 
-                          variant="destructive" 
-                          size="sm"
-                          onClick={() => deleteUserMutation.mutate(selectedUserForDetails.id)}
-                          disabled={deleteUserMutation.isPending}
+                        <div 
+                          className={`flex items-center p-3 border border-red-200 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 transition-colors cursor-pointer ${deleteUserMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          onClick={() => !deleteUserMutation.isPending && deleteUserMutation.mutate(selectedUserForDetails.id)}
                         >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete User
-                        </Button>
+                          <Trash2 className="mr-3 h-4 w-4 text-red-600" />
+                          <span className="font-medium text-red-600">Delete User</span>
+                        </div>
                       )}
                     </CardContent>
                   </Card>
