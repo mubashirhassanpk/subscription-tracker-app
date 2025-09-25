@@ -818,12 +818,19 @@ export default function AdminUserManagement() {
                       </div>
                     </div>
                     
-                    {selectedUserForDetails.trialEndsAt && (
+                    {userDetailsData?.data?.user?.trialEndsAt && (
                       <div className="flex justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded">
                         <span className="text-sm">Trial ends:</span>
                         <span className="text-sm font-medium">
-                          {new Date(selectedUserForDetails.trialEndsAt).toLocaleDateString()}
+                          {new Date(userDetailsData.data.user.trialEndsAt).toLocaleDateString()}
                         </span>
+                      </div>
+                    )}
+                    
+                    {userDetailsData?.data?.user?.subscriptionStatus === 'trial' && !userDetailsData?.data?.user?.trialEndsAt && (
+                      <div className="flex justify-between p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded">
+                        <span className="text-sm">Trial Status:</span>
+                        <span className="text-sm font-medium text-yellow-600">No expiry date set</span>
                       </div>
                     )}
 
