@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { User, Settings, LogOut, Crown, CreditCard, HelpCircle, Menu, Bell, Plus, Clock, Calendar as CalendarIcon } from "lucide-react";
+import { User, Settings, LogOut, Crown, CreditCard, HelpCircle, Menu, Bell, Plus, Clock, Calendar as CalendarIcon, Home, Star, DollarSign } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { NotificationCenter } from "./NotificationCenter";
 import { Link, useLocation } from "wouter";
@@ -34,13 +34,25 @@ export function HeaderMenu() {
   const isTrialUser = userStatus?.subscriptionStatus === 'trial';
   const planName = userStatus?.plan?.name || (isTrialUser ? 'Trial' : 'Free');
 
-  const navigationItems = [
-    { title: "Dashboard", url: "/", icon: User, active: location === "/" },
+  // Determine if we're on a marketing page or dashboard page
+  const isMarketingPage = location === '/' || location === '/features' || location === '/pricing';
+  
+  const marketingNavItems = [
+    { title: "Home", url: "/", icon: Home, active: location === "/" },
+    { title: "Features", url: "/features", icon: Star, active: location === "/features" },
+    { title: "Pricing", url: "/pricing", icon: DollarSign, active: location === "/pricing" },
+    { title: "Dashboard", url: "/dashboard", icon: User, active: location === "/dashboard" },
+  ];
+
+  const dashboardNavItems = [
+    { title: "Dashboard", url: "/dashboard", icon: User, active: location === "/dashboard" },
     { title: "Calendar", url: "/calendar", icon: CalendarIcon, active: location === "/calendar" },
     { title: "History", url: "/history", icon: Clock, active: location === "/history" },
     { title: "API Docs", url: "/docs", icon: HelpCircle, active: location === "/docs" },
     { title: "API Keys", url: "/api-keys", icon: CreditCard, active: location === "/api-keys" },
   ];
+
+  const navigationItems = isMarketingPage ? marketingNavItems : dashboardNavItems;
 
   const handleLogout = () => {
     // Implement logout logic here
@@ -51,7 +63,7 @@ export function HeaderMenu() {
     <header className="flex items-center justify-between px-3 py-2 sm:p-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Left side - Logo and Search */}
       <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-        <Link href="/" className="flex items-center gap-2 hover-elevate rounded-md px-2 py-1 -mx-2 -my-1" data-testid="link-dashboard-logo">
+        <Link href={isMarketingPage ? "/" : "/dashboard"} className="flex items-center gap-2 hover-elevate rounded-md px-2 py-1 -mx-2 -my-1" data-testid="link-dashboard-logo">
           <Crown className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" />
           <span className="font-semibold text-sm sm:text-lg hidden xs:block truncate">Subscription Tracker</span>
         </Link>
