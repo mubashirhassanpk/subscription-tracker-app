@@ -7,7 +7,7 @@ import AddSubscriptionForm from "./AddSubscriptionForm";
 import AIInsightsDialog from "./AIInsightsDialog";
 import SubscriptionDetailsDialog from "./SubscriptionDetailsDialog";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, List, RefreshCw } from "lucide-react";
+import { LayoutGrid, List, RefreshCw, Download } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useSearch } from "../contexts/SearchContext";
@@ -124,6 +124,26 @@ export default function Dashboard({
     URL.revokeObjectURL(url);
   };
 
+  const handleExportAllData = async () => {
+    try {
+      const response = await fetch("/api/export/subscriptions/csv");
+      if (!response.ok) throw new Error("Export failed");
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `all_subscriptions_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Failed to export data. Please try again.");
+    }
+  };
+
   const filteredSubscriptions = useMemo(() => {
     return subscriptions.filter(subscription => {
       const matchesSearch = subscription.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -155,6 +175,16 @@ export default function Dashboard({
             </div>
             <div className="flex items-center justify-center sm:justify-end gap-2 sm:gap-4">
               <AIInsightsDialog />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportAllData}
+                className="hidden sm:flex items-center gap-2"
+                data-testid="button-export-all"
+              >
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
               <AddSubscriptionForm 
                 onSubmit={onAddSubscription} 
                 isLoading={isLoading}

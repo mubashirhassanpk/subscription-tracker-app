@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { User, Settings, LogOut, Crown, CreditCard, HelpCircle, Menu, Bell, Plus, Clock, Calendar as CalendarIcon, Home, Star, DollarSign } from "lucide-react";
+import { User, Settings, LogOut, Crown, CreditCard, HelpCircle, Menu, Bell, Plus, Clock, Calendar as CalendarIcon, Home, Star, DollarSign, BarChart3, AlertCircle } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { NotificationCenter } from "./NotificationCenter";
 import { Link, useLocation } from "wouter";
@@ -46,9 +46,10 @@ export function HeaderMenu() {
 
   const dashboardNavItems = [
     { title: "Dashboard", url: "/dashboard", icon: User, active: location === "/dashboard" },
+    { title: "Analytics", url: "/analytics", icon: BarChart3, active: location === "/analytics" },
     { title: "Calendar", url: "/calendar", icon: CalendarIcon, active: location === "/calendar" },
+    { title: "Reminders", url: "/reminders", icon: AlertCircle, active: location === "/reminders" },
     { title: "History", url: "/history", icon: Clock, active: location === "/history" },
-    { title: "API Docs", url: "/docs", icon: HelpCircle, active: location === "/docs" },
     { title: "API Keys", url: "/api-keys", icon: CreditCard, active: location === "/api-keys" },
   ];
 

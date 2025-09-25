@@ -16,6 +16,8 @@ import Profile from "./pages/Profile";
 import Plans from "./pages/Plans";
 import History from "./pages/History";
 import Calendar from "./pages/Calendar";
+import Analytics from "./pages/Analytics";
+import Reminders from "./pages/Reminders";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,6 +28,8 @@ function Router() {
       <Route path="/features" component={Features} />
       <Route path="/calendar" component={Calendar} />
       <Route path="/history" component={History} />
+      <Route path="/analytics" component={Analytics} />
+      <Route path="/reminders" component={Reminders} />
       <Route path="/docs" component={Documentation} />
       <Route path="/api-keys" component={ApiKeys} />
       <Route path="/profile" component={Profile} />
