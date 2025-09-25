@@ -190,7 +190,7 @@ export default function ReminderSettings() {
   // Test connection mutation
   const testConnectionMutation = useMutation({
     mutationFn: async ({ service, settings }: { service: string; settings: any }) => {
-      return apiRequest(`/api/test-connection/${service.toLowerCase()}`, 'POST', settings);
+      return apiRequest('POST', `/api/test-connection/${service.toLowerCase()}`, settings);
     },
     onSuccess: (data, { service }) => {
       toast({
@@ -228,7 +228,7 @@ export default function ReminderSettings() {
 
   // Google Calendar OAuth initiation
   const initiateGoogleOAuth = useMutation({
-    mutationFn: () => apiRequest('/api/auth/google/calendar', 'GET'),
+    mutationFn: () => apiRequest('GET', '/api/auth/google/calendar'),
     onSuccess: (data: any) => {
       if (data.authUrl) {
         window.open(data.authUrl, '_blank', 'width=500,height=600');
