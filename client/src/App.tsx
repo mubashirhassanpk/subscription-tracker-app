@@ -19,6 +19,7 @@ import History from "./pages/History";
 import Calendar from "./pages/Calendar";
 import Analytics from "./pages/Analytics";
 import Reminders from "./pages/Reminders";
+import ReminderSettings from "./pages/ReminderSettings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/history" component={History} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/reminders" component={Reminders} />
+      <Route path="/reminder-settings" component={ReminderSettings} />
       <Route path="/docs" component={Documentation} />
       <Route path="/api-keys" component={ApiKeys} />
       <Route path="/profile" component={Profile} />
