@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import handlebars from 'handlebars';
 import fs from 'fs';
 import path from 'path';
@@ -11,10 +11,22 @@ const __dirname = path.dirname(__filename);
 export class EmailService {
   private templates: Map<string, HandlebarsTemplateDelegate> = new Map();
   private encryptionKey: string;
+  private resend: Resend | null = null;
   
   constructor() {
     this.encryptionKey = process.env.ENCRYPTION_KEY || 'fallback-key-change-in-production';
+    this.initializeResend();
     this.initializeTemplates();
+  }
+
+  /**
+   * Initialize Resend client
+   */
+  private initializeResend() {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (apiKey) {
+      this.resend = new Resend(apiKey);
+    }
   }
 
   /**
@@ -298,7 +310,7 @@ Manage all your subscriptions in one place`;
   }
 
   /**
-   * Test email connection
+   * Test email connection using Resend API
    */
   async testConnection(preferences: UserNotificationPreferences) {
     try {
@@ -306,28 +318,42 @@ Manage all your subscriptions in one place`;
         return { success: false, message: 'Email not enabled or address missing' };
       }
 
-      const transporter = await this.createTransporter(preferences);
-      await transporter.verify();
+      if (!this.resend) {
+        return { success: false, message: 'Resend API key not configured. Please add RESEND_API_KEY to your environment variables.' };
+      }
 
-      // Send test email
-      await transporter.sendMail({
-        from: `"Subscription Tracker" <${process.env.FROM_EMAIL || 'noreply@subscriptiontracker.app'}>`,
-        to: preferences.emailAddress,
-        subject: '✅ Email Connection Test Successful',
-        text: 'Your email configuration is working correctly! You will receive subscription reminders at this address.',
+      // Send test email using Resend
+      const { data, error } = await this.resend.emails.send({
+        from: 'Subscription Tracker <onboarding@yourdomain.com>', // You'll need to use a verified domain
+        to: [preferences.emailAddress],
+        subject: '✅ Email Connection Test Successful - Subscription Tracker',
         html: `
-          <h2>✅ Email Connection Test Successful</h2>
-          <p>Your email configuration is working correctly!</p>
-          <p>You will receive subscription reminders at this address.</p>
-          <p>Best regards,<br>The Subscription Tracker Team</p>
-        `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">✅ Email Connection Test Successful</h2>
+            <p>Your email configuration is working correctly!</p>
+            <p>You will receive subscription reminders at this address.</p>
+            <hr style="border: 1px solid #eee; margin: 20px 0;">
+            <p style="color: #666; font-size: 14px;">
+              This test was sent from your subscription tracker app using Resend API.
+            </p>
+            <p>Best regards,<br>The Subscription Tracker Team</p>
+          </div>
+        `,
+        text: 'Your email configuration is working correctly! You will receive subscription reminders at this address.'
       });
 
-      return { success: true, message: 'Email connection test successful' };
+      if (error) {
+        console.error('Resend error:', error);
+        return { success: false, message: error.message || 'Failed to send test email' };
+      }
+
+      return { success: true, message: `Test email sent successfully! Email ID: ${data?.id}` };
     } catch (error) {
-      console.error('Email connection test failed:', error);
-      const message = error instanceof Error ? error.message : 'Connection test failed';
-      return { success: false, message };
+      console.error('Email test connection error:', error);
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Email test failed' 
+      };
     }
   }
 
