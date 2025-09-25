@@ -239,42 +239,173 @@ class SubscriptionTrackerPopup {
     if (!Array.isArray(this.subscriptions) || this.subscriptions.length === 0) {
       listContainer.innerHTML = `
         <div class="empty-state">
+          <div class="empty-icon">📱</div>
           <h3>No subscriptions yet</h3>
-          <p>Add your first subscription to get started</p>
+          <p>Add your first subscription to get started tracking your spending</p>
+          <button class="empty-action-btn" onclick="popup.showQuickAddForm()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5V19"/>
+              <path d="M5 12H19"/>
+            </svg>
+            Add Subscription
+          </button>
         </div>
       `;
       return;
     }
 
-    // Show only the first 3 subscriptions in popup
-    const recentSubs = this.subscriptions.slice(0, 3);
+    // Show only the first 4 subscriptions in popup with priority for trials and due soon
+    const prioritizedSubs = this.prioritizeSubscriptions(this.subscriptions).slice(0, 4);
     
-    listContainer.innerHTML = recentSubs.map(sub => `
-      <div class="subscription-item" data-id="${sub.id}">
-        <div class="subscription-info">
-          <div class="subscription-name">
-            <span class="status-indicator ${(sub.isActive === 1 || sub.isActive === true) ? 'active' : 'inactive'}"></span>
-            ${this.escapeHtml(sub.name)}
+    listContainer.innerHTML = prioritizedSubs.map(sub => this.renderSubscriptionCard(sub)).join('');
+  }
+
+  prioritizeSubscriptions(subscriptions) {
+    // Sort: trials first, then due soon, then by cost (highest first)
+    return subscriptions.sort((a, b) => {
+      // Trials get highest priority
+      if (this.isTrialSubscription(a) && !this.isTrialSubscription(b)) return -1;
+      if (!this.isTrialSubscription(a) && this.isTrialSubscription(b)) return 1;
+      
+      // Next priority: subscriptions due soon
+      const isDueSoonA = this.isDueSoon(a);
+      const isDueSoonB = this.isDueSoon(b);
+      if (isDueSoonA && !isDueSoonB) return -1;
+      if (!isDueSoonA && isDueSoonB) return 1;
+      
+      // Finally by cost (highest first)
+      return parseFloat(b.cost || 0) - parseFloat(a.cost || 0);
+    });
+  }
+
+  renderSubscriptionCard(sub) {
+    const isActive = sub.isActive === 1 || sub.isActive === true;
+    const isTrial = this.isTrialSubscription(sub);
+    const isDueSoon = this.isDueSoon(sub);
+    const nextBilling = this.formatNextBillingDate(sub);
+    const daysUntil = this.getDaysUntilRenewal(sub);
+    
+    let statusClass = 'active';
+    let statusText = 'Active';
+    let urgencyClass = '';
+    
+    if (isTrial) {
+      statusClass = 'trial';
+      statusText = 'Trial';
+      urgencyClass = 'trial-card';
+    } else if (!isActive) {
+      statusClass = 'inactive';
+      statusText = 'Inactive';
+    } else if (isDueSoon) {
+      urgencyClass = 'due-soon-card';
+    }
+
+    return `
+      <div class="subscription-card ${urgencyClass}" data-id="${sub.id}">
+        <div class="subscription-header">
+          <div class="subscription-main">
+            <div class="subscription-name">
+              <span class="status-indicator ${statusClass}" title="${statusText}"></span>
+              <span class="name-text">${this.escapeHtml(sub.name)}</span>
+              ${isTrial ? '<span class="trial-badge">TRIAL</span>' : ''}
+            </div>
+            <div class="subscription-cost">
+              $${parseFloat(sub.cost || 0).toFixed(2)}
+              <span class="billing-cycle">/${this.formatBillingCycle(sub.billingCycle, true)}</span>
+            </div>
           </div>
-          <div class="subscription-details">
-            ${this.escapeHtml(sub.category || 'Other')} • ${this.formatBillingCycle(sub.billingCycle)}
+          <div class="subscription-actions">
+            <button class="subscription-btn edit-btn" onclick="popup.editSubscription('${sub.id}')" title="Edit">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+              </svg>
+            </button>
+            <button class="subscription-btn delete-btn" onclick="popup.deleteSubscription('${sub.id}')" title="Delete">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m18 6-12 12M6 6l12 12"/>
+              </svg>
+            </button>
           </div>
         </div>
-        <div class="subscription-cost">$${parseFloat(sub.cost || 0).toFixed(2)}</div>
-        <div class="subscription-actions">
-          <button class="subscription-btn" onclick="popup.editSubscription('${sub.id}')" title="Edit">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" stroke="currentColor" stroke-width="2"/>
-            </svg>
-          </button>
-          <button class="subscription-btn" onclick="popup.deleteSubscription('${sub.id}')" title="Delete">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <path d="m18 6-12 12M6 6l12 12" stroke="currentColor" stroke-width="2"/>
-            </svg>
-          </button>
+        
+        <div class="subscription-details">
+          <div class="detail-item">
+            <span class="detail-label">Category:</span>
+            <span class="detail-value">${this.escapeHtml(sub.category || 'Other')}</span>
+          </div>
+          ${nextBilling ? `
+            <div class="detail-item">
+              <span class="detail-label">${isTrial ? 'Trial ends:' : 'Next billing:'}</span>
+              <span class="detail-value ${isDueSoon ? 'urgent' : ''}">${nextBilling}</span>
+            </div>
+          ` : ''}
+          ${daysUntil !== null ? `
+            <div class="detail-item">
+              <span class="detail-label">Due in:</span>
+              <span class="detail-value ${isDueSoon ? 'urgent' : ''}">
+                ${daysUntil === 0 ? 'Today' : daysUntil === 1 ? '1 day' : `${daysUntil} days`}
+              </span>
+            </div>
+          ` : ''}
         </div>
       </div>
-    `).join('');
+    `;
+  }
+
+  isTrialSubscription(sub) {
+    return sub.isTrial === true || sub.isTrial === 1;
+  }
+
+  isDueSoon(sub, days = 7) {
+    if (!sub.nextBillingDate) return false;
+    const today = new Date();
+    const renewalDate = new Date(sub.nextBillingDate);
+    const diffTime = renewalDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= days && diffDays >= 0;
+  }
+
+  formatNextBillingDate(sub) {
+    if (!sub.nextBillingDate) return null;
+    const date = new Date(sub.nextBillingDate);
+    const today = new Date();
+    
+    // If it's today or tomorrow, show special text
+    const diffTime = date.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Tomorrow';
+    if (diffDays < 0) return 'Overdue';
+    
+    // Otherwise show formatted date
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+    });
+  }
+
+  getDaysUntilRenewal(sub) {
+    if (!sub.nextBillingDate) return null;
+    const today = new Date();
+    const renewalDate = new Date(sub.nextBillingDate);
+    const diffTime = renewalDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  }
+
+  formatBillingCycle(cycle, short = false) {
+    if (short) {
+      switch (cycle?.toLowerCase()) {
+        case 'monthly': return 'mo';
+        case 'yearly': case 'annual': return 'yr';
+        case 'weekly': return 'wk';
+        case 'daily': return 'day';
+        default: return 'mo';
+      }
+    }
+    return cycle || 'monthly';
   }
 
   escapeHtml(text) {

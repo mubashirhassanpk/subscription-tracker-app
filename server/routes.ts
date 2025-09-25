@@ -14,6 +14,7 @@ import accountRouter from "./routes/account";
 import { remindersRouter } from "./routes/reminders";
 import { analyticsRouter } from "./routes/analytics";
 import { exportRouter } from "./routes/export";
+import { testConnectionsRouter } from "./routes/test-connections";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register API route modules
@@ -28,6 +29,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/reminders', remindersRouter);
   app.use('/api/analytics', analyticsRouter);
   app.use('/api/export', exportRouter);
+  app.use('/api/test-connection', testConnectionsRouter);
   app.use('/api/v1', apiRouter);
 
   // API Keys management page

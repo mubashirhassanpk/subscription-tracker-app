@@ -82,6 +82,10 @@ export interface IStorage {
   getUpcomingReminders(userId: string): Promise<SubscriptionReminder[]>;
   createSubscriptionReminder(reminder: InsertSubscriptionReminder): Promise<SubscriptionReminder>;
   deleteSubscriptionReminder(reminderId: string, userId: string): Promise<boolean>;
+  getReminderForSubscriptionAndDay(subscriptionId: string, daysBefore: number): Promise<SubscriptionReminder | undefined>;
+  deleteSubscriptionReminders(subscriptionId: string): Promise<boolean>;
+  getUserReminderStats(userId: string): Promise<SubscriptionReminder[]>;
+  getAllUsersWithPreferences(): Promise<Array<{id: string; preferences: UserNotificationPreferences}>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -462,6 +466,44 @@ export class DatabaseStorage implements IStorage {
         )
       );
     return (result.rowCount ?? 0) > 0;
+  }
+
+  async getReminderForSubscriptionAndDay(subscriptionId: string, daysBefore: number): Promise<SubscriptionReminder | undefined> {
+    const [reminder] = await db.select().from(subscriptionReminders)
+      .where(and(
+        eq(subscriptionReminders.subscriptionId, subscriptionId),
+        eq(subscriptionReminders.daysBefore, daysBefore)
+      ));
+    return reminder || undefined;
+  }
+
+  async deleteSubscriptionReminders(subscriptionId: string): Promise<boolean> {
+    const result = await db.delete(subscriptionReminders)
+      .where(eq(subscriptionReminders.subscriptionId, subscriptionId));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getUserReminderStats(userId: string): Promise<SubscriptionReminder[]> {
+    return await db.select().from(subscriptionReminders)
+      .where(eq(subscriptionReminders.userId, userId))
+      .orderBy(desc(subscriptionReminders.createdAt));
+  }
+
+  async getAllUsersWithPreferences(): Promise<Array<{id: string; preferences: UserNotificationPreferences}>> {
+    // Get all users who have notification preferences set up
+    const usersWithPrefs = await db.select({
+      id: users.id,
+      preferences: userNotificationPreferences
+    })
+    .from(users)
+    .leftJoin(userNotificationPreferences, eq(users.id, userNotificationPreferences.userId));
+
+    return usersWithPrefs
+      .filter(user => user.preferences !== null)
+      .map(user => ({
+        id: user.id,
+        preferences: user.preferences!
+      }));
   }
 }
 
