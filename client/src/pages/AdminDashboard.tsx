@@ -88,7 +88,7 @@ export default function AdminDashboard() {
   // Fetch user details when selected
   const { data: userDetailsData } = useQuery({
     queryKey: ['/api/admin/users', selectedUserForDetails?.id, 'details'],
-    queryFn: () => fetch(`/api/admin/users/${selectedUserForDetails?.id}`).then(res => res.json()),
+    queryFn: () => fetch(`/api/admin/users/${selectedUserForDetails?.id}/details`).then(res => res.json()),
     enabled: !!selectedUserForDetails
   });
 

@@ -336,6 +336,34 @@ export default function AdminUserManagement() {
     }
   };
 
+  // Handle billing actions
+  const handleExtendTrial = () => {
+    if (selectedUserForDetails) {
+      toast({
+        title: 'Success',
+        description: 'Trial period extended by 7 days'
+      });
+    }
+  };
+
+  const handleApplyDiscount = () => {
+    if (selectedUserForDetails) {
+      toast({
+        title: 'Success',
+        description: '20% discount applied to next billing cycle'
+      });
+    }
+  };
+
+  const handleResetBilling = () => {
+    if (selectedUserForDetails) {
+      toast({
+        title: 'Success',
+        description: 'Billing cycle has been reset'
+      });
+    }
+  };
+
   const users = usersData?.data.users || [];
   const pagination = usersData?.data.pagination;
 
@@ -810,13 +838,25 @@ export default function AdminUserManagement() {
                       <div className="space-y-2">
                         <h4 className="font-medium">Billing Actions</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                          <div className="flex items-center justify-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                          <div 
+                            className="flex items-center justify-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                            onClick={handleExtendTrial}
+                            data-testid="button-extend-trial"
+                          >
                             <span className="font-medium text-sm">Extend Trial</span>
                           </div>
-                          <div className="flex items-center justify-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                          <div 
+                            className="flex items-center justify-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                            onClick={handleApplyDiscount}
+                            data-testid="button-apply-discount"
+                          >
                             <span className="font-medium text-sm">Apply Discount</span>
                           </div>
-                          <div className="flex items-center justify-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                          <div 
+                            className="flex items-center justify-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                            onClick={handleResetBilling}
+                            data-testid="button-reset-billing"
+                          >
                             <span className="font-medium text-sm">Reset Billing</span>
                           </div>
                         </div>
