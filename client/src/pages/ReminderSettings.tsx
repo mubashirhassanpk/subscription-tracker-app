@@ -169,7 +169,7 @@ export default function ReminderSettings() {
   // Save settings mutation
   const saveSettingsMutation = useMutation({
     mutationFn: async (data: ReminderSettingsForm) => {
-      return apiRequest('/api/reminders/preferences', 'PUT', data);
+      return apiRequest('PUT', '/api/reminders/preferences', data);
     },
     onSuccess: () => {
       toast({
