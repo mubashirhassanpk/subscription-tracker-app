@@ -1,24 +1,48 @@
-// Chrome Extension Popup Script
+// Enhanced Chrome Extension Popup Script
 class SubscriptionTrackerPopup {
   constructor() {
     this.apiUrl = '';
     this.apiKey = '';
     this.subscriptions = [];
     this.isAuthenticated = false;
+    this.currentTab = 'dashboard';
+    this.searchQuery = '';
+    this.activeFilter = 'all';
+    this.isLoading = false;
+    this.animationQueue = [];
+    this.notifications = [];
+    this.syncStatus = 'idle';
+    this.retryCount = 0;
+    this.maxRetries = 3;
     this.init();
   }
 
   async init() {
     await this.loadSettings();
     this.setupEventListeners();
+    this.setupKeyboardShortcuts();
+    this.initializeAnimations();
     this.checkAuthenticationStatus();
+    this.startPeriodicSync();
+    this.loadNotifications();
+    this.addLoadingAnimations();
   }
 
   async loadSettings() {
     try {
-      const result = await chrome.storage.sync.get(['apiUrl', 'apiKey']);
+      const result = await chrome.storage.sync.get([
+        'apiUrl', 'apiKey', 'theme', 'compactMode', 'autoSync', 
+        'syncInterval', 'notifications', 'lastSyncTime'
+      ]);
+      
       this.apiUrl = result.apiUrl || '';
       this.apiKey = result.apiKey || '';
+      this.theme = result.theme || 'system';
+      this.compactMode = result.compactMode || false;
+      this.autoSync = result.autoSync !== false;
+      this.syncInterval = result.syncInterval || 300000; // 5 minutes
+      this.notificationsEnabled = result.notifications !== false;
+      this.lastSyncTime = result.lastSyncTime || 0;
       
       // Set form values if they exist
       const apiUrlInput = document.getElementById('apiUrl');
@@ -27,60 +51,95 @@ class SubscriptionTrackerPopup {
       if (apiKeyInput) apiKeyInput.value = this.apiKey;
       
       this.isAuthenticated = !!(this.apiUrl && this.apiKey);
+      
+      // Apply theme and settings
+      this.applyTheme();
+      this.applyCompactMode();
+      
+      console.log('Settings loaded:', {
+        hasApiUrl: !!this.apiUrl,
+        hasApiKey: !!this.apiKey,
+        theme: this.theme,
+        compactMode: this.compactMode,
+        autoSync: this.autoSync
+      });
     } catch (error) {
       console.error('Error loading settings:', error);
+      this.showErrorToast('Failed to load settings');
     }
   }
 
   setupEventListeners() {
-    // Settings button
+    // Settings button with enhanced animation
     document.getElementById('settingsBtn').addEventListener('click', () => {
+      this.animateClick(document.getElementById('settingsBtn'));
       this.showAuthSection();
     });
 
-    // Connect button
-    document.getElementById('connectBtn').addEventListener('click', () => {
-      this.handleConnect();
+    // Connect button with loading state
+    document.getElementById('connectBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('connectBtn');
+      this.showButtonLoading(btn, 'Connecting...');
+      await this.handleConnect();
+      this.hideButtonLoading(btn, 'Connect Account');
     });
 
-    // Navigation tabs
+    // Navigation tabs with smooth transitions
     document.querySelectorAll('.nav-tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        this.switchTab(tab.dataset.tab);
+        if (!tab.classList.contains('active')) {
+          this.animateTabSwitch(tab);
+          this.switchTab(tab.dataset.tab);
+        }
       });
     });
 
-    // Search and filter
-    document.getElementById('searchInput').addEventListener('input', () => {
-      this.handleSearch();
+    // Enhanced search with debouncing
+    let searchTimeout;
+    document.getElementById('searchInput')?.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        this.handleSearch(e.target.value);
+      }, 300);
     });
 
-    document.getElementById('searchBtn').addEventListener('click', () => {
-      this.handleSearch();
+    document.getElementById('searchBtn')?.addEventListener('click', () => {
+      const searchInput = document.getElementById('searchInput');
+      this.handleSearch(searchInput?.value || '');
     });
 
+    // Enhanced filter chips with animations
     document.querySelectorAll('.filter-chip').forEach(chip => {
       chip.addEventListener('click', () => {
+        this.animateFilterSelection(chip);
         this.handleFilter(chip.dataset.filter);
       });
     });
 
-    // Calendar navigation
-    document.getElementById('prevMonth').addEventListener('click', () => {
+    // Calendar navigation with smooth animations
+    document.getElementById('prevMonth')?.addEventListener('click', () => {
+      this.animateCalendarTransition(-1);
       this.navigateMonth(-1);
     });
 
-    document.getElementById('nextMonth').addEventListener('click', () => {
+    document.getElementById('nextMonth')?.addEventListener('click', () => {
+      this.animateCalendarTransition(1);
       this.navigateMonth(1);
     });
 
-    // Quick actions
-    document.getElementById('addSubBtn').addEventListener('click', () => {
+    // Enhanced quick actions with loading states
+    document.getElementById('addSubBtn')?.addEventListener('click', () => {
+      this.animateClick(document.getElementById('addSubBtn'));
       this.showQuickAddForm();
     });
 
-    document.getElementById('syncBtn').addEventListener('click', () => {
-      this.syncData();
+    document.getElementById('syncBtn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('syncBtn');
+      if (this.syncStatus !== 'syncing') {
+        this.showSyncAnimation(btn);
+        await this.syncData();
+        this.hideSyncAnimation(btn);
+      }
     });
 
     // Quick action buttons
@@ -156,6 +215,290 @@ class SubscriptionTrackerPopup {
 
     // Auto-detect current site subscription
     this.detectCurrentSiteSubscription();
+  }
+
+  // New enhanced methods for better UX
+  setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+      // Ctrl/Cmd + K for search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        }
+      }
+      
+      // Ctrl/Cmd + N for new subscription
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        this.showQuickAddForm();
+      }
+      
+      // Ctrl/Cmd + R for refresh/sync
+      if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+        e.preventDefault();
+        this.syncData();
+      }
+      
+      // Escape to close modals/forms
+      if (e.key === 'Escape') {
+        this.closeActiveModal();
+      }
+      
+      // Tab numbers (1-4) for navigation
+      if (e.key >= '1' && e.key <= '4' && !e.ctrlKey && !e.metaKey) {
+        const tabs = ['dashboard', 'calendar', 'insights', 'reminders'];
+        const tabIndex = parseInt(e.key) - 1;
+        if (tabs[tabIndex]) {
+          this.switchTab(tabs[tabIndex]);
+        }
+      }
+    });
+  }
+
+  initializeAnimations() {
+    // Add entrance animations to cards
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    // Observe all subscription cards
+    document.querySelectorAll('.subscription-card').forEach(card => {
+      observer.observe(card);
+    });
+  }
+
+  addLoadingAnimations() {
+    // Add skeleton loading states
+    this.skeletonTemplate = `
+      <div class="skeleton-card">
+        <div class="skeleton-header">
+          <div class="skeleton-title"></div>
+          <div class="skeleton-amount"></div>
+        </div>
+        <div class="skeleton-details">
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line short"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  startPeriodicSync() {
+    if (this.autoSync && this.isAuthenticated) {
+      setInterval(() => {
+        this.syncData(true); // Silent sync
+      }, this.syncInterval);
+    }
+  }
+
+  async loadNotifications() {
+    try {
+      const result = await chrome.storage.local.get(['notifications']);
+      this.notifications = result.notifications || [];
+      this.updateNotificationBadge();
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+    }
+  }
+
+  // Animation utilities
+  animateClick(element) {
+    if (!element) return;
+    element.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      element.style.transform = '';
+    }, 150);
+  }
+
+  animateTabSwitch(newTab) {
+    const currentTab = document.querySelector('.nav-tab.active');
+    if (currentTab) {
+      currentTab.style.transform = 'translateX(-10px)';
+      currentTab.style.opacity = '0.5';
+      setTimeout(() => {
+        currentTab.style.transform = '';
+        currentTab.style.opacity = '';
+      }, 200);
+    }
+    
+    newTab.style.transform = 'translateX(10px)';
+    newTab.style.opacity = '0.5';
+    setTimeout(() => {
+      newTab.style.transform = '';
+      newTab.style.opacity = '';
+    }, 200);
+  }
+
+  animateFilterSelection(chip) {
+    chip.style.transform = 'scale(1.1)';
+    setTimeout(() => {
+      chip.style.transform = '';
+    }, 150);
+  }
+
+  animateCalendarTransition(direction) {
+    const calendar = document.querySelector('.calendar-days');
+    if (calendar) {
+      calendar.style.transform = `translateX(${direction * 10}px)`;
+      calendar.style.opacity = '0.8';
+      setTimeout(() => {
+        calendar.style.transform = '';
+        calendar.style.opacity = '';
+      }, 200);
+    }
+  }
+
+  showButtonLoading(button, loadingText) {
+    if (!button) return;
+    button.dataset.originalText = button.textContent;
+    button.innerHTML = `
+      <svg class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+      </svg>
+      ${loadingText}
+    `;
+    button.disabled = true;
+  }
+
+  hideButtonLoading(button, originalText) {
+    if (!button) return;
+    button.innerHTML = originalText || button.dataset.originalText || 'Button';
+    button.disabled = false;
+    delete button.dataset.originalText;
+  }
+
+  showSyncAnimation(button) {
+    this.syncStatus = 'syncing';
+    if (!button) return;
+    button.innerHTML = `
+      <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+      </svg>
+      Syncing...
+    `;
+    button.disabled = true;
+  }
+
+  hideSyncAnimation(button) {
+    this.syncStatus = 'idle';
+    if (!button) return;
+    button.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M23 4v6h-6M1 20v-6h6M20.49 9A9 9 0 0 0 5.64 5.64L1 10M3.51 15A9 9 0 0 0 18.36 18.36L23 14"/>
+      </svg>
+      Sync Now
+    `;
+    button.disabled = false;
+  }
+
+  // Enhanced error handling and user feedback
+  showErrorToast(message, duration = 3000) {
+    const toast = this.createToast(message, 'error');
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.remove();
+    }, duration);
+  }
+
+  showSuccessToast(message, duration = 3000) {
+    const toast = this.createToast(message, 'success');
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.remove();
+    }, duration);
+  }
+
+  createToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+      <div class="toast-content">
+        <div class="toast-icon">${type === 'error' ? '⚠️' : '✅'}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+    `;
+    
+    // Add toast styles if not already added
+    if (!document.querySelector('#toast-styles')) {
+      const styles = document.createElement('style');
+      styles.id = 'toast-styles';
+      styles.textContent = `
+        .toast {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          z-index: 10000;
+          max-width: 350px;
+          padding: 12px 16px;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+          backdrop-filter: blur(10px);
+          animation: slideIn 0.3s ease-out;
+        }
+        .toast-error {
+          background: rgba(248, 113, 113, 0.9);
+          border: 1px solid rgba(220, 38, 38, 0.3);
+          color: white;
+        }
+        .toast-success {
+          background: rgba(52, 211, 153, 0.9);
+          border: 1px solid rgba(16, 185, 129, 0.3);
+          color: white;
+        }
+        .toast-content {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(styles);
+    }
+    
+    return toast;
+  }
+
+  applyTheme() {
+    if (this.theme === 'system') {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.body.classList.toggle('dark-theme', prefersDark);
+    } else {
+      document.body.classList.toggle('dark-theme', this.theme === 'dark');
+    }
+  }
+
+  applyCompactMode() {
+    document.body.classList.toggle('compact-mode', this.compactMode);
+  }
+
+  updateNotificationBadge() {
+    const badge = document.querySelector('.notification-badge');
+    const unreadCount = this.notifications.filter(n => !n.read).length;
+    
+    if (badge) {
+      badge.textContent = unreadCount;
+      badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+    }
+  }
+
+  closeActiveModal() {
+    // Close any open modals or forms
+    const activeModal = document.querySelector('.modal.active, .quick-add-form:not(.hidden)');
+    if (activeModal) {
+      this.hideQuickAddForm();
+    }
   }
 
   checkAuthenticationStatus() {
