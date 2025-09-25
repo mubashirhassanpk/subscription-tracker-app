@@ -477,24 +477,28 @@ export default function AdminDashboard() {
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end space-x-2">
-                                  <Link href="/admin/users">
-                                    <Button 
-                                      size="sm" 
-                                      variant="ghost" 
-                                      data-testid={`button-view-${user.id}`}
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
-                                  </Link>
-                                  <Link href="/admin/users">
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      data-testid={`button-edit-${user.id}`}
-                                    >
-                                      <Settings className="h-4 w-4" />
-                                    </Button>
-                                  </Link>
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    onClick={() => {
+                                      setSelectedUserForDetails(user);
+                                      setIsUserDetailsOpen(true);
+                                    }}
+                                    data-testid={`button-view-${user.id}`}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setSelectedUserForDetails(user);
+                                      setIsUserDetailsOpen(true);
+                                    }}
+                                    data-testid={`button-edit-${user.id}`}
+                                  >
+                                    <Settings className="h-4 w-4" />
+                                  </Button>
                                 </div>
                               </TableCell>
                             </TableRow>
@@ -703,93 +707,215 @@ export default function AdminDashboard() {
         </Tabs>
       </div>
 
-      {/* User Details Dialog */}
+      {/* Comprehensive User Management Dialog */}
       <Dialog open={isUserDetailsOpen} onOpenChange={setIsUserDetailsOpen}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>User Details</DialogTitle>
+            <DialogTitle className="flex items-center space-x-2">
+              <Users className="h-5 w-5" />
+              <span>User Management: {selectedUserForDetails?.name}</span>
+            </DialogTitle>
             <DialogDescription>
-              View detailed information about {selectedUserForDetails?.name}
+              Comprehensive user feature and subscription management
             </DialogDescription>
           </DialogHeader>
-          {userDetailsData?.data && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Name</Label>
-                  <div className="mt-1 text-sm">{userDetailsData.data.name}</div>
+          
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="subscription">Subscription</TabsTrigger>
+              <TabsTrigger value="permissions">Permissions</TabsTrigger>
+              <TabsTrigger value="notifications">Notifications</TabsTrigger>
+              <TabsTrigger value="api-keys">API Keys</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-4">
+              <div className="grid grid-cols-2 gap-6">
+                {/* Account Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Account Information</h3>
+                  {userDetailsData?.data?.user && (
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-sm font-medium">User ID:</Label>
+                        <div className="mt-1 text-sm font-mono bg-muted px-2 py-1 rounded">
+                          {userDetailsData.data.user.id}
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Email:</Label>
+                        <div className="mt-1 text-sm">{userDetailsData.data.user.email}</div>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Role:</Label>
+                        <div className="mt-1">
+                          <Badge variant={userDetailsData.data.user.role === 'admin' ? 'default' : 'secondary'}>
+                            {userDetailsData.data.user.role}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Status:</Label>
+                        <div className="mt-1">
+                          <Badge variant={userDetailsData.data.user.isActive ? 'default' : 'destructive'}>
+                            {userDetailsData.data.user.isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Created:</Label>
+                        <div className="mt-1 text-sm">
+                          {new Date(userDetailsData.data.user.createdAt).toLocaleDateString('en-US', { 
+                            month: 'numeric', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })}
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Last Login:</Label>
+                        <div className="mt-1 text-sm">
+                          {userDetailsData.data.user.lastLoginAt 
+                            ? new Date(userDetailsData.data.user.lastLoginAt).toLocaleString()
+                            : 'Never'
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <Label>Email</Label>
-                  <div className="mt-1 text-sm">{userDetailsData.data.email}</div>
-                </div>
-                <div>
-                  <Label>Role</Label>
-                  <div className="mt-1">
-                    <Badge variant={userDetailsData.data.role === 'admin' ? 'default' : 'secondary'}>
-                      {userDetailsData.data.role}
-                    </Badge>
-                  </div>
-                </div>
-                <div>
-                  <Label>Status</Label>
-                  <div className="mt-1">
-                    <Badge variant={userDetailsData.data.isActive ? 'default' : 'destructive'}>
-                      {userDetailsData.data.isActive ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </div>
-                </div>
-                <div>
-                  <Label>Subscriptions</Label>
-                  <div className="mt-1 text-sm flex items-center">
-                    <CreditCard className="h-4 w-4 mr-1" />
-                    {userDetailsData.data.subscriptionCount || 0}
-                  </div>
-                </div>
-                <div>
-                  <Label>Last Login</Label>
-                  <div className="mt-1 text-sm">
-                    {userDetailsData.data.lastLoginAt 
-                      ? new Date(userDetailsData.data.lastLoginAt).toLocaleString()
-                      : 'Never'
-                    }
-                  </div>
-                </div>
-                <div>
-                  <Label>Created</Label>
-                  <div className="mt-1 text-sm">
-                    {new Date(userDetailsData.data.createdAt).toLocaleString()}
-                  </div>
-                </div>
-                <div>
-                  <Label>Plan</Label>
-                  <div className="mt-1 text-sm">
-                    {userDetailsData.data.planId || 'No plan assigned'}
+
+                {/* Quick Actions */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Quick Actions</h3>
+                  <div className="space-y-3">
+                    <div 
+                      className="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                      data-testid="action-edit-user"
+                    >
+                      <Edit className="mr-3 h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">Edit User Details</span>
+                    </div>
+                    <div 
+                      className="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                      onClick={() => {
+                        if (selectedUserForDetails) {
+                          impersonateMutation.mutate(selectedUserForDetails.id);
+                          setIsUserDetailsOpen(false);
+                        }
+                      }}
+                      data-testid="action-impersonate"
+                    >
+                      <UserCheck className="mr-3 h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">Impersonate User</span>
+                    </div>
+                    <div 
+                      className="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                      data-testid="action-view-logs"
+                    >
+                      <Activity className="mr-3 h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">View Activity Logs</span>
+                    </div>
+                    <div 
+                      className="flex items-center p-3 border border-red-200 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer text-red-600"
+                      data-testid="action-delete-user"
+                    >
+                      <AlertCircle className="mr-3 h-4 w-4" />
+                      <span className="font-medium">Delete User</span>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="flex space-x-2 pt-4">
-                <Link href="/admin/users">
-                  <Button variant="outline">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Full Management
-                  </Button>
-                </Link>
-                <Button
-                  onClick={() => {
-                    if (selectedUserForDetails) {
-                      impersonateMutation.mutate(selectedUserForDetails.id);
-                      setIsUserDetailsOpen(false);
-                    }
-                  }}
-                  disabled={impersonateMutation.isPending}
-                >
-                  <UserCheck className="h-4 w-4 mr-2" />
-                  Impersonate User
-                </Button>
-              </div>
-            </div>
-          )}
+            </TabsContent>
+
+            <TabsContent value="subscription" className="space-y-4">
+              <h3 className="text-lg font-semibold">Subscription Management</h3>
+              {userDetailsData?.data?.user && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Current Plan</Label>
+                      <div className="mt-1">
+                        {userDetailsData.data.user.planId ? (
+                          <Badge variant="default">Plan Assigned</Badge>
+                        ) : (
+                          <Badge variant="secondary">No Plan</Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Subscription Status</Label>
+                      <div className="mt-1">
+                        <Badge variant={userDetailsData.data.user.subscriptionStatus === 'active' ? 'default' : 'secondary'}>
+                          {userDetailsData.data.user.subscriptionStatus}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Assign New Plan</Label>
+                      <Select value={userDetailsData.data.user.planId || ''}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select a plan" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">No Plan</SelectItem>
+                          {plansData?.map((plan: any) => (
+                            <SelectItem key={plan.id} value={plan.id}>
+                              {plan.name} - ${plan.price}/{plan.billingInterval}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label>Subscription Status</Label>
+                      <Select value={userDetailsData.data.user.subscriptionStatus || 'active'}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="trial">Trial</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                      Save Subscription Changes
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="permissions" className="space-y-4">
+              <h3 className="text-lg font-semibold">User Permissions</h3>
+              <p className="text-sm text-muted-foreground">Manage user access permissions and feature access.</p>
+            </TabsContent>
+
+            <TabsContent value="notifications" className="space-y-4">
+              <h3 className="text-lg font-semibold">Notification Settings</h3>
+              <p className="text-sm text-muted-foreground">Configure notification preferences for this user.</p>
+            </TabsContent>
+
+            <TabsContent value="api-keys" className="space-y-4">
+              <h3 className="text-lg font-semibold">API Keys</h3>
+              <p className="text-sm text-muted-foreground">Manage API keys for this user account.</p>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-4">
+              <h3 className="text-lg font-semibold">User Analytics</h3>
+              <p className="text-sm text-muted-foreground">View usage statistics and analytics for this user.</p>
+            </TabsContent>
+          </Tabs>
+          
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsUserDetailsOpen(false)}>
               Close
