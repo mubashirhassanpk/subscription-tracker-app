@@ -862,7 +862,7 @@ export default function AdminDashboard() {
                           <SelectValue placeholder="Select a plan" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No Plan</SelectItem>
+                          <SelectItem value="no_plan">No Plan</SelectItem>
                           {plansData?.map((plan: any) => (
                             <SelectItem key={plan.id} value={plan.id}>
                               {plan.name} - ${plan.price}/{plan.billingInterval}
