@@ -516,7 +516,17 @@ export default function AdminUserManagement() {
                           {user.isActive ? 'Active' : 'Disabled'}
                         </Badge>
                       </TableCell>
-                      <TableCell>{user.subscriptionCount || 0}</TableCell>
+                      <TableCell>
+                        {user.planId ? (
+                          <Badge variant="default" className="text-xs">
+                            Plan Assigned
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">
+                            No Plan
+                          </Badge>
+                        )}
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
                       </TableCell>
