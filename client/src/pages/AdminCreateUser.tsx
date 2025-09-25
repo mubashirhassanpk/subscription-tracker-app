@@ -33,6 +33,7 @@ export default function AdminCreateUser() {
     subscriptionStatus: 'trial' as 'active' | 'cancelled' | 'expired' | 'trial',
     sendWelcomeEmail: true,
     generateApiKey: false,
+    initialSubscriptions: [] as string[], // Array of subscription IDs to assign
     notificationPreferences: {
       email: true,
       whatsapp: false,
@@ -44,6 +45,12 @@ export default function AdminCreateUser() {
   // Get available plans
   const { data: plansData } = useQuery({
     queryKey: ['/api/plans'],
+  });
+
+  // Get available subscriptions for assignment
+  const { data: subscriptionsData } = useQuery({
+    queryKey: ['/api/subscriptions', 'all'],
+    queryFn: () => fetch('/api/subscriptions?limit=100').then(res => res.json())
   });
 
   // Create user mutation
@@ -278,7 +285,7 @@ export default function AdminCreateUser() {
                     <SelectValue placeholder="Select plan (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No Plan</SelectItem>
+                    <SelectItem value="none">No Plan</SelectItem>
                     {Array.isArray(plansData) && plansData.map((plan: Plan) => (
                       <SelectItem key={plan.id} value={plan.id}>
                         {plan.name} - ${plan.price}/{plan.currency}
@@ -306,6 +313,57 @@ export default function AdminCreateUser() {
                     <SelectItem value="expired">Expired</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <Label>Assign Subscriptions</Label>
+                <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
+                  {subscriptionsData?.data && subscriptionsData.data.length > 0 ? (
+                    subscriptionsData.data.map((subscription: any) => (
+                      <div key={subscription.id} className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`subscription-${subscription.id}`}
+                          checked={formData.initialSubscriptions.includes(subscription.id)}
+                          onChange={(e) => {
+                            const subscriptionId = subscription.id;
+                            if (e.target.checked) {
+                              setFormData(prev => ({
+                                ...prev,
+                                initialSubscriptions: [...prev.initialSubscriptions, subscriptionId]
+                              }));
+                            } else {
+                              setFormData(prev => ({
+                                ...prev,
+                                initialSubscriptions: prev.initialSubscriptions.filter(id => id !== subscriptionId)
+                              }));
+                            }
+                          }}
+                          className="h-4 w-4"
+                          data-testid={`checkbox-subscription-${subscription.id}`}
+                        />
+                        <label 
+                          htmlFor={`subscription-${subscription.id}`} 
+                          className="text-sm flex-1 cursor-pointer"
+                        >
+                          <div className="font-medium">{subscription.name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            ${subscription.cost}/{subscription.billingCycle} • {subscription.category}
+                          </div>
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-muted-foreground py-4 text-center">
+                      No subscriptions available to assign
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Select existing subscriptions to assign to this user
+                </p>
               </div>
             </CardContent>
           </Card>

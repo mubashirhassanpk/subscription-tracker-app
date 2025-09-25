@@ -57,6 +57,8 @@ interface UsersResponse {
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateSubscriptionOpen, setIsCreateSubscriptionOpen] = useState(false);
+  const [selectedUserForDetails, setSelectedUserForDetails] = useState<User | null>(null);
+  const [isUserDetailsOpen, setIsUserDetailsOpen] = useState(false);
   const [subscriptionFormData, setSubscriptionFormData] = useState({
     userId: '',
     name: '',
@@ -81,6 +83,13 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/users', { search: searchTerm, limit: 10 }],
     queryFn: () => 
       fetch(`/api/admin/users?limit=10${searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ''}`).then(res => res.json())
+  });
+
+  // Fetch user details when selected
+  const { data: userDetailsData } = useQuery({
+    queryKey: ['/api/admin/users', selectedUserForDetails?.id, 'details'],
+    queryFn: () => fetch(`/api/admin/users/${selectedUserForDetails?.id}`).then(res => res.json()),
+    enabled: !!selectedUserForDetails
   });
 
   // Impersonation mutation
@@ -426,11 +435,17 @@ export default function AdminDashboard() {
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end space-x-2">
-                                  <Link href={`/admin/users/${user.id}`}>
-                                    <Button size="sm" variant="ghost" data-testid={`button-view-${user.id}`}>
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
-                                  </Link>
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    onClick={() => {
+                                      setSelectedUserForDetails(user);
+                                      setIsUserDetailsOpen(true);
+                                    }}
+                                    data-testid={`button-view-${user.id}`}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
                                   <Button
                                     size="sm"
                                     variant="ghost"
@@ -616,6 +631,101 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* User Details Dialog */}
+      <Dialog open={isUserDetailsOpen} onOpenChange={setIsUserDetailsOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+            <DialogDescription>
+              View detailed information about {selectedUserForDetails?.name}
+            </DialogDescription>
+          </DialogHeader>
+          {userDetailsData?.data && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Name</Label>
+                  <div className="mt-1 text-sm">{userDetailsData.data.name}</div>
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <div className="mt-1 text-sm">{userDetailsData.data.email}</div>
+                </div>
+                <div>
+                  <Label>Role</Label>
+                  <div className="mt-1">
+                    <Badge variant={userDetailsData.data.role === 'admin' ? 'default' : 'secondary'}>
+                      {userDetailsData.data.role}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <div className="mt-1">
+                    <Badge variant={userDetailsData.data.isActive ? 'default' : 'destructive'}>
+                      {userDetailsData.data.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <Label>Subscriptions</Label>
+                  <div className="mt-1 text-sm flex items-center">
+                    <CreditCard className="h-4 w-4 mr-1" />
+                    {userDetailsData.data.subscriptionCount || 0}
+                  </div>
+                </div>
+                <div>
+                  <Label>Last Login</Label>
+                  <div className="mt-1 text-sm">
+                    {userDetailsData.data.lastLoginAt 
+                      ? new Date(userDetailsData.data.lastLoginAt).toLocaleString()
+                      : 'Never'
+                    }
+                  </div>
+                </div>
+                <div>
+                  <Label>Created</Label>
+                  <div className="mt-1 text-sm">
+                    {new Date(userDetailsData.data.createdAt).toLocaleString()}
+                  </div>
+                </div>
+                <div>
+                  <Label>Plan</Label>
+                  <div className="mt-1 text-sm">
+                    {userDetailsData.data.planId || 'No plan assigned'}
+                  </div>
+                </div>
+              </div>
+              <div className="flex space-x-2 pt-4">
+                <Link href="/admin/users">
+                  <Button variant="outline">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Full Management
+                  </Button>
+                </Link>
+                <Button
+                  onClick={() => {
+                    if (selectedUserForDetails) {
+                      impersonateMutation.mutate(selectedUserForDetails.id);
+                      setIsUserDetailsOpen(false);
+                    }
+                  }}
+                  disabled={impersonateMutation.isPending}
+                >
+                  <UserCheck className="h-4 w-4 mr-2" />
+                  Impersonate User
+                </Button>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsUserDetailsOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Create Subscription Dialog */}
       <Dialog open={isCreateSubscriptionOpen} onOpenChange={setIsCreateSubscriptionOpen}>

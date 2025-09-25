@@ -790,6 +790,27 @@ export default function AdminUserManagement() {
                     </div>
 
                     <Separator />
+
+                    <div className="space-y-2">
+                      <Label>Assign Subscriptions</Label>
+                      <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
+                        <div className="text-sm text-muted-foreground py-4 text-center">
+                          Loading subscriptions...
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline">
+                          <Plus className="h-4 w-4 mr-1" />
+                          Assign Subscription
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Edit className="h-4 w-4 mr-1" />
+                          Manage Subscriptions
+                        </Button>
+                      </div>
+                    </div>
+
+                    <Separator />
                     
                     <div className="space-y-4">
                       <div className="flex justify-end">
