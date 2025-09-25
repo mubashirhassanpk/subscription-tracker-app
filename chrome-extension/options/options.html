@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscription Tracker - Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 3V21H21V3H3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 9L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M15 9L9 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <h1>Subscription Tracker</h1>
+          <p>Extension Settings</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Connection Settings -->
+      <section class="settings-section">
+        <div class="section-header">
+          <h2>Connection Settings</h2>
+          <p>Configure your connection to the Subscription Tracker app</p>
+        </div>
+        
+        <div class="settings-grid">
+          <div class="setting-item">
+            <label for="apiUrl" class="setting-label">
+              App URL
+              <span class="required">*</span>
+            </label>
+            <input 
+              type="url" 
+              id="apiUrl" 
+              class="setting-input" 
+              placeholder="https://your-app.replit.dev"
+              required
+            />
+            <p class="setting-description">
+              The URL where your Subscription Tracker app is hosted
+            </p>
+          </div>
+
+          <div class="setting-item">
+            <label for="apiKey" class="setting-label">
+              API Key
+              <span class="required">*</span>
+            </label>
+            <div class="input-group">
+              <input 
+                type="password" 
+                id="apiKey" 
+                class="setting-input" 
+                placeholder="Enter your API key"
+                required
+              />
+              <button type="button" id="toggleApiKey" class="toggle-btn" title="Show/Hide API Key">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <p class="setting-description">
+              Get your API key from the app settings page
+            </p>
+          </div>
+        </div>
+
+        <div class="connection-status" id="connectionStatus">
+          <div class="status-indicator" id="statusIndicator"></div>
+          <span id="statusText">Not connected</span>
+        </div>
+
+        <div class="section-actions">
+          <button type="button" id="testConnection" class="btn btn-secondary">
+            Test Connection
+          </button>
+          <button type="button" id="saveConnection" class="btn btn-primary">
+            Save Connection
+          </button>
+        </div>
+      </section>
+
+      <!-- Sync Settings -->
+      <section class="settings-section">
+        <div class="section-header">
+          <h2>Sync Settings</h2>
+          <p>Configure how and when your data syncs</p>
+        </div>
+
+        <div class="settings-grid">
+          <div class="setting-item">
+            <div class="setting-toggle">
+              <label for="syncEnabled" class="toggle-label">
+                Enable Automatic Sync
+              </label>
+              <div class="toggle-switch">
+                <input type="checkbox" id="syncEnabled" checked />
+                <span class="toggle-slider"></span>
+              </div>
+            </div>
+            <p class="setting-description">
+              Automatically sync your subscriptions in the background
+            </p>
+          </div>
+
+          <div class="setting-item">
+            <label for="syncInterval" class="setting-label">
+              Sync Interval
+            </label>
+            <select id="syncInterval" class="setting-select">
+              <option value="5">Every 5 minutes</option>
+              <option value="15">Every 15 minutes</option>
+              <option value="30" selected>Every 30 minutes</option>
+              <option value="60">Every hour</option>
+              <option value="180">Every 3 hours</option>
+            </select>
+            <p class="setting-description">
+              How often to sync data with the server
+            </p>
+          </div>
+        </div>
+
+        <div class="sync-info">
+          <div class="sync-stat">
+            <span class="stat-label">Last Sync:</span>
+            <span id="lastSyncTime">Never</span>
+          </div>
+          <div class="sync-stat">
+            <span class="stat-label">Total Subscriptions:</span>
+            <span id="totalSubscriptions">0</span>
+          </div>
+        </div>
+
+        <div class="section-actions">
+          <button type="button" id="syncNow" class="btn btn-secondary">
+            Sync Now
+          </button>
+        </div>
+      </section>
+
+      <!-- Notification Settings -->
+      <section class="settings-section">
+        <div class="section-header">
+          <h2>Notification Settings</h2>
+          <p>Configure alerts and reminders</p>
+        </div>
+
+        <div class="settings-grid">
+          <div class="setting-item">
+            <div class="setting-toggle">
+              <label for="notificationsEnabled" class="toggle-label">
+                Enable Notifications
+              </label>
+              <div class="toggle-switch">
+                <input type="checkbox" id="notificationsEnabled" checked />
+                <span class="toggle-slider"></span>
+              </div>
+            </div>
+            <p class="setting-description">
+              Show browser notifications for subscription reminders
+            </p>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-toggle">
+              <label for="renewalReminders" class="toggle-label">
+                Renewal Reminders
+              </label>
+              <div class="toggle-switch">
+                <input type="checkbox" id="renewalReminders" checked />
+                <span class="toggle-slider"></span>
+              </div>
+            </div>
+            <p class="setting-description">
+              Get notified 3 days before subscription renewals
+            </p>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-toggle">
+              <label for="autoDetectSubscriptions" class="toggle-label">
+                Auto-Detect Subscriptions
+              </label>
+              <div class="toggle-switch">
+                <input type="checkbox" id="autoDetectSubscriptions" checked />
+                <span class="toggle-slider"></span>
+              </div>
+            </div>
+            <p class="setting-description">
+              Automatically detect subscription services when browsing
+            </p>
+          </div>
+        </div>
+
+        <div class="section-actions">
+          <button type="button" id="testNotifications" class="btn btn-secondary">
+            Test Notifications
+          </button>
+        </div>
+      </section>
+
+      <!-- Data Management -->
+      <section class="settings-section">
+        <div class="section-header">
+          <h2>Data Management</h2>
+          <p>Manage your extension data</p>
+        </div>
+
+        <div class="data-stats">
+          <div class="data-stat">
+            <h3 id="cachedSubscriptions">0</h3>
+            <p>Cached Subscriptions</p>
+          </div>
+          <div class="data-stat">
+            <h3 id="storageUsed">0 KB</h3>
+            <p>Storage Used</p>
+          </div>
+          <div class="data-stat">
+            <h3 id="lastBackup">Never</h3>
+            <p>Last Backup</p>
+          </div>
+        </div>
+
+        <div class="section-actions">
+          <button type="button" id="exportData" class="btn btn-secondary">
+            Export Data
+          </button>
+          <button type="button" id="clearCache" class="btn btn-secondary">
+            Clear Cache
+          </button>
+          <button type="button" id="resetSettings" class="btn btn-danger">
+            Reset All Settings
+          </button>
+        </div>
+      </section>
+
+      <!-- About -->
+      <section class="settings-section">
+        <div class="section-header">
+          <h2>About</h2>
+          <p>Extension information and support</p>
+        </div>
+
+        <div class="about-info">
+          <div class="info-item">
+            <span class="info-label">Version:</span>
+            <span class="info-value">1.0.0</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Developer:</span>
+            <span class="info-value">Subscription Tracker Team</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Privacy:</span>
+            <a href="#" class="info-link">Privacy Policy</a>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Support:</span>
+            <a href="#" class="info-link">Help Center</a>
+          </div>
+        </div>
+
+        <div class="section-actions">
+          <button type="button" id="openFullApp" class="btn btn-primary">
+            Open Full App
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container hidden">
+      <div class="message" id="message">
+        <span class="message-text" id="messageText"></span>
+        <button class="message-close" id="closeMessage">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6L18 18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
