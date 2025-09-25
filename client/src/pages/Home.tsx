@@ -487,6 +487,133 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Advanced Features Highlight */}
+      <section className="py-20 bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 dark:from-indigo-950 dark:via-blue-950 dark:to-purple-950">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <Badge variant="secondary" className="mb-4">
+                <Sparkles className="h-3 w-3 mr-1" />
+                Latest Updates
+              </Badge>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-4">
+                Next-Generation Features Just Launched
+              </h2>
+              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                We've added enterprise-level capabilities to give you the most advanced subscription management experience available.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <Card className="group hover:shadow-2xl transition-all duration-500 border-2 hover:border-purple-200 dark:hover:border-purple-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+                <CardContent className="p-8">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl text-white">
+                      <Bell className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Multi-Channel Alerts</h3>
+                      <Badge variant="secondary" className="mt-1 bg-purple-100 text-purple-800">NEW</Badge>
+                    </div>
+                  </div>
+                  <div className="space-y-3 text-gray-600 dark:text-gray-300">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-purple-500" />
+                      <span>Email notifications</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-purple-500" />
+                      <span>Google & Apple Calendar sync</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Smartphone className="h-4 w-4 text-purple-500" />
+                      <span>WhatsApp & browser alerts</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-purple-500" />
+                      <span>Chrome extension sync</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="group hover:shadow-2xl transition-all duration-500 border-2 hover:border-blue-200 dark:hover:border-blue-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+                <CardContent className="p-8">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl text-white">
+                      <BarChart3 className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Advanced Analytics</h3>
+                      <Badge variant="secondary" className="mt-1 bg-blue-100 text-blue-800">NEW</Badge>
+                    </div>
+                  </div>
+                  <div className="space-y-3 text-gray-600 dark:text-gray-300">
+                    <div className="flex items-center gap-2">
+                      <PieChart className="h-4 w-4 text-blue-500" />
+                      <span>Category spending breakdown</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-blue-500" />
+                      <span>Peak payment month analysis</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-blue-500" />
+                      <span>Historical spending trends</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-blue-500" />
+                      <span>Export analytics to CSV</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="group hover:shadow-2xl transition-all duration-500 border-2 hover:border-green-200 dark:hover:border-green-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+                <CardContent className="p-8">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl text-white">
+                      <Smartphone className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Mobile Optimized</h3>
+                      <Badge variant="secondary" className="mt-1 bg-green-100 text-green-800">NEW</Badge>
+                    </div>
+                  </div>
+                  <div className="space-y-3 text-gray-600 dark:text-gray-300">
+                    <div className="flex items-center gap-2">
+                      <MousePointer className="h-4 w-4 text-green-500" />
+                      <span>Touch-friendly interface</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Settings className="h-4 w-4 text-green-500" />
+                      <span>Bottom navigation bar</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Target className="h-4 w-4 text-green-500" />
+                      <span>Floating action button</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Database className="h-4 w-4 text-green-500" />
+                      <span>Complete data export</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="text-center mt-12">
+              <Link href="/dashboard" data-testid="button-try-features">
+                <Button size="lg" className="px-12 py-4 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                  <Sparkles className="mr-3 h-6 w-6" />
+                  Try Advanced Features
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Competitive Comparison */}
       <section className="py-20 bg-white dark:bg-gray-950">
         <div className="container mx-auto px-4">
