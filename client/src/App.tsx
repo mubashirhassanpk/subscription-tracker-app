@@ -20,6 +20,9 @@ import Calendar from "./pages/Calendar";
 import Analytics from "./pages/Analytics";
 import Reminders from "./pages/Reminders";
 import ReminderSettings from "./pages/ReminderSettings";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUserManagement from "./pages/AdminUserManagement";
+import AdminSubscriptionManagement from "./pages/AdminSubscriptionManagement";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -39,6 +42,9 @@ function Router() {
       <Route path="/plans" component={Plans} />
       <Route path="/pricing" component={Plans} />
       <Route path="/settings" component={Settings} />
+      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/users" component={AdminUserManagement} />
+      <Route path="/admin/subscriptions" component={AdminSubscriptionManagement} />
       <Route component={NotFound} />
     </Switch>
   );
