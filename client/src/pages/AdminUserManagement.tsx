@@ -76,6 +76,10 @@ export default function AdminUserManagement() {
   // User details view state
   const [selectedUserForDetails, setSelectedUserForDetails] = useState<User | null>(null);
   const [isUserDetailsOpen, setIsUserDetailsOpen] = useState(false);
+  const [userPlanChanges, setUserPlanChanges] = useState({
+    planId: '',
+    subscriptionStatus: ''
+  });
 
   // Fetch users
   const { data: usersData, isLoading } = useQuery({
@@ -174,16 +178,26 @@ export default function AdminUserManagement() {
   // Impersonation mutation
   const impersonateMutation = useMutation({
     mutationFn: (userId: string) => 
-      fetch(`/api/admin/impersonate/${userId}`, {
+      fetch(`/api/admin/users/${userId}/impersonate`, {
         method: 'POST'
       }).then(res => res.json()),
     onSuccess: (data: any) => {
-      toast({
-        title: 'Success',
-        description: `Impersonation session created. You can now login as ${data.data?.targetUser?.email || 'the user'}`,
-      });
-      // You could redirect to the user's dashboard here
-      // window.open(`/impersonate?token=${data.data.sessionToken}`, '_blank');
+      if (data.success && data.data?.impersonationToken) {
+        // Open impersonation in new tab
+        const impersonationUrl = `/?impersonate=${data.data.impersonationToken}&user=${data.data.impersonatedUser.id}`;
+        window.open(impersonationUrl, '_blank');
+        
+        toast({
+          title: 'Success',
+          description: `Opening impersonation session for ${data.data.impersonatedUser.name} in new tab`,
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to create impersonation session',
+          variant: 'destructive'
+        });
+      }
     },
     onError: (error: any) => {
       toast({
@@ -240,6 +254,49 @@ export default function AdminUserManagement() {
       userId: selectedUser.id,
       userData
     });
+  };
+
+  // Update user plan mutation
+  const updateUserPlanMutation = useMutation({
+    mutationFn: ({ userId, planData }: { userId: string; planData: any }) =>
+      fetch(`/api/admin/users/${userId}/plan`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(planData)
+      }).then(res => res.json()),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users', selectedUserForDetails?.id, 'details'] });
+      toast({
+        title: 'Success',
+        description: 'User plan updated successfully'
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update user plan',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  // Handle plan changes
+  const handlePlanChange = (field: string, value: string) => {
+    setUserPlanChanges(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Save plan changes
+  const handleSavePlanChanges = () => {
+    if (selectedUserForDetails) {
+      updateUserPlanMutation.mutate({
+        userId: selectedUserForDetails.id,
+        planData: userPlanChanges
+      });
+    }
   };
 
   const users = usersData?.data.users || [];
@@ -414,6 +471,11 @@ export default function AdminUserManagement() {
                             onClick={() => {
                               setSelectedUserForDetails(user);
                               setIsUserDetailsOpen(true);
+                              // Initialize plan changes state with current user data
+                              setUserPlanChanges({
+                                planId: user.planId || '',
+                                subscriptionStatus: user.subscriptionStatus || ''
+                              });
                             }}
                             data-testid={`button-details-${user.id}`}
                           >
@@ -676,12 +738,16 @@ export default function AdminUserManagement() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Current Plan</Label>
-                        <Select value={selectedUserForDetails.planId || ''}>
+                        <Select 
+                          value={userPlanChanges.planId} 
+                          onValueChange={(value) => handlePlanChange('planId', value)}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Select plan" />
                           </SelectTrigger>
                           <SelectContent>
-                            {plansData?.data?.map((plan: Plan) => (
+                            <SelectItem value="">No Plan</SelectItem>
+                            {Array.isArray(plansData) && plansData.map((plan: Plan) => (
                               <SelectItem key={plan.id} value={plan.id}>
                                 {plan.name} - ${plan.price}/{plan.currency}
                               </SelectItem>
@@ -691,9 +757,12 @@ export default function AdminUserManagement() {
                       </div>
                       <div className="space-y-2">
                         <Label>Subscription Status</Label>
-                        <Select value={selectedUserForDetails.subscriptionStatus}>
+                        <Select 
+                          value={userPlanChanges.subscriptionStatus} 
+                          onValueChange={(value) => handlePlanChange('subscriptionStatus', value)}
+                        >
                           <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="active">Active</SelectItem>
@@ -722,18 +791,32 @@ export default function AdminUserManagement() {
 
                     <Separator />
                     
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Billing Actions</h4>
-                      <div className="flex space-x-2">
-                        <Button size="sm" variant="outline">
-                          Extend Trial
+                    <div className="space-y-4">
+                      <div className="flex justify-end">
+                        <Button 
+                          onClick={handleSavePlanChanges}
+                          disabled={updateUserPlanMutation.isPending}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          {updateUserPlanMutation.isPending ? 'Saving...' : 'Save Changes'}
                         </Button>
-                        <Button size="sm" variant="outline">
-                          Apply Discount
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          Reset Billing
-                        </Button>
+                      </div>
+                      
+                      <Separator />
+                      
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Billing Actions</h4>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline">
+                            Extend Trial
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            Apply Discount
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            Reset Billing
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

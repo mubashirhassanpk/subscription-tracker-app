@@ -28,6 +28,7 @@ export class AdminService {
             role: users.role,
             isActive: users.isActive,
             subscriptionStatus: users.subscriptionStatus,
+            planId: users.planId,
             lastLoginAt: users.lastLoginAt,
             createdAt: users.createdAt,
             updatedAt: users.updatedAt
@@ -44,11 +45,26 @@ export class AdminService {
           .where(whereClause)
       ]);
 
+      // Get subscription counts for each user
+      const usersWithSubscriptionCount = await Promise.all(
+        userResults.map(async (user) => {
+          const subscriptionCount = await db
+            .select({ count: count() })
+            .from(subscriptions)
+            .where(eq(subscriptions.userId, user.id));
+          
+          return {
+            ...user,
+            subscriptionCount: subscriptionCount[0].count
+          };
+        })
+      );
+
       const total = totalResult[0].count;
       const totalPages = Math.ceil(total / limit);
 
       return {
-        users: userResults,
+        users: usersWithSubscriptionCount,
         pagination: {
           page,
           limit,
