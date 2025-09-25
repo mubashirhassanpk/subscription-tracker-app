@@ -792,21 +792,24 @@ export default function AdminUserManagement() {
                     <Separator />
 
                     <div className="space-y-2">
-                      <Label>Assign Subscriptions</Label>
+                      <Label>Assign User Plans</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Manage plans that the user has purchased or is on trial for
+                      </p>
                       <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
                         <div className="text-sm text-muted-foreground py-4 text-center">
-                          Loading subscriptions...
+                          Loading user plans...
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <Button size="sm" variant="outline">
-                          <Plus className="h-4 w-4 mr-1" />
-                          Assign Subscription
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Edit className="h-4 w-4 mr-1" />
-                          Manage Subscriptions
-                        </Button>
+                        <div className="flex items-center px-2 py-1 text-xs border rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                          <Plus className="h-3 w-3 mr-1" />
+                          <span>Assign Plan</span>
+                        </div>
+                        <div className="flex items-center px-2 py-1 text-xs border rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                          <Edit className="h-3 w-3 mr-1" />
+                          <span>Manage Plans</span>
+                        </div>
                       </div>
                     </div>
 

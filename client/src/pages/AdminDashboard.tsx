@@ -271,7 +271,7 @@ export default function AdminDashboard() {
           <TabsList data-testid="admin-nav-tabs">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+            <TabsTrigger value="subscriptions">Plans</TabsTrigger>
             <TabsTrigger value="activity">Activity Logs</TabsTrigger>
           </TabsList>
 
@@ -284,35 +284,35 @@ export default function AdminDashboard() {
                   <CardTitle>Quick Actions</CardTitle>
                   <CardDescription>Common admin tasks</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <Link href="/admin/users/create">
-                    <Button className="w-full justify-start" variant="outline" data-testid="button-create-user">
-                      <Users className="mr-2 h-4 w-4" />
-                      Create New User
-                    </Button>
+                <CardContent className="space-y-3">
+                  <Link href="/admin/users/create" className="block">
+                    <div className="flex items-center p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" data-testid="button-create-user">
+                      <Users className="mr-3 h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium">Create New User</span>
+                    </div>
                   </Link>
-                  <Link href="/admin/settings">
-                    <Button className="w-full justify-start" variant="outline" data-testid="button-settings">
-                      <Settings className="mr-2 h-4 w-4" />
-                      System Settings
-                    </Button>
+                  <Link href="/admin/settings" className="block">
+                    <div className="flex items-center p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" data-testid="button-settings">
+                      <Settings className="mr-3 h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium">System Settings</span>
+                    </div>
                   </Link>
-                  <Link href="/admin/notifications">
-                    <Button className="w-full justify-start" variant="outline" data-testid="button-notifications">
-                      <Bell className="mr-2 h-4 w-4" />
-                      Send Notifications
-                    </Button>
+                  <Link href="/admin/notifications" className="block">
+                    <div className="flex items-center p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" data-testid="button-notifications">
+                      <Bell className="mr-3 h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium">Send Notifications</span>
+                    </div>
                   </Link>
-                  <Link href="/admin/api-keys">
-                    <Button className="w-full justify-start" variant="outline" data-testid="button-api-keys">
-                      <Key className="mr-2 h-4 w-4" />
-                      Manage API Keys
-                    </Button>
+                  <Link href="/admin/api-keys" className="block">
+                    <div className="flex items-center p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" data-testid="button-api-keys">
+                      <Key className="mr-3 h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium">Manage API Keys</span>
+                    </div>
                   </Link>
-                  <Button className="w-full justify-start" variant="outline" data-testid="button-impersonate">
-                    <UserCheck className="mr-2 h-4 w-4" />
-                    User Impersonation
-                  </Button>
+                  <div className="flex items-center p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" data-testid="button-impersonate">
+                    <UserCheck className="mr-3 h-5 w-5 text-muted-foreground" />
+                    <span className="font-medium">User Impersonation</span>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -349,16 +349,16 @@ export default function AdminDashboard() {
                   <span>User Management</span>
                   <div className="flex items-center space-x-2">
                     <Link href="/admin/users/create">
-                      <Button size="sm" data-testid="button-create-user">
+                      <div className="flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" data-testid="button-create-user">
                         <UserPlus className="h-4 w-4 mr-2" />
-                        Create User
-                      </Button>
+                        <span className="text-sm font-medium">Create User</span>
+                      </div>
                     </Link>
                     <Link href="/admin/users">
-                      <Button size="sm" variant="outline" data-testid="button-full-management">
+                      <div className="flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" data-testid="button-full-management">
                         <Settings className="h-4 w-4 mr-2" />
-                        Full Management
-                      </Button>
+                        <span className="text-sm font-medium">Full Management</span>
+                      </div>
                     </Link>
                   </div>
                 </CardTitle>
@@ -493,33 +493,33 @@ export default function AdminDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  <span>Subscription Management</span>
+                  <span>Plan Management</span>
                   <div className="flex items-center space-x-2">
-                    <Button 
-                      size="sm" 
+                    <div 
+                      className="flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                       onClick={() => setIsCreateSubscriptionOpen(true)}
                       data-testid="button-create-subscription"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Subscription
-                    </Button>
+                      <span className="text-sm font-medium">Add User Plan</span>
+                    </div>
                     <Link href="/admin/subscriptions">
-                      <Button size="sm" variant="outline" data-testid="button-full-subscription-management">
+                      <div className="flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" data-testid="button-full-subscription-management">
                         <Settings className="h-4 w-4 mr-2" />
-                        Full Management
-                      </Button>
+                        <span className="text-sm font-medium">Full Management</span>
+                      </div>
                     </Link>
                   </div>
                 </CardTitle>
-                <CardDescription>View and manage all user subscriptions</CardDescription>
+                <CardDescription>Manage user plans - purchased subscriptions and trials</CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Subscription Stats */}
+                {/* Plan Management Stats */}
                 <div className="grid gap-4 md:grid-cols-3 mb-6">
                   <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-lg">
                     <CreditCard className="h-5 w-5 text-blue-600" />
                     <div>
-                      <div className="text-sm font-medium">Total Subscriptions</div>
+                      <div className="text-sm font-medium">Total User Plans</div>
                       <div className="text-2xl font-bold" data-testid="stat-total-subscriptions">
                         {dashboardData?.totalSubscriptions || 0}
                       </div>
@@ -528,7 +528,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-lg">
                     <UserCheck className="h-5 w-5 text-green-600" />
                     <div>
-                      <div className="text-sm font-medium">Active</div>
+                      <div className="text-sm font-medium">Active Plans</div>
                       <div className="text-2xl font-bold" data-testid="stat-active-subscriptions">
                         {dashboardData?.activeSubscriptions || 0}
                       </div>
@@ -543,9 +543,9 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Recent Subscriptions */}
+                {/* Recent User Plans */}
                 <div className="space-y-4">
-                  <h4 className="text-lg font-semibold">Recent Subscriptions</h4>
+                  <h4 className="text-lg font-semibold">Recent User Plans</h4>
                   
                   {dashboardData?.totalSubscriptions && dashboardData.totalSubscriptions > 0 ? (
                     <div className="rounded-md border">
@@ -564,7 +564,7 @@ export default function AdminDashboard() {
                           <TableRow>
                             <TableCell colSpan={6} className="text-center py-8">
                               <div className="text-muted-foreground">
-                                No subscriptions found. Click "Add Subscription" to create one.
+                                No user plans found. Click "Add User Plan" to assign one.
                               </div>
                             </TableCell>
                           </TableRow>
@@ -574,15 +574,16 @@ export default function AdminDashboard() {
                   ) : (
                     <div className="text-center py-8 border border-dashed rounded-lg">
                       <CreditCard className="mx-auto h-12 w-12 text-muted-foreground" />
-                      <h3 className="mt-4 text-lg font-semibold">No Subscriptions Yet</h3>
-                      <p className="text-muted-foreground mb-4">Start by adding the first subscription to track.</p>
-                      <Button 
+                      <h3 className="mt-4 text-lg font-semibold">No User Plans Yet</h3>
+                      <p className="text-muted-foreground mb-4">Start by assigning the first plan to a user.</p>
+                      <div 
+                        className="inline-flex items-center px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                         onClick={() => setIsCreateSubscriptionOpen(true)}
                         data-testid="button-add-first-subscription"
                       >
                         <Plus className="h-4 w-4 mr-2" />
-                        Add First Subscription
-                      </Button>
+                        <span className="font-medium">Add First User Plan</span>
+                      </div>
                     </div>
                   )}
 

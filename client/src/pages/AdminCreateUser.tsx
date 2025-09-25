@@ -318,7 +318,7 @@ export default function AdminCreateUser() {
               <Separator />
 
               <div className="space-y-2">
-                <Label>Assign Subscriptions</Label>
+                <Label>Assign User Plans</Label>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
                   {subscriptionsData?.data && subscriptionsData.data.length > 0 ? (
                     subscriptionsData.data.map((subscription: any) => (
@@ -357,12 +357,12 @@ export default function AdminCreateUser() {
                     ))
                   ) : (
                     <div className="text-sm text-muted-foreground py-4 text-center">
-                      No subscriptions available to assign
+                      No user plans available to assign
                     </div>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Select existing subscriptions to assign to this user
+                  Assign plans that the user has purchased or is on trial for
                 </p>
               </div>
             </CardContent>
