@@ -101,20 +101,36 @@ export const userNotificationPreferences = pgTable("user_notification_preference
   // Email notifications
   emailEnabled: boolean("email_enabled").default(true).notNull(),
   emailAddress: text("email_address"),
-  // Calendar sync
+  emailProvider: text("email_provider").default("gmail").notNull(), // 'gmail', 'outlook', 'smtp'
+  smtpHost: text("smtp_host"),
+  smtpPort: integer("smtp_port"),
+  smtpUsername: text("smtp_username"),
+  smtpPasswordEncrypted: text("smtp_password_encrypted"), // AES-256-GCM encrypted
+  // Calendar sync with OAuth tokens
   googleCalendarEnabled: boolean("google_calendar_enabled").default(false).notNull(),
   googleCalendarId: text("google_calendar_id"),
+  googleAccessToken: text("google_access_token"), // OAuth access token
+  googleRefreshToken: text("google_refresh_token"), // OAuth refresh token
+  googleTokenExpiry: timestamp("google_token_expiry"), // when token expires
   appleCalendarEnabled: boolean("apple_calendar_enabled").default(false).notNull(),
   // Browser notifications
   chromeExtensionEnabled: boolean("chrome_extension_enabled").default(false).notNull(),
   browserNotificationEnabled: boolean("browser_notification_enabled").default(true).notNull(),
-  // WhatsApp notifications  
+  // WhatsApp notifications with API configuration
   whatsappEnabled: boolean("whatsapp_enabled").default(false).notNull(),
-  whatsappNumber: text("whatsapp_number"),
+  whatsappNumber: text("whatsapp_number"), // user's WhatsApp number
+  whatsappBusinessAccountId: text("whatsapp_business_account_id"), // Meta Business Account ID
+  whatsappPhoneNumberId: text("whatsapp_phone_number_id"), // WhatsApp Business Phone Number ID
+  whatsappAccessTokenEncrypted: text("whatsapp_access_token_encrypted"), // AES-256-GCM encrypted access token
+  whatsappWebhookToken: text("whatsapp_webhook_token"), // webhook verification token
   // Reminder timing preferences
   reminderDaysBefore: integer("reminder_days_before").array().default(sql`ARRAY[7,3,1]`), // remind 7, 3, 1 days before
   reminderTime: text("reminder_time").default("09:00").notNull(), // HH:MM format
   timezone: text("timezone").default("UTC").notNull(),
+  // Template preferences
+  emailTemplate: text("email_template").default("professional").notNull(), // 'professional', 'casual', 'minimal'
+  includeSpendingSummary: boolean("include_spending_summary").default(true).notNull(),
+  includeActionButtons: boolean("include_action_buttons").default(true).notNull(),
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
   updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
 });
