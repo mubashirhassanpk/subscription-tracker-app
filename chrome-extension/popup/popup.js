@@ -43,6 +43,37 @@ class SubscriptionTrackerPopup {
       this.handleConnect();
     });
 
+    // Navigation tabs
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        this.switchTab(tab.dataset.tab);
+      });
+    });
+
+    // Search and filter
+    document.getElementById('searchInput').addEventListener('input', () => {
+      this.handleSearch();
+    });
+
+    document.getElementById('searchBtn').addEventListener('click', () => {
+      this.handleSearch();
+    });
+
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        this.handleFilter(chip.dataset.filter);
+      });
+    });
+
+    // Calendar navigation
+    document.getElementById('prevMonth').addEventListener('click', () => {
+      this.navigateMonth(-1);
+    });
+
+    document.getElementById('nextMonth').addEventListener('click', () => {
+      this.navigateMonth(1);
+    });
+
     // Quick actions
     document.getElementById('addSubBtn').addEventListener('click', () => {
       this.showQuickAddForm();
@@ -52,6 +83,30 @@ class SubscriptionTrackerPopup {
       this.syncData();
     });
 
+    // Quick action buttons
+    document.getElementById('pauseAllBtn').addEventListener('click', () => {
+      this.pauseAllSubscriptions();
+    });
+
+    document.getElementById('exportDataBtn').addEventListener('click', () => {
+      this.exportData();
+    });
+
+    document.getElementById('budgetAlertBtn').addEventListener('click', () => {
+      this.showBudgetModal();
+    });
+
+    document.getElementById('shareBtn').addEventListener('click', () => {
+      this.showShareModal();
+    });
+
+    // Enhanced form tabs
+    document.querySelectorAll('.form-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        this.switchFormTab(tab.dataset.formTab);
+      });
+    });
+
     // Quick add form
     document.getElementById('saveSubBtn').addEventListener('click', () => {
       this.saveNewSubscription();
@@ -59,6 +114,31 @@ class SubscriptionTrackerPopup {
 
     document.getElementById('cancelSubBtn').addEventListener('click', () => {
       this.hideQuickAddForm();
+    });
+
+    document.getElementById('closeAddForm').addEventListener('click', () => {
+      this.hideQuickAddForm();
+    });
+
+    // Modal handlers
+    document.getElementById('saveBudgetBtn').addEventListener('click', () => {
+      this.saveBudgetAlert();
+    });
+
+    document.getElementById('closeBudgetModal').addEventListener('click', () => {
+      this.hideBudgetModal();
+    });
+
+    document.getElementById('shareTextBtn').addEventListener('click', () => {
+      this.shareAsText();
+    });
+
+    document.getElementById('shareLinkBtn').addEventListener('click', () => {
+      this.shareAsLink();
+    });
+
+    document.getElementById('closeShareModal').addEventListener('click', () => {
+      this.hideShareModal();
     });
 
     // Footer actions
@@ -565,6 +645,446 @@ class SubscriptionTrackerPopup {
   editSubscription(id) {
     // For now, just open the full app to the dashboard
     chrome.tabs.create({ url: `${this.apiUrl}` });
+  }
+
+  // Enhanced tab switching functionality
+  switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.remove('active');
+    });
+    document.getElementById(`${tabName}Tab`).classList.add('active');
+
+    // Load tab-specific data
+    this.loadTabData(tabName);
+  }
+
+  async loadTabData(tabName) {
+    switch (tabName) {
+      case 'calendar':
+        this.initializeCalendar();
+        break;
+      case 'insights':
+        this.loadInsightsData();
+        break;
+      default:
+        break;
+    }
+  }
+
+  // Calendar functionality
+  initializeCalendar() {
+    this.currentDate = new Date();
+    this.renderCalendar();
+    this.loadUpcomingRenewals();
+  }
+
+  renderCalendar() {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
+    
+    // Update title
+    document.getElementById('calendarTitle').textContent = 
+      new Date(year, month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    // Generate calendar days
+    const calendarDays = document.getElementById('calendarDays');
+    calendarDays.innerHTML = '';
+
+    const firstDay = new Date(year, month, 1);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+    for (let i = 0; i < 42; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+
+      const dayElement = document.createElement('div');
+      dayElement.className = 'calendar-day';
+      dayElement.textContent = currentDate.getDate();
+
+      // Add classes
+      if (currentDate.getMonth() !== month) {
+        dayElement.classList.add('other-month');
+      }
+      if (this.isToday(currentDate)) {
+        dayElement.classList.add('today');
+      }
+      if (this.hasRenewalOnDate(currentDate)) {
+        dayElement.classList.add('has-renewal');
+      }
+
+      calendarDays.appendChild(dayElement);
+    }
+  }
+
+  navigateMonth(direction) {
+    this.currentDate.setMonth(this.currentDate.getMonth() + direction);
+    this.renderCalendar();
+  }
+
+  isToday(date) {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  }
+
+  hasRenewalOnDate(date) {
+    return this.subscriptions.some(sub => {
+      if (!sub.nextBillingDate) return false;
+      const renewalDate = new Date(sub.nextBillingDate);
+      return renewalDate.toDateString() === date.toDateString();
+    });
+  }
+
+  async loadUpcomingRenewals() {
+    const upcomingList = document.getElementById('upcomingRenewals');
+    if (!upcomingList) return;
+    
+    const today = new Date();
+    const thirtyDaysFromNow = new Date(today.getTime() + (30 * 24 * 60 * 60 * 1000));
+
+    const upcomingSubscriptions = this.subscriptions.filter(sub => {
+      if (!sub.nextBillingDate) return false;
+      const renewalDate = new Date(sub.nextBillingDate);
+      return renewalDate >= today && renewalDate <= thirtyDaysFromNow;
+    }).sort((a, b) => new Date(a.nextBillingDate) - new Date(b.nextBillingDate));
+
+    if (upcomingSubscriptions.length === 0) {
+      upcomingList.innerHTML = '<div class="loading-state">No upcoming renewals in the next 30 days</div>';
+      return;
+    }
+
+    upcomingList.innerHTML = upcomingSubscriptions.map(sub => `
+      <div class="upcoming-item">
+        <div class="upcoming-item-info">
+          <div class="upcoming-item-name">${sub.name}</div>
+          <div class="upcoming-item-date">${this.formatDateShort(sub.nextBillingDate)}</div>
+        </div>
+        <div class="upcoming-item-cost">$${sub.cost}</div>
+      </div>
+    `).join('');
+
+    // Update "Due Soon" count
+    const upcomingCountEl = document.getElementById('upcomingCount');
+    if (upcomingCountEl) {
+      upcomingCountEl.textContent = upcomingSubscriptions.length;
+    }
+  }
+
+  // Search and filter functionality
+  handleSearch() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    this.filteredSubscriptions = this.subscriptions.filter(sub =>
+      sub.name.toLowerCase().includes(searchTerm) ||
+      (sub.category && sub.category.toLowerCase().includes(searchTerm))
+    );
+    this.renderSubscriptionsList();
+  }
+
+  handleFilter(filterType) {
+    // Update filter chips
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.classList.remove('active');
+    });
+    document.querySelector(`[data-filter="${filterType}"]`).classList.add('active');
+
+    // Apply filter
+    switch (filterType) {
+      case 'all':
+        this.filteredSubscriptions = [...this.subscriptions];
+        break;
+      case 'active':
+        this.filteredSubscriptions = this.subscriptions.filter(sub => sub.isActive !== false);
+        break;
+      case 'due-soon':
+        const today = new Date();
+        const sevenDaysFromNow = new Date(today.getTime() + (7 * 24 * 60 * 60 * 1000));
+        this.filteredSubscriptions = this.subscriptions.filter(sub => {
+          if (!sub.nextBillingDate) return false;
+          const renewalDate = new Date(sub.nextBillingDate);
+          return renewalDate >= today && renewalDate <= sevenDaysFromNow;
+        });
+        break;
+    }
+    this.renderSubscriptionsList();
+  }
+
+  // Insights functionality
+  async loadInsightsData() {
+    this.calculateSpendingInsights();
+    this.renderCategoryChart();
+    this.generateRecommendations();
+  }
+
+  calculateSpendingInsights() {
+    const totalMonthly = this.subscriptions.reduce((sum, sub) => {
+      const monthlyCost = this.convertToMonthly(sub.cost, sub.billingCycle);
+      return sum + monthlyCost;
+    }, 0);
+
+    const yearlyTotal = totalMonthly * 12;
+    const averageCost = this.subscriptions.length > 0 ? totalMonthly / this.subscriptions.length : 0;
+    const mostExpensive = this.subscriptions.reduce((max, sub) => 
+      this.convertToMonthly(sub.cost, sub.billingCycle) > this.convertToMonthly(max.cost || 0, max.billingCycle || 'monthly') 
+        ? sub : max, {});
+
+    const totalSpendingEl = document.getElementById('totalSpending');
+    const averageCostEl = document.getElementById('averageCost');
+    const yearlyTotalEl = document.getElementById('yearlyTotal');
+    const mostExpensiveEl = document.getElementById('mostExpensive');
+
+    if (totalSpendingEl) totalSpendingEl.textContent = `$${totalMonthly.toFixed(2)}`;
+    if (averageCostEl) averageCostEl.textContent = `$${averageCost.toFixed(2)}`;
+    if (yearlyTotalEl) yearlyTotalEl.textContent = `$${yearlyTotal.toFixed(2)}`;
+    if (mostExpensiveEl) mostExpensiveEl.textContent = mostExpensive.name || '-';
+  }
+
+  renderCategoryChart() {
+    const categoryTotals = {};
+    let totalSpending = 0;
+
+    this.subscriptions.forEach(sub => {
+      const monthlyCost = this.convertToMonthly(sub.cost, sub.billingCycle);
+      const category = sub.category || 'Other';
+      categoryTotals[category] = (categoryTotals[category] || 0) + monthlyCost;
+      totalSpending += monthlyCost;
+    });
+
+    const chartContainer = document.getElementById('categoryChart');
+    if (!chartContainer) return;
+
+    const colors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#20c997'];
+
+    chartContainer.innerHTML = Object.entries(categoryTotals)
+      .sort(([,a], [,b]) => b - a)
+      .map(([category, amount], index) => {
+        const percentage = totalSpending > 0 ? (amount / totalSpending) * 100 : 0;
+        const color = colors[index % colors.length];
+        
+        return `
+          <div class="category-bar">
+            <div class="category-label">${category}</div>
+            <div class="category-progress">
+              <div class="category-fill" style="width: ${percentage}%; background: ${color}"></div>
+            </div>
+            <div class="category-amount">$${amount.toFixed(2)}</div>
+          </div>
+        `;
+      }).join('');
+  }
+
+  generateRecommendations() {
+    const recommendations = [];
+    const monthlyTotal = this.subscriptions.reduce((sum, sub) => 
+      sum + this.convertToMonthly(sub.cost, sub.billingCycle), 0);
+
+    // High spending recommendation
+    if (monthlyTotal > 100) {
+      recommendations.push({
+        text: `You're spending $${monthlyTotal.toFixed(2)}/month on subscriptions. Consider reviewing unused services.`,
+        savings: `Potential savings: $${(monthlyTotal * 0.2).toFixed(2)}/month`
+      });
+    }
+
+    // Duplicate category recommendation
+    const categories = {};
+    this.subscriptions.forEach(sub => {
+      const category = sub.category || 'Other';
+      categories[category] = (categories[category] || 0) + 1;
+    });
+
+    Object.entries(categories).forEach(([category, count]) => {
+      if (count > 2) {
+        recommendations.push({
+          text: `You have ${count} ${category} subscriptions. Consider consolidating to save money.`,
+          savings: 'Potential savings: 30-50%'
+        });
+      }
+    });
+
+    // Annual vs monthly recommendation
+    const monthlyBilled = this.subscriptions.filter(sub => sub.billingCycle === 'monthly').length;
+    if (monthlyBilled > 2) {
+      recommendations.push({
+        text: `${monthlyBilled} subscriptions are billed monthly. Switching to annual can save 15-20%.`,
+        savings: `Potential savings: $${(monthlyTotal * 0.15).toFixed(2)}/month`
+      });
+    }
+
+    const recommendationsList = document.getElementById('recommendationsList');
+    if (!recommendationsList) return;
+
+    if (recommendations.length === 0) {
+      recommendationsList.innerHTML = '<div class="loading-state">Great job! No recommendations at this time.</div>';
+      return;
+    }
+
+    recommendationsList.innerHTML = recommendations.map(rec => `
+      <div class="recommendation-item">
+        <div class="recommendation-text">${rec.text}</div>
+        <div class="recommendation-savings">${rec.savings}</div>
+      </div>
+    `).join('');
+  }
+
+  // Quick actions functionality
+  async pauseAllSubscriptions() {
+    if (!confirm('Are you sure you want to pause all subscriptions? This will update all active subscriptions to inactive status.')) {
+      return;
+    }
+
+    try {
+      for (const sub of this.subscriptions.filter(s => s.isActive !== false)) {
+        await this.updateSubscription(sub.id, { ...sub, isActive: false });
+      }
+      await this.loadSubscriptions();
+      this.showSuccess('All subscriptions have been paused');
+    } catch (error) {
+      this.showError('Failed to pause subscriptions: ' + error.message);
+    }
+  }
+
+  async exportData() {
+    try {
+      const data = {
+        subscriptions: this.subscriptions,
+        exportDate: new Date().toISOString(),
+        totalMonthly: this.subscriptions.reduce((sum, sub) => 
+          sum + this.convertToMonthly(sub.cost, sub.billingCycle), 0)
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `subscriptions-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      this.showSuccess('Data exported successfully');
+    } catch (error) {
+      this.showError('Failed to export data: ' + error.message);
+    }
+  }
+
+  // Modal functionality
+  showBudgetModal() {
+    const modal = document.getElementById('budgetModal');
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  hideBudgetModal() {
+    const modal = document.getElementById('budgetModal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  async saveBudgetAlert() {
+    const budgetAmountInput = document.getElementById('budgetAmount');
+    if (!budgetAmountInput) return;
+
+    const budgetAmount = parseFloat(budgetAmountInput.value);
+    if (!budgetAmount || budgetAmount <= 0) {
+      this.showError('Please enter a valid budget amount');
+      return;
+    }
+
+    try {
+      await chrome.storage.sync.set({ budgetAlert: budgetAmount });
+      this.hideBudgetModal();
+      this.showSuccess(`Budget alert set for $${budgetAmount.toFixed(2)}/month`);
+    } catch (error) {
+      this.showError('Failed to save budget alert: ' + error.message);
+    }
+  }
+
+  showShareModal() {
+    const modal = document.getElementById('shareModal');
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  hideShareModal() {
+    const modal = document.getElementById('shareModal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  async shareAsText() {
+    const totalMonthly = this.subscriptions.reduce((sum, sub) => 
+      sum + this.convertToMonthly(sub.cost, sub.billingCycle), 0);
+
+    const shareText = `My Subscription Summary:
+📊 Total: $${totalMonthly.toFixed(2)}/month
+📱 Active subscriptions: ${this.subscriptions.filter(s => s.isActive !== false).length}
+📅 Total yearly cost: $${(totalMonthly * 12).toFixed(2)}
+
+Top subscriptions:
+${this.subscriptions
+  .sort((a, b) => this.convertToMonthly(b.cost, b.billingCycle) - this.convertToMonthly(a.cost, a.billingCycle))
+  .slice(0, 3)
+  .map(sub => `• ${sub.name}: $${this.convertToMonthly(sub.cost, sub.billingCycle).toFixed(2)}/month`)
+  .join('\n')}
+
+Track your subscriptions too! 💡`;
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      this.hideShareModal();
+      this.showSuccess('Summary copied to clipboard!');
+    } catch (error) {
+      this.showError('Failed to copy to clipboard: ' + error.message);
+    }
+  }
+
+  async shareAsLink() {
+    if (this.apiUrl) {
+      try {
+        await navigator.clipboard.writeText(this.apiUrl);
+        this.hideShareModal();
+        this.showSuccess('App link copied to clipboard!');
+      } catch (error) {
+        this.showError('Failed to copy link: ' + error.message);
+      }
+    } else {
+      this.showError('No app URL configured');
+    }
+  }
+
+  // Enhanced form functionality
+  switchFormTab(tabName) {
+    document.querySelectorAll('.form-tab').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    const targetTab = document.querySelector(`[data-form-tab="${tabName}"]`);
+    if (targetTab) targetTab.classList.add('active');
+
+    document.querySelectorAll('.form-tab-content').forEach(content => {
+      content.classList.remove('active');
+    });
+    const targetContent = document.getElementById(`${tabName}FormTab`);
+    if (targetContent) targetContent.classList.add('active');
+  }
+
+  convertToMonthly(cost, cycle) {
+    const numCost = parseFloat(cost) || 0;
+    switch (cycle) {
+      case 'weekly': return numCost * 4.33;
+      case 'yearly': return numCost / 12;
+      default: return numCost;
+    }
+  }
+
+  formatDateShort(dateString) {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   }
 }
 

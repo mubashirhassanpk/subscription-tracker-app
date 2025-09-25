@@ -49,79 +49,273 @@
 
     <!-- Main Content -->
     <div id="mainContent" class="main-content hidden">
-      <!-- Stats Overview -->
-      <div class="stats-section">
-        <div class="stat-card">
-          <div class="stat-value" id="totalCost">$0.00</div>
-          <div class="stat-label">Monthly Total</div>
+      <!-- Navigation Tabs -->
+      <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
+        <button class="nav-tab" data-tab="calendar">Calendar</button>
+        <button class="nav-tab" data-tab="insights">Insights</button>
+      </div>
+
+      <!-- Dashboard Tab -->
+      <div id="dashboardTab" class="tab-content active">
+        <!-- Stats Overview -->
+        <div class="stats-section">
+          <div class="stat-card">
+            <div class="stat-value" id="totalCost">$0.00</div>
+            <div class="stat-label">Monthly Total</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="activeCount">0</div>
+            <div class="stat-label">Active Subs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="upcomingCount">0</div>
+            <div class="stat-label">Due Soon</div>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value" id="activeCount">0</div>
-          <div class="stat-label">Active Subs</div>
+
+        <!-- Search and Filter -->
+        <div class="search-section">
+          <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search subscriptions..." />
+            <button id="searchBtn" class="search-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+            </button>
+          </div>
+          <div class="filter-chips">
+            <button class="filter-chip active" data-filter="all">All</button>
+            <button class="filter-chip" data-filter="active">Active</button>
+            <button class="filter-chip" data-filter="due-soon">Due Soon</button>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="actions-section">
+          <button id="addSubBtn" class="action-btn primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Add Subscription
+          </button>
+          <button id="syncBtn" class="action-btn secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 12A9 9 0 1 1 12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M21 3V12H12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Sync Now
+          </button>
+        </div>
+
+        <!-- Subscriptions List -->
+        <div class="subscriptions-section">
+          <div class="section-header">
+            <h3>Your Subscriptions</h3>
+            <button id="viewAllBtn" class="view-all-btn">View All</button>
+          </div>
+          <div id="subscriptionsList" class="subscriptions-list">
+            <div class="loading-state">Loading subscriptions...</div>
+          </div>
         </div>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="actions-section">
-        <button id="addSubBtn" class="action-btn primary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          Add Subscription
-        </button>
-        <button id="syncBtn" class="action-btn secondary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 12A9 9 0 1 1 12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M21 3V12H12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          Sync Now
-        </button>
+      <!-- Calendar Tab -->
+      <div id="calendarTab" class="tab-content">
+        <div class="calendar-header">
+          <button id="prevMonth" class="calendar-nav">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15,18 9,12 15,6"/>
+            </svg>
+          </button>
+          <h3 id="calendarTitle">January 2025</h3>
+          <button id="nextMonth" class="calendar-nav">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9,18 15,12 9,6"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="calendar-grid">
+          <div class="calendar-day-header">S</div>
+          <div class="calendar-day-header">M</div>
+          <div class="calendar-day-header">T</div>
+          <div class="calendar-day-header">W</div>
+          <div class="calendar-day-header">T</div>
+          <div class="calendar-day-header">F</div>
+          <div class="calendar-day-header">S</div>
+        </div>
+        
+        <div id="calendarDays" class="calendar-days"></div>
+        
+        <div class="upcoming-section">
+          <h4>Upcoming Renewals (Next 30 Days)</h4>
+          <div id="upcomingRenewals" class="upcoming-list">
+            <div class="loading-state">Loading upcoming renewals...</div>
+          </div>
+        </div>
       </div>
 
-      <!-- Subscriptions List -->
-      <div class="subscriptions-section">
-        <div class="section-header">
-          <h3>Recent Subscriptions</h3>
-          <button id="viewAllBtn" class="view-all-btn">View All</button>
-        </div>
-        <div id="subscriptionsList" class="subscriptions-list">
-          <div class="loading-state">Loading subscriptions...</div>
+      <!-- Insights Tab -->
+      <div id="insightsTab" class="tab-content">
+        <div class="insights-section">
+          <h3>Spending Analysis</h3>
+          
+          <div class="spending-chart">
+            <div class="chart-header">
+              <h4>Monthly Breakdown</h4>
+              <div id="totalSpending" class="total-spending">$0.00</div>
+            </div>
+            <div id="categoryChart" class="category-chart"></div>
+          </div>
+          
+          <div class="insights-cards">
+            <div class="insight-card">
+              <h4>Most Expensive</h4>
+              <div id="mostExpensive" class="insight-value">-</div>
+            </div>
+            <div class="insight-card">
+              <h4>Average Cost</h4>
+              <div id="averageCost" class="insight-value">$0.00</div>
+            </div>
+            <div class="insight-card">
+              <h4>This Year Total</h4>
+              <div id="yearlyTotal" class="insight-value">$0.00</div>
+            </div>
+          </div>
+          
+          <div class="recommendations">
+            <h4>Smart Recommendations</h4>
+            <div id="recommendationsList" class="recommendations-list">
+              <div class="loading-state">Analyzing your subscriptions...</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Quick Add Form -->
+      <!-- Quick Actions Panel -->
+      <div class="quick-actions-panel">
+        <h4>Quick Actions</h4>
+        <div class="quick-actions-grid">
+          <button id="pauseAllBtn" class="quick-action-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="6" y="4" width="4" height="16"/>
+              <rect x="14" y="4" width="4" height="16"/>
+            </svg>
+            Pause All
+          </button>
+          <button id="exportDataBtn" class="quick-action-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7,10 12,15 17,10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export
+          </button>
+          <button id="budgetAlertBtn" class="quick-action-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Set Budget
+          </button>
+          <button id="shareBtn" class="quick-action-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"/>
+              <circle cx="6" cy="12" r="3"/>
+              <circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+            Share
+          </button>
+        </div>
+      </div>
+
+      <!-- Enhanced Quick Add Form -->
       <div id="quickAddForm" class="quick-add-form hidden">
-        <h3>Add New Subscription</h3>
-        <div class="form-row">
-          <input type="text" id="subName" placeholder="Service name" required />
-          <input type="number" id="subCost" placeholder="Cost" step="0.01" min="0" required />
+        <div class="form-header">
+          <h3>Add New Subscription</h3>
+          <button id="closeAddForm" class="close-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
-        <div class="form-row">
-          <select id="subCategory">
-            <option value="Entertainment">Entertainment</option>
-            <option value="Productivity">Productivity</option>
-            <option value="Music">Music</option>
-            <option value="Cloud Storage">Cloud Storage</option>
-            <option value="Software">Software</option>
-            <option value="News">News</option>
-            <option value="Fitness">Fitness</option>
-            <option value="Gaming">Gaming</option>
-            <option value="Education">Education</option>
-            <option value="Other">Other</option>
-          </select>
-          <select id="subCycle">
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-            <option value="weekly">Weekly</option>
-          </select>
+        
+        <div class="form-tabs">
+          <button class="form-tab active" data-form-tab="basic">Basic Info</button>
+          <button class="form-tab" data-form-tab="advanced">Advanced</button>
         </div>
-        <div class="form-row">
-          <input type="email" id="subEmail" placeholder="Email (optional)" />
-          <input type="text" id="subDescription" placeholder="Description (optional)" />
+        
+        <div id="basicFormTab" class="form-tab-content active">
+          <div class="form-row">
+            <input type="text" id="subName" placeholder="Service name" required />
+            <input type="number" id="subCost" placeholder="Cost" step="0.01" min="0" required />
+          </div>
+          <div class="form-row">
+            <select id="subCategory">
+              <option value="Entertainment">Entertainment</option>
+              <option value="Productivity">Productivity</option>
+              <option value="Music">Music</option>
+              <option value="Cloud Storage">Cloud Storage</option>
+              <option value="Software">Software</option>
+              <option value="News">News</option>
+              <option value="Fitness">Fitness</option>
+              <option value="Gaming">Gaming</option>
+              <option value="Education">Education</option>
+              <option value="Other">Other</option>
+            </select>
+            <select id="subCycle">
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+              <option value="weekly">Weekly</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <input type="date" id="nextBillingDate" />
+            <label class="checkbox-label">
+              <input type="checkbox" id="isActive" checked />
+              <span>Active subscription</span>
+            </label>
+          </div>
         </div>
+        
+        <div id="advancedFormTab" class="form-tab-content">
+          <div class="form-row">
+            <input type="email" id="subEmail" placeholder="Account email (optional)" />
+            <input type="url" id="subUrl" placeholder="Website URL (optional)" />
+          </div>
+          <div class="form-row">
+            <input type="text" id="subDescription" placeholder="Description (optional)" />
+          </div>
+          <div class="form-row">
+            <select id="subPriority">
+              <option value="low">Low Priority</option>
+              <option value="medium">Medium Priority</option>
+              <option value="high">High Priority</option>
+              <option value="essential">Essential</option>
+            </select>
+            <input type="number" id="subBudgetLimit" placeholder="Budget limit (optional)" step="0.01" min="0" />
+          </div>
+          <div class="form-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="sendReminders" checked />
+              <span>Send renewal reminders</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="trackUsage" />
+              <span>Track usage patterns</span>
+            </label>
+          </div>
+        </div>
+        
         <div class="form-actions">
-          <button id="saveSubBtn" class="save-btn">Save</button>
+          <button id="saveSubBtn" class="save-btn">Save Subscription</button>
           <button id="cancelSubBtn" class="cancel-btn">Cancel</button>
         </div>
       </div>
@@ -145,6 +339,48 @@
     <footer class="footer">
       <button id="openAppBtn" class="footer-btn">Open Full App</button>
     </footer>
+
+    <!-- Budget Alert Modal -->
+    <div id="budgetModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Set Budget Alert</h3>
+        <p>Get notified when your monthly subscription spending approaches your limit.</p>
+        <div class="form-row">
+          <input type="number" id="budgetAmount" placeholder="Monthly budget limit" step="0.01" min="0" />
+        </div>
+        <div class="modal-actions">
+          <button id="saveBudgetBtn" class="save-btn">Set Alert</button>
+          <button id="closeBudgetModal" class="cancel-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Share Subscription Summary</h3>
+        <p>Share your subscription insights with others.</p>
+        <div class="share-options">
+          <button id="shareTextBtn" class="share-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+            </svg>
+            Copy as Text
+          </button>
+          <button id="shareLinkBtn" class="share-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+            Share Link
+          </button>
+        </div>
+        <div class="modal-actions">
+          <button id="closeShareModal" class="cancel-btn">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="popup.js"></script>
