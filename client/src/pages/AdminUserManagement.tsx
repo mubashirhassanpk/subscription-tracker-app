@@ -721,7 +721,7 @@ export default function AdminUserManagement() {
                         Manage plans that the user has purchased or is on trial for
                       </p>
                       <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
-                        {userDetailsData?.data?.user?.planId ? (
+                        {userDetailsData && userDetailsData.data?.user?.planId ? (
                           <div className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-950/20 rounded">
                             <div>
                               <div className="font-medium text-sm">
@@ -735,9 +735,13 @@ export default function AdminUserManagement() {
                               {userDetailsData.data.user.subscriptionStatus}
                             </Badge>
                           </div>
-                        ) : (
+                        ) : userDetailsData ? (
                           <div className="text-sm text-muted-foreground py-4 text-center">
                             No plan assigned
+                          </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground py-4 text-center">
+                            Loading user plans...
                           </div>
                         )}
                       </div>
