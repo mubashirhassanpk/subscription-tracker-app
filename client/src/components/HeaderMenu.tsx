@@ -45,6 +45,7 @@ export function HeaderMenu() {
   ];
 
   const dashboardNavItems = [
+    { title: "Home", url: "/", icon: Home, active: location === "/" },
     { title: "Dashboard", url: "/dashboard", icon: User, active: location === "/dashboard" },
     { title: "Analytics", url: "/analytics", icon: BarChart3, active: location === "/analytics" },
     { title: "Calendar", url: "/calendar", icon: CalendarIcon, active: location === "/calendar" },
