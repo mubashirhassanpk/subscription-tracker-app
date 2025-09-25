@@ -1037,11 +1037,21 @@ router.put('/users/:userId/plan', trySessionOrApiKey, requireAdmin, logAdminActi
       });
     }
 
-    // Update user's plan
-    const updatedUser = await storage.updateUser(userId, {
+    // Prepare update data
+    const updateData: any = {
       planId,
       subscriptionStatus: subscriptionStatus || user.subscriptionStatus
-    });
+    };
+
+    // If setting to trial status, automatically set 7-day trial period
+    if (subscriptionStatus === 'trial') {
+      const trialEndDate = new Date();
+      trialEndDate.setDate(trialEndDate.getDate() + 7);
+      updateData.trialEndsAt = trialEndDate;
+    }
+
+    // Update user's plan
+    const updatedUser = await storage.updateUser(userId, updateData);
 
     res.json({
       success: true,
