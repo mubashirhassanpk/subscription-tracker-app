@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscription Tracker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 3V21H21V3H3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 9L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M15 9L9 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1>SubTracker</h1>
+      </div>
+      <button id="settingsBtn" class="settings-btn" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 15A3 3 0 1 0 12 9A3 3 0 0 0 12 15Z" stroke="currentColor" stroke-width="2"/>
+          <path d="M19.4 15A1.65 1.65 0 0 0 18 13.34A1.65 1.65 0 0 0 19.4 9A2.15 2.15 0 0 1 21.5 7A2.15 2.15 0 0 1 19.4 5A1.65 1.65 0 0 0 18 3.34A1.65 1.65 0 0 0 19.4 1A2.15 2.15 0 0 1 17 0A2.15 2.15 0 0 1 15.6 1A1.65 1.65 0 0 0 14.34 3.34A1.65 1.65 0 0 0 12 5A1.65 1.65 0 0 0 9.66 3.34A1.65 1.65 0 0 0 8.4 1A2.15 2.15 0 0 1 6 0A2.15 2.15 0 0 1 4.6 1A1.65 1.65 0 0 0 3.34 3.34A1.65 1.65 0 0 0 4.6 9A2.15 2.15 0 0 1 2.5 7A2.15 2.15 0 0 1 4.6 15A1.65 1.65 0 0 0 6 13.34A1.65 1.65 0 0 0 4.6 19A2.15 2.15 0 0 1 7 21A2.15 2.15 0 0 1 9.66 19A1.65 1.65 0 0 0 12 20.66A1.65 1.65 0 0 0 14.34 19A1.65 1.65 0 0 0 15.6 21A2.15 2.15 0 0 1 17 21A2.15 2.15 0 0 1 19.4 19A1.65 1.65 0 0 0 20.66 20.66A1.65 1.65 0 0 0 19.4 15Z" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Auth Section -->
+    <div id="authSection" class="auth-section hidden">
+      <div class="auth-form">
+        <h2>Connect to Your Account</h2>
+        <p class="auth-description">Enter your Subscription Tracker URL and API key to sync your data.</p>
+        
+        <div class="form-group">
+          <label for="apiUrl">App URL:</label>
+          <input type="url" id="apiUrl" placeholder="https://your-app.replit.dev" />
+        </div>
+        
+        <div class="form-group">
+          <label for="apiKey">API Key:</label>
+          <input type="password" id="apiKey" placeholder="Enter your API key" />
+          <small>Get your API key from the app settings</small>
+        </div>
+        
+        <button id="connectBtn" class="connect-btn">Connect Account</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="main-content hidden">
+      <!-- Stats Overview -->
+      <div class="stats-section">
+        <div class="stat-card">
+          <div class="stat-value" id="totalCost">$0.00</div>
+          <div class="stat-label">Monthly Total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="activeCount">0</div>
+          <div class="stat-label">Active Subs</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="actions-section">
+        <button id="addSubBtn" class="action-btn primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Add Subscription
+        </button>
+        <button id="syncBtn" class="action-btn secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 12A9 9 0 1 1 12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M21 3V12H12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Sync Now
+        </button>
+      </div>
+
+      <!-- Subscriptions List -->
+      <div class="subscriptions-section">
+        <div class="section-header">
+          <h3>Recent Subscriptions</h3>
+          <button id="viewAllBtn" class="view-all-btn">View All</button>
+        </div>
+        <div id="subscriptionsList" class="subscriptions-list">
+          <div class="loading-state">Loading subscriptions...</div>
+        </div>
+      </div>
+
+      <!-- Quick Add Form -->
+      <div id="quickAddForm" class="quick-add-form hidden">
+        <h3>Add New Subscription</h3>
+        <div class="form-row">
+          <input type="text" id="subName" placeholder="Service name" required />
+          <input type="number" id="subCost" placeholder="Monthly cost" step="0.01" required />
+        </div>
+        <div class="form-row">
+          <select id="subCategory">
+            <option value="Entertainment">Entertainment</option>
+            <option value="Productivity">Productivity</option>
+            <option value="Music">Music</option>
+            <option value="Cloud Storage">Cloud Storage</option>
+            <option value="Software">Software</option>
+            <option value="News">News</option>
+            <option value="Fitness">Fitness</option>
+            <option value="Gaming">Gaming</option>
+            <option value="Education">Education</option>
+            <option value="Other">Other</option>
+          </select>
+          <select id="subCycle">
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+            <option value="weekly">Weekly</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button id="saveSubBtn" class="save-btn">Save</button>
+          <button id="cancelSubBtn" class="cancel-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="error-state hidden">
+      <div class="error-icon">⚠️</div>
+      <h3>Connection Error</h3>
+      <p id="errorMessage">Unable to connect to your subscription tracker.</p>
+      <button id="retryBtn" class="retry-btn">Retry</button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <button id="openAppBtn" class="footer-btn">Open Full App</button>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
