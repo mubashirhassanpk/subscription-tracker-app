@@ -82,7 +82,7 @@ export default function ReminderSettings() {
 
   // Fetch current notification preferences
   const { data: preferences, isLoading } = useQuery({
-    queryKey: ['/api/notification-preferences']
+    queryKey: ['/api/reminders/preferences']
   });
 
   // Fetch available timezones
@@ -109,51 +109,53 @@ export default function ReminderSettings() {
 
   // Update form when preferences are loaded
   useEffect(() => {
-    if (preferences) {
+    if (preferences && (preferences as any)?.preferences) {
+      const prefs = (preferences as any).preferences;
       form.reset({
-        emailEnabled: preferences.emailEnabled,
-        emailAddress: preferences.emailAddress || '',
-        emailProvider: preferences.emailProvider || 'gmail',
-        emailTemplate: preferences.emailTemplate || 'professional',
-        smtpHost: preferences.smtpHost || '',
-        smtpPort: preferences.smtpPort || 587,
-        smtpUsername: preferences.smtpUsername || '',
+        emailEnabled: prefs.emailEnabled || false,
+        emailAddress: prefs.emailAddress || '',
+        emailProvider: prefs.emailProvider || 'gmail',
+        emailTemplate: prefs.emailTemplate || 'professional',
+        smtpHost: prefs.smtpHost || '',
+        smtpPort: prefs.smtpPort || 587,
+        smtpUsername: prefs.smtpUsername || '',
         
-        googleCalendarEnabled: preferences.googleCalendarEnabled,
-        googleCalendarId: preferences.googleCalendarId || '',
+        googleCalendarEnabled: prefs.googleCalendarEnabled || false,
+        googleCalendarId: prefs.googleCalendarId || '',
         
-        whatsappEnabled: preferences.whatsappEnabled,
-        whatsappNumber: preferences.whatsappNumber || '',
-        whatsappBusinessAccountId: preferences.whatsappBusinessAccountId || '',
-        whatsappPhoneNumberId: preferences.whatsappPhoneNumberId || '',
+        whatsappEnabled: prefs.whatsappEnabled || false,
+        whatsappNumber: prefs.whatsappNumber || '',
+        whatsappBusinessAccountId: prefs.whatsappBusinessAccountId || '',
+        whatsappPhoneNumberId: prefs.whatsappPhoneNumberId || '',
         
-        reminderDaysBefore: preferences.reminderDaysBefore || [7, 3, 1],
-        reminderTime: preferences.reminderTime || '09:00',
-        timezone: preferences.timezone || 'UTC',
-        includeSpendingSummary: preferences.includeSpendingSummary !== false,
-        includeActionButtons: preferences.includeActionButtons !== false
+        reminderDaysBefore: prefs.reminderDaysBefore || [7, 3, 1],
+        reminderTime: prefs.reminderTime || '09:00',
+        timezone: prefs.timezone || 'UTC',
+        includeSpendingSummary: prefs.includeSpendingSummary !== false,
+        includeActionButtons: prefs.includeActionButtons !== false
       });
     }
   }, [preferences, form]);
 
   // Update connection statuses based on preferences
   useEffect(() => {
-    if (preferences) {
+    if (preferences && (preferences as any)?.preferences) {
+      const prefs = (preferences as any).preferences;
       const statuses: ConnectionStatus[] = [
         {
           service: 'Email',
-          connected: preferences.emailEnabled && !!preferences.emailAddress,
-          error: !preferences.emailAddress && preferences.emailEnabled ? 'Email address not configured' : undefined
+          connected: prefs.emailEnabled && !!prefs.emailAddress,
+          error: !prefs.emailAddress && prefs.emailEnabled ? 'Email address not configured' : undefined
         },
         {
           service: 'Google Calendar',
-          connected: preferences.googleCalendarEnabled && !!preferences.googleAccessToken,
-          error: !preferences.googleAccessToken && preferences.googleCalendarEnabled ? 'Not connected to Google Calendar' : undefined
+          connected: prefs.googleCalendarEnabled && !!prefs.googleAccessToken,
+          error: !prefs.googleAccessToken && prefs.googleCalendarEnabled ? 'Not connected to Google Calendar' : undefined
         },
         {
           service: 'WhatsApp',
-          connected: preferences.whatsappEnabled && !!preferences.whatsappAccessTokenEncrypted,
-          error: !preferences.whatsappAccessTokenEncrypted && preferences.whatsappEnabled ? 'WhatsApp Business API not configured' : undefined
+          connected: prefs.whatsappEnabled && !!prefs.whatsappAccessTokenEncrypted,
+          error: !prefs.whatsappAccessTokenEncrypted && prefs.whatsappEnabled ? 'WhatsApp Business API not configured' : undefined
         }
       ];
       setConnectionStatuses(statuses);
@@ -163,17 +165,14 @@ export default function ReminderSettings() {
   // Save settings mutation
   const saveSettingsMutation = useMutation({
     mutationFn: async (data: ReminderSettingsForm) => {
-      return apiRequest('/api/notification-preferences', {
-        method: 'PUT',
-        body: JSON.stringify(data)
-      });
+      return apiRequest('/api/reminders/preferences', 'PUT', data);
     },
     onSuccess: () => {
       toast({
         title: 'Settings saved',
         description: 'Your reminder preferences have been updated.'
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/notification-preferences'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/reminders/preferences'] });
     },
     onError: (error: any) => {
       toast({
@@ -187,10 +186,7 @@ export default function ReminderSettings() {
   // Test connection mutation
   const testConnectionMutation = useMutation({
     mutationFn: async ({ service, settings }: { service: string; settings: any }) => {
-      return apiRequest(`/api/test-connection/${service.toLowerCase()}`, {
-        method: 'POST',
-        body: JSON.stringify(settings)
-      });
+      return apiRequest(`/api/test-connection/${service.toLowerCase()}`, 'POST', settings);
     },
     onSuccess: (data, { service }) => {
       toast({
@@ -228,12 +224,14 @@ export default function ReminderSettings() {
 
   // Google Calendar OAuth initiation
   const initiateGoogleOAuth = useMutation({
-    mutationFn: () => apiRequest('/api/auth/google/calendar', { method: 'GET' }),
-    onSuccess: (data) => {
-      window.open(data.authUrl, '_blank', 'width=500,height=600');
+    mutationFn: () => apiRequest('/api/auth/google/calendar', 'GET'),
+    onSuccess: (data: any) => {
+      if (data.authUrl) {
+        window.open(data.authUrl, '_blank', 'width=500,height=600');
+      }
       // Poll for completion
       const pollInterval = setInterval(() => {
-        queryClient.invalidateQueries({ queryKey: ['/api/notification-preferences'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/reminders/preferences'] });
       }, 2000);
       
       setTimeout(() => clearInterval(pollInterval), 30000); // Stop polling after 30 seconds
@@ -516,7 +514,7 @@ export default function ReminderSettings() {
 
                 {form.watch('googleCalendarEnabled') && (
                   <div className="space-y-4 pl-6 border-l-2 border-green-200">
-                    {!preferences?.googleAccessToken ? (
+                    {!preferences?.preferences?.googleAccessToken ? (
                       <Alert>
                         <Shield className="h-4 w-4" />
                         <AlertDescription className="flex items-center justify-between">
