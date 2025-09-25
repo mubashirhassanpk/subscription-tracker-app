@@ -1,6 +1,6 @@
 import { db } from '../db';
 import { users, subscriptions, adminActivityLogs, adminSettings, userSessions, notifications } from '@shared/schema';
-import { eq, desc, and, like, sql, count } from 'drizzle-orm';
+import { eq, desc, and, like, sql, count, isNotNull } from 'drizzle-orm';
 import bcryptjs from 'bcryptjs';
 import crypto from 'crypto';
 
@@ -405,14 +405,15 @@ export class AdminService {
       const [
         totalUsersResult,
         activeUsersResult,
-        totalSubscriptionsResult,
-        activeSubscriptionsResult,
-        recentActivityResult
+        totalUserPlansResult,
+        activeUserPlansResult,
+        recentActivityResult,
+        recentUserPlansResult
       ] = await Promise.all([
         db.select({ count: count() }).from(users),
         db.select({ count: count() }).from(users).where(eq(users.isActive, true)),
-        db.select({ count: count() }).from(subscriptions),
-        db.select({ count: count() }).from(subscriptions).where(eq(subscriptions.isActive, 1)),
+        db.select({ count: count() }).from(users).where(isNotNull(users.planId)),
+        db.select({ count: count() }).from(users).where(and(isNotNull(users.planId), eq(users.subscriptionStatus, 'active'))),
         db
           .select({
             action: adminActivityLogs.action,
@@ -422,15 +423,29 @@ export class AdminService {
           .from(adminActivityLogs)
           .leftJoin(users, eq(adminActivityLogs.adminUserId, users.id))
           .limit(5)
-          .orderBy(desc(adminActivityLogs.createdAt))
+          .orderBy(desc(adminActivityLogs.createdAt)),
+        db
+          .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            planId: users.planId,
+            subscriptionStatus: users.subscriptionStatus,
+            createdAt: users.createdAt
+          })
+          .from(users)
+          .where(isNotNull(users.planId))
+          .limit(5)
+          .orderBy(desc(users.updatedAt))
       ]);
 
       return {
         totalUsers: totalUsersResult[0].count,
         activeUsers: activeUsersResult[0].count,
-        totalSubscriptions: totalSubscriptionsResult[0].count,
-        activeSubscriptions: activeSubscriptionsResult[0].count,
-        recentActivity: recentActivityResult
+        totalSubscriptions: totalUserPlansResult[0].count,
+        activeSubscriptions: activeUserPlansResult[0].count,
+        recentActivity: recentActivityResult,
+        recentUserPlans: recentUserPlansResult
       };
     } catch (error) {
       console.error('Error getting dashboard stats:', error);

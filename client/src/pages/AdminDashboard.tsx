@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, CreditCard, Activity, Settings, UserCheck, AlertCircle, Bell, Key, Search, Edit, UserPlus, Eye, Plus } from 'lucide-react';
+import { Users, CreditCard, Activity, Settings, UserCheck, AlertCircle, Bell, Key, Search, Edit, UserPlus, Eye, Plus, ExternalLink } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
@@ -23,6 +23,14 @@ interface DashboardStats {
     action: string;
     createdAt: string;
     adminUserName: string;
+  }[];
+  recentUserPlans?: {
+    id: string;
+    name: string;
+    email: string;
+    planId: string;
+    subscriptionStatus: string;
+    createdAt: string;
   }[];
 }
 
@@ -576,27 +584,57 @@ export default function AdminDashboard() {
                 <div className="space-y-4">
                   <h4 className="text-lg font-semibold">Recent User Plans</h4>
                   
-                  {dashboardData?.totalSubscriptions && dashboardData.totalSubscriptions > 0 ? (
+                  {dashboardData?.recentUserPlans && dashboardData.recentUserPlans.length > 0 ? (
                     <div className="rounded-md border">
                       <Table>
                         <TableHeader>
                           <TableRow>
                             <TableHead>User</TableHead>
-                            <TableHead>Service</TableHead>
-                            <TableHead>Cost</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Plan ID</TableHead>
                             <TableHead>Status</TableHead>
-                            <TableHead>Next Billing</TableHead>
+                            <TableHead>Assigned Date</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          <TableRow>
-                            <TableCell colSpan={6} className="text-center py-8">
-                              <div className="text-muted-foreground">
-                                No user plans found. Click "Add User Plan" to assign one.
-                              </div>
-                            </TableCell>
-                          </TableRow>
+                          {dashboardData.recentUserPlans.map((userPlan) => (
+                            <TableRow key={userPlan.id}>
+                              <TableCell className="font-medium">
+                                {userPlan.name}
+                              </TableCell>
+                              <TableCell className="text-muted-foreground">
+                                {userPlan.email}
+                              </TableCell>
+                              <TableCell>
+                                <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                                  {userPlan.planId?.slice(0, 8)}...
+                                </code>
+                              </TableCell>
+                              <TableCell>
+                                <Badge 
+                                  variant={userPlan.subscriptionStatus === 'active' ? 'default' : 'secondary'}
+                                  data-testid={`status-${userPlan.subscriptionStatus}`}
+                                >
+                                  {userPlan.subscriptionStatus}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-muted-foreground">
+                                {new Date(userPlan.createdAt).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Link href="/admin/users">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    data-testid={`button-view-user-${userPlan.id}`}
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </Button>
+                                </Link>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                         </TableBody>
                       </Table>
                     </div>
