@@ -16,6 +16,7 @@ import { analyticsRouter } from "./routes/analytics";
 import { exportRouter } from "./routes/export";
 import { testConnectionsRouter } from "./routes/test-connections";
 import { googleAuthRouter } from "./routes/google-auth";
+import { adminRouter } from "./routes/admin";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register API route modules
@@ -32,6 +33,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/analytics', analyticsRouter);
   app.use('/api/export', exportRouter);
   app.use('/api/test-connection', testConnectionsRouter);
+  app.use('/api/admin', adminRouter);
   app.use('/api/v1', apiRouter);
 
   // API Keys management page
