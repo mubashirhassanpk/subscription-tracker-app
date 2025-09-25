@@ -6,6 +6,7 @@ import {
   insertSubscriptionReminderSchema,
 } from "@shared/schema";
 import { z } from "zod";
+import { EmailService } from "../services/email.service";
 
 // Extend Express Request to include session
 declare global {
@@ -23,6 +24,7 @@ declare global {
 }
 
 const router = Router();
+const emailService = new EmailService();
 
 // Get user notification preferences
 router.get("/preferences", async (req, res) => {
@@ -62,6 +64,21 @@ router.put("/preferences", async (req, res) => {
   try {
     const userId = req.session?.user?.id || "1"; // Mock user for development
     const updateData = updateUserNotificationPreferencesSchema.parse(req.body);
+    
+    // Handle Resend API key encryption
+    if (req.body.resendApiKey && req.body.resendApiKey.trim() !== '') {
+      try {
+        // Encrypt the API key before storing
+        updateData.resendApiKeyEncrypted = (emailService as any).encrypt(req.body.resendApiKey);
+        console.log('Resend API key encrypted successfully');
+      } catch (error) {
+        console.error('Failed to encrypt Resend API key:', error);
+        return res.status(400).json({
+          success: false,
+          error: "Failed to encrypt API key"
+        });
+      }
+    }
     
     const updatedPreferences = await storage.updateUserNotificationPreferences(userId, updateData);
     
