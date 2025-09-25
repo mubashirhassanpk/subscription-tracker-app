@@ -743,16 +743,16 @@ export default function AdminUserManagement() {
                       
                       <div className="space-y-2">
                         <h4 className="font-medium">Billing Actions</h4>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline">
-                            Extend Trial
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            Apply Discount
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            Reset Billing
-                          </Button>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          <div className="flex items-center justify-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                            <span className="font-medium text-sm">Extend Trial</span>
+                          </div>
+                          <div className="flex items-center justify-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                            <span className="font-medium text-sm">Apply Discount</span>
+                          </div>
+                          <div className="flex items-center justify-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                            <span className="font-medium text-sm">Reset Billing</span>
+                          </div>
                         </div>
                       </div>
                     </div>
