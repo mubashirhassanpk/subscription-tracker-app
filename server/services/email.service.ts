@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import handlebars from 'handlebars';
 import fs from 'fs';
 import path from 'path';
@@ -175,13 +176,110 @@ export class EmailService {
         throw new Error('Email notifications not enabled or address not configured');
       }
 
-      const transporter = await this.createTransporter(preferences);
-      const templateName = preferences.emailTemplate || 'professional';
-      const template = this.templates.get(templateName);
-
-      if (!template) {
-        throw new Error(`Email template '${templateName}' not found`);
+      // Use Resend API for all email sending
+      if (preferences.emailProvider === 'resend') {
+        return await this.sendViaResend(preferences, subscription, daysBefore, userSubscriptions);
+      } else {
+        // For SMTP, use nodemailer
+        return await this.sendViaSMTP(preferences, subscription, daysBefore, userSubscriptions);
       }
+    } catch (error) {
+      console.error('Error sending email reminder:', error);
+      const message = error instanceof Error ? error.message : 'Unknown error occurred';
+      throw new Error(`Failed to send email reminder: ${message}`);
+    }
+  }
+
+  private async sendViaResend(
+    preferences: UserNotificationPreferences,
+    subscription: any,
+    daysBefore: number,
+    userSubscriptions?: any[]
+  ) {
+    // Get API key from preferences
+    let apiKey = process.env.RESEND_API_KEY;
+    if (preferences.resendApiKeyEncrypted) {
+      try {
+        apiKey = this.decrypt(preferences.resendApiKeyEncrypted);
+      } catch (error) {
+        throw new Error('Failed to decrypt Resend API key');
+      }
+    }
+
+    if (!apiKey) {
+      throw new Error('Resend API key not configured');
+    }
+
+    const resend = new Resend(apiKey);
+    
+    // Send via Resend API
+    const { data, error } = await resend.emails.send({
+      from: 'Subscription Tracker <notifications@yourdomain.com>',
+      to: [preferences.emailAddress!],
+      subject: this.createEmailSubject(subscription, daysBefore),
+      html: this.createEmailHTML(subscription, daysBefore),
+      text: this.createPlainTextEmail(subscription, daysBefore)
+    });
+
+    if (error) {
+      throw new Error(`Resend API error: ${error.message}`);
+    }
+
+    return {
+      messageId: data?.id,
+      accepted: [preferences.emailAddress],
+      rejected: [],
+      status: 'sent',
+      timestamp: new Date()
+    };
+  }
+
+  private async sendViaSMTP(
+    preferences: UserNotificationPreferences,
+    subscription: any,
+    daysBefore: number,
+    userSubscriptions?: any[]
+  ) {
+    const transporter = nodemailer.createTransport({
+      host: preferences.smtpHost,
+      port: preferences.smtpPort || 587,
+      secure: (preferences.smtpPort || 587) === 465,
+      auth: {
+        user: preferences.smtpUsername,
+        pass: preferences.smtpPasswordEncrypted ? this.decrypt(preferences.smtpPasswordEncrypted) : undefined
+      }
+    });
+
+    const result = await transporter.sendMail({
+      from: preferences.smtpUsername,
+      to: preferences.emailAddress,
+      subject: this.createEmailSubject(subscription, daysBefore),
+      html: this.createEmailHTML(subscription, daysBefore),
+      text: this.createPlainTextEmail(subscription, daysBefore)
+    });
+
+    return {
+      messageId: result.messageId,
+      accepted: result.accepted,
+      rejected: result.rejected,
+      status: 'sent',
+      timestamp: new Date()
+    };
+  }
+
+  private createEmailHTML(subscription: any, daysBefore: number): string {
+    const timeframe = daysBefore === 0 ? 'today' : daysBefore === 1 ? 'tomorrow' : `in ${daysBefore} days`;
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Subscription Renewal Reminder</h2>
+        <p>Your <strong>${subscription.name}</strong> subscription will renew ${timeframe}.</p>
+        <p><strong>Cost:</strong> $${subscription.cost}</p>
+        <p><strong>Renewal Date:</strong> ${subscription.nextBillingDate.toLocaleDateString()}</p>
+        <hr>
+        <p style="color: #666; font-size: 14px;">This reminder was sent by your Subscription Tracker.</p>
+      </div>
+    `;
+  }
 
       // Calculate spending summary if enabled
       let spendingSummary = null;

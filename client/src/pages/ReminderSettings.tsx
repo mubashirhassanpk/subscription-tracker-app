@@ -41,7 +41,7 @@ const reminderSettingsSchema = z.object({
   // Email settings
   emailEnabled: z.boolean(),
   emailAddress: z.string().email().optional().or(z.literal('')),
-  emailProvider: z.enum(['resend', 'gmail', 'outlook', 'smtp']),
+  emailProvider: z.enum(['resend', 'smtp']),
   emailTemplate: z.enum(['professional', 'casual', 'minimal']),
   resendApiKey: z.string().optional(),
   smtpHost: z.string().optional(),
@@ -498,8 +498,6 @@ export default function ReminderSettings() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="resend">Resend (Recommended)</SelectItem>
-                          <SelectItem value="gmail">Gmail</SelectItem>
-                          <SelectItem value="outlook">Outlook</SelectItem>
                           <SelectItem value="smtp">Custom SMTP</SelectItem>
                         </SelectContent>
                       </Select>

@@ -1,0 +1,18 @@
+{
+  "name": "Add these scripts to your package.json",
+  "scripts": {
+    "db:generate:turso": "drizzle-kit generate --config=drizzle.config.turso.ts",
+    "db:push:turso": "drizzle-kit push --config=drizzle.config.turso.ts", 
+    "db:studio:turso": "drizzle-kit studio --config=drizzle.config.turso.ts",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "tsc -p server/tsconfig.json",
+    "vercel:dev": "vercel dev",
+    "vercel:deploy": "vercel --prod"
+  },
+  "dependencies_to_install": {
+    "@libsql/client": "^0.5.0",
+    "dotenv": "^16.4.0"
+  },
+  "note": "Install Turso dependencies: npm install @libsql/client dotenv"
+}
