@@ -217,7 +217,7 @@ export class WhatsAppService {
       );
 
       return {
-        messageId: result.data?.messages?.[0]?.id,
+        messageId: (result as any)?.messages?.[0]?.id || 'unknown',
         status: 'sent',
         timestamp: new Date()
       };
