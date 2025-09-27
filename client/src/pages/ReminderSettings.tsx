@@ -214,11 +214,28 @@ export default function ReminderSettings() {
       );
     },
     onError: (error: any, { service }) => {
-      toast({
-        title: `${service} connection failed`,
-        description: error.message,
-        variant: 'destructive'
-      });
+      // Check if this is a Resend API key not configured error
+      const isApiKeyError = error.message && error.message.includes('API key not configured');
+      
+      if (isApiKeyError && service === 'Email') {
+        toast({
+          title: "🔑 API Key Required",
+          description: "To test email functionality, you need to configure your Resend API key first. Go to Settings → API Keys to set it up.",
+          variant: 'default'
+        });
+        
+        // Automatically open the API keys page for convenience
+        setTimeout(() => {
+          window.open('/settings?tab=api-keys', '_blank');
+        }, 2000);
+      } else {
+        toast({
+          title: `${service} connection failed`,
+          description: error.message,
+          variant: 'destructive'
+        });
+      }
+      
       // Update connection status
       setConnectionStatuses(prev => 
         prev.map(status => 
