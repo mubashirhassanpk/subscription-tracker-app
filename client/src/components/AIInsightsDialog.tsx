@@ -139,7 +139,7 @@ export default function AIInsightsDialog() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => window.open('/api-keys', '_blank')}
+              onClick={() => window.location.href = '/settings?tab=api-keys'}
               data-testid="button-manage-api-keys"
             >
               <Settings className="h-4 w-4" />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,6 +61,12 @@ export default function Settings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
+  // Get initial tab from URL parameters
+  const [activeTab, setActiveTab] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('tab') || 'general';
+  });
+  
   const [userSettings, setUserSettings] = useState<UserSettings>({
     theme: 'system',
     notifications: {
@@ -77,6 +83,17 @@ export default function Settings() {
   // API Key form states
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [isShowingGeminiKey, setIsShowingGeminiKey] = useState(false);
+
+  // Update URL when tab changes
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (activeTab === 'general') {
+      url.searchParams.delete('tab');
+    } else {
+      url.searchParams.set('tab', activeTab);
+    }
+    window.history.replaceState({}, '', url.toString());
+  }, [activeTab]);
 
   // Fetch user account info
   const { data: userStatus } = useQuery({
@@ -183,7 +200,7 @@ export default function Settings() {
   };
 
   const getGeminiApiKey = () => {
-    return userApiKeys?.find((key: UserExternalApiKey) => key.service === 'gemini');
+    return (userApiKeys as UserExternalApiKey[])?.find((key: UserExternalApiKey) => key.service === 'gemini');
   };
 
   return (
@@ -193,7 +210,7 @@ export default function Settings() {
         <h1 className="text-2xl font-bold">Settings</h1>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
