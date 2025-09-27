@@ -39,6 +39,11 @@ function decryptKey(encryptedKey: string): string {
     const encrypted = parts[1];
     const authTag = Buffer.from(parts[2], 'hex');
     
+    // Validate authentication tag length (must be 16 bytes for AES-256-GCM)
+    if (authTag.length !== 16) {
+      throw new Error('Invalid authentication tag length');
+    }
+    
     const decipher = createDecipheriv('aes-256-gcm', Buffer.from(ENCRYPTION_KEY.slice(0, 32)), iv);
     decipher.setAuthTag(authTag);
     
