@@ -81,6 +81,10 @@ app.use((req, res, next) => {
   const { seedDatabase } = await import("./seed");
   await seedDatabase();
   
+  // Initialize notification service and start reminder scheduler
+  const { notificationService } = await import("./services/notification.service");
+  notificationService.startReminderScheduler();
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

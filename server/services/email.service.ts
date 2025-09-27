@@ -103,9 +103,9 @@ export class EmailService {
     
     // Send test email
     const { data, error } = await resend.emails.send({
-      from: 'Subscription Tracker <onboarding@resend.dev>',
+      from: 'SubTracker <notifications@subtracker.uk>',
       to: [preferences.emailAddress!],
-      subject: 'Test Email from Subscription Tracker',
+      subject: 'Test Email from SubTracker',
       html: '<p>This is a test email to verify your email configuration.</p>'
     });
 
@@ -369,7 +369,7 @@ export class EmailService {
     const resend = new Resend(apiKey);
     
     const { data, error } = await resend.emails.send({
-      from: 'Subscription Tracker <notifications@yourdomain.com>',
+      from: 'SubTracker <notifications@subtracker.uk>',
       to: [preferences.emailAddress!],
       subject,
       html: htmlContent

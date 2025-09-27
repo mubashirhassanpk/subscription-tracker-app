@@ -182,11 +182,13 @@ router.delete("/:reminderId", async (req, res) => {
 // Test email reminder endpoint
 router.post("/test-email", async (req, res) => {
   try {
-    const userId = req.session?.user?.id || "1"; // Mock user for development
+    const userId = req.session?.user?.id || "dev-user-1"; // Mock user for development
     
     // Get user preferences and subscriptions
     const preferences = await storage.getUserNotificationPreferences(userId);
     const subscriptions = await storage.getUserSubscriptions(userId);
+    
+    console.log(`DEBUG: userId=${userId}, subscriptions found: ${subscriptions.length}`);
     
     if (!preferences) {
       return res.status(404).json({ 
@@ -205,7 +207,7 @@ router.post("/test-email", async (req, res) => {
     if (subscriptions.length === 0) {
       return res.status(400).json({ 
         success: false, 
-        error: "No subscriptions found to send reminder for" 
+        error: `No subscriptions found for user ${userId}` 
       });
     }
 
