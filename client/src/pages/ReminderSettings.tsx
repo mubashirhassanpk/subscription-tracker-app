@@ -242,8 +242,27 @@ export default function ReminderSettings() {
       );
     },
     onError: (error: any, { service }) => {
+      // Parse and clean the error message
+      let cleanErrorMessage = error.message;
+      
+      // Extract meaningful message from JSON error responses
+      if (error.message && error.message.includes('{"success":false')) {
+        try {
+          const match = error.message.match(/"message":"([^"]+)"/);
+          if (match && match[1]) {
+            cleanErrorMessage = match[1];
+          }
+        } catch (e) {
+          // If parsing fails, extract after the colon
+          const colonIndex = error.message.indexOf(':');
+          if (colonIndex > -1) {
+            cleanErrorMessage = error.message.substring(colonIndex + 1).trim();
+          }
+        }
+      }
+      
       // Check if this is a Resend API key not configured error
-      const isApiKeyError = error.message && error.message.includes('API key not configured');
+      const isApiKeyError = cleanErrorMessage && cleanErrorMessage.includes('API key not configured');
       
       if (isApiKeyError && service === 'Email') {
         toast({
@@ -256,19 +275,22 @@ export default function ReminderSettings() {
         setTimeout(() => {
           window.open('/settings?tab=api-keys', '_blank');
         }, 2000);
+        
+        // Set a clean error message for display
+        cleanErrorMessage = "Resend API key not configured";
       } else {
         toast({
           title: `${service} connection failed`,
-          description: error.message,
+          description: cleanErrorMessage,
           variant: 'destructive'
         });
       }
       
-      // Update connection status
+      // Update connection status with clean error message
       setConnectionStatuses(prev => 
         prev.map(status => 
           status.service === service 
-            ? { ...status, connected: false, error: error.message }
+            ? { ...status, connected: false, error: cleanErrorMessage }
             : status
         )
       );
