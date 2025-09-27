@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: Subscription Tracker API
+  title: SubTracker API
   description: |
     Comprehensive REST API for managing subscriptions, API keys, and user accounts.
     
@@ -14,18 +14,18 @@ info:
     ```
     
     ## Base URL
-    - Production: `https://your-app-domain.replit.app`
+    - Production: `https://subtacker.uk`
     - Development: `http://localhost:5000`
   version: 1.0.0
   contact:
     name: API Support
-    url: https://your-app-domain.replit.app/support
+    url: https://subtacker.uk/support
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: https://your-app-domain.replit.app
+  - url: https://subtacker.uk
     description: Production server
   - url: http://localhost:5000
     description: Development server

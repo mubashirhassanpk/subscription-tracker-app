@@ -1,10 +1,10 @@
-# Subscription Tracker API Documentation
+# SubTracker API Documentation
 
 ## Overview
 
-The Subscription Tracker API provides a comprehensive REST API for managing subscriptions, API keys, and user accounts. This API supports Chrome extensions, web applications, mobile apps, and AI integrations with secure authentication and rate limiting.
+The SubTracker API provides a comprehensive REST API for managing subscriptions, API keys, and user accounts. This API supports Chrome extensions, web applications, mobile apps, and AI integrations with secure authentication and rate limiting.
 
-**Base URL:** `https://your-app-domain.replit.app` (or `http://localhost:5000` for development)  
+**Base URL:** `https://subtacker.uk` (or `http://localhost:5000` for development)  
 **API Version:** v1  
 **Authentication:** API Key (Bearer token)
 
@@ -42,23 +42,23 @@ X-API-Key: sk_1234567890abcdef...
 
 ```bash
 # Create new API key
-curl -X POST https://your-app-domain.replit.app/api/api-keys \
+curl -X POST https://subtacker.uk/api/api-keys \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <existing-key>" \
   -d '{"name": "My Chrome Extension", "expiresAt": "2024-12-31T23:59:59Z"}'
 
 # List your API keys
-curl https://your-app-domain.replit.app/api/api-keys \
+curl https://subtacker.uk/api/api-keys \
   -H "Authorization: Bearer <your-key>"
 
 # Update API key
-curl -X PUT https://your-app-domain.replit.app/api/api-keys/{id} \
+curl -X PUT https://subtacker.uk/api/api-keys/{id} \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <your-key>" \
   -d '{"name": "Updated Name", "isActive": false}'
 
 # Delete API key
-curl -X DELETE https://your-app-domain.replit.app/api/api-keys/{id} \
+curl -X DELETE https://subtacker.uk/api/api-keys/{id} \
   -H "Authorization: Bearer <your-key>"
 ```
 
@@ -237,7 +237,7 @@ Create a `manifest.json` for your Chrome extension:
     "activeTab"
   ],
   "host_permissions": [
-    "https://your-app-domain.replit.app/*",
+    "https://subtacker.uk/*",
     "http://localhost:5000/*"
   ],
   "background": {
@@ -254,7 +254,7 @@ Create a `manifest.json` for your Chrome extension:
 #### Service Worker (background.js)
 ```javascript
 // background.js
-const API_BASE_URL = 'https://your-app-domain.replit.app/api/v1';
+const API_BASE_URL = 'https://subtacker.uk/api/v1';
 
 // Store API key securely
 async function storeApiKey(apiKey) {
@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!result.apiKey) {
     statusDiv.innerHTML = '<a href="#" id="setupLink">Setup API Key</a>';
     document.getElementById('setupLink').onclick = () => {
-      chrome.tabs.create({ url: 'https://your-app-domain.replit.app/api-keys' });
+      chrome.tabs.create({ url: 'https://subtacker.uk/api-keys' });
     };
     return;
   }
@@ -433,7 +433,7 @@ import requests
 import os
 
 class SubscriptionTrackerAPI:
-    def __init__(self, api_key, base_url="https://your-app-domain.replit.app"):
+    def __init__(self, api_key, base_url="https://subtacker.uk"):
         self.api_key = api_key
         self.base_url = base_url
         self.headers = {
@@ -477,7 +477,7 @@ For React/Vue/Angular applications:
 ```javascript
 // subscription-api.js
 class SubscriptionAPI {
-  constructor(apiKey, baseURL = 'https://your-app-domain.replit.app') {
+  constructor(apiKey, baseURL = 'https://subtacker.uk') {
     this.apiKey = apiKey;
     this.baseURL = baseURL;
   }
@@ -582,7 +582,7 @@ For React Native or native mobile apps:
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class MobileSubscriptionAPI {
-  constructor(baseURL = 'https://your-app-domain.replit.app') {
+  constructor(baseURL = 'https://subtacker.uk') {
     this.baseURL = baseURL;
   }
 
@@ -706,7 +706,7 @@ def get_subscriptions_tool(api_key):
     """Tool for Claude to get user subscriptions"""
     try:
         response = requests.get(
-            "https://your-app-domain.replit.app/api/v1/subscriptions",
+            "https://subtacker.uk/api/v1/subscriptions",
             headers={"Authorization": f"Bearer {api_key}"}
         )
         response.raise_for_status()
@@ -736,7 +736,7 @@ def create_subscription_tool(api_key, name, cost, billing_cycle, category, next_
         }
         
         response = requests.post(
-            "https://your-app-domain.replit.app/api/v1/subscriptions",
+            "https://subtacker.uk/api/v1/subscriptions",
             headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
             json=data
         )
@@ -789,7 +789,7 @@ import json
 class SubscriptionTrackerTools:
     def __init__(self, api_key):
         self.api_key = api_key
-        self.base_url = "https://your-app-domain.replit.app/api/v1"
+        self.base_url = "https://subtacker.uk/api/v1"
         self.headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
@@ -974,19 +974,19 @@ async function apiRequestWithRetry(url, options, maxRetries = 3) {
 
 ```bash
 # 1. Create new API key
-curl -X POST https://your-app-domain.replit.app/api/api-keys \
+curl -X POST https://subtacker.uk/api/api-keys \
   -H "Authorization: Bearer <old-key>" \
   -d '{"name": "Production Key v2"}'
 
 # 2. Update applications with new key
 # 3. Test thoroughly
 # 4. Deactivate old key
-curl -X PUT https://your-app-domain.replit.app/api/api-keys/{old-key-id} \
+curl -X PUT https://subtacker.uk/api/api-keys/{old-key-id} \
   -H "Authorization: Bearer <new-key>" \
   -d '{"isActive": false}'
 
 # 5. Delete old key after grace period
-curl -X DELETE https://your-app-domain.replit.app/api/api-keys/{old-key-id} \
+curl -X DELETE https://subtacker.uk/api/api-keys/{old-key-id} \
   -H "Authorization: Bearer <new-key>"
 ```
 
@@ -1008,16 +1008,16 @@ curl -X DELETE https://your-app-domain.replit.app/api/api-keys/{old-key-id} \
 
 ### Useful Tools
 
-- **Postman Collection:** [Import our Postman collection](https://your-app-domain.replit.app/api/postman)
-- **OpenAPI Spec:** [View interactive API docs](https://your-app-domain.replit.app/api/docs)
+- **Postman Collection:** [Import our Postman collection](https://subtacker.uk/api/postman)
+- **OpenAPI Spec:** [View interactive API docs](https://subtacker.uk/api/docs)
 - **SDKs:** Official SDKs available for Python, JavaScript, and Go
 
 ### Community & Updates
 
-- **API Changelog:** [View recent updates](https://your-app-domain.replit.app/api/changelog)
-- **Status Page:** [Check API status](https://your-app-domain.replit.app/status)
+- **API Changelog:** [View recent updates](https://subtacker.uk/api/changelog)
+- **Status Page:** [Check API status](https://subtacker.uk/status)
 - **Community Forum:** [Join discussions](https://community.subscription-tracker.com)
 
 ---
 
-*This documentation covers the core functionality. For the latest updates and additional features, visit the online documentation at [your-app-domain.replit.app/api/docs](https://your-app-domain.replit.app/api/docs)*
+*This documentation covers the core functionality. For the latest updates and additional features, visit the online documentation at [your-app-domain.replit.app/api/docs](https://subtacker.uk/api/docs)*

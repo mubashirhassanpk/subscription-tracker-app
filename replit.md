@@ -1,4 +1,4 @@
-# Subscription Tracker
+# SubTracker
 
 ## Overview
 

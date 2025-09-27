@@ -664,7 +664,7 @@ export default function ReminderSettings() {
                                 
                                 <div>
                                   <p><strong>Step 3: Configure Redirect URIs</strong></p>
-                                  <p>→ Add: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">https://your-app.replit.dev/api/auth/google/callback</code></p>
+                                  <p>→ Add: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">https://subtacker.uk/api/auth/google/callback</code></p>
                                   <p>→ Add: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">http://localhost:5000/api/auth/google/callback</code></p>
                                 </div>
                                 

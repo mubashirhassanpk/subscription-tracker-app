@@ -2,7 +2,7 @@
 
 ## Quick Start for Chrome Extensions
 
-This guide shows you how to build a Chrome extension that syncs with your Subscription Tracker API using Manifest V3.
+This guide shows you how to build a Chrome extension that syncs with your SubTracker API using Manifest V3.
 
 ## Extension Setup
 
@@ -13,7 +13,7 @@ Create `manifest.json`:
 ```json
 {
   "manifest_version": 3,
-  "name": "Subscription Tracker Sync",
+  "name": "SubTracker Sync",
   "version": "1.0",
   "description": "Sync and manage your subscriptions",
   
@@ -23,7 +23,7 @@ Create `manifest.json`:
   ],
   
   "host_permissions": [
-    "https://your-app-domain.replit.app/*",
+    "https://subtacker.uk/*",
     "http://localhost:5000/*"
   ],
   
@@ -33,7 +33,7 @@ Create `manifest.json`:
   
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Subscription Tracker"
+    "default_title": "SubTracker"
   },
   
   "content_scripts": [
@@ -52,7 +52,7 @@ Create `background.js`:
 
 ```javascript
 // Configuration
-const API_BASE_URL = 'https://your-app-domain.replit.app/api/v1';
+const API_BASE_URL = 'https://subtacker.uk/api/v1';
 
 // Secure API key storage
 class ApiKeyManager {
