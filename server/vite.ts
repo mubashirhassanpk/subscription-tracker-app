@@ -43,6 +43,11 @@ export async function setupVite(app: Express, server: Server) {
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
+    
+    // Skip health check endpoints to avoid overriding them
+    if (url === '/' || url === '/health' || url === '/api/health') {
+      return next();
+    }
 
     try {
       const clientTemplate = path.resolve(
@@ -78,8 +83,12 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
+  // fall through to index.html if the file doesn't exist (but not for health checks)
+  app.use("*", (req, res) => {
+    // Health check endpoints should be handled by routes, not static files
+    if (req.originalUrl === '/' || req.originalUrl === '/health' || req.originalUrl === '/api/health') {
+      return res.status(404).json({ error: 'Health check endpoint not found' });
+    }
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }

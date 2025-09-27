@@ -5,6 +5,25 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
+// Health check endpoint MUST be first to avoid middleware conflicts
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'healthy', 
+    service: 'SubTracker',
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+    env: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Health check endpoint for deployment at root (simple version)
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok',
+    service: 'SubTracker'
+  });
+});
+
 // CORS configuration for Chrome extensions and web apps
 app.use(cors({
   origin: [
