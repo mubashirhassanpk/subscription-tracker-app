@@ -203,7 +203,7 @@ export function Footer() {
               <div className="space-y-4 mb-6">
                 <div className="flex items-center gap-3 text-gray-400">
                   <Mail className="h-4 w-4 text-purple-400 flex-shrink-0" />
-                  <span className="text-sm">hello@subtracker.com</span>
+                  <span className="text-sm">hello@subtracker.uk</span>
                 </div>
                 <div className="flex items-center gap-3 text-gray-400">
                   <Phone className="h-4 w-4 text-purple-400 flex-shrink-0" />
