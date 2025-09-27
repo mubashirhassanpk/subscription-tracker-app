@@ -39,8 +39,24 @@ import {
   Activity,
   Database,
   FileText,
-  Settings
+  Settings,
+  Plug,
+  MessageSquare,
+  Workflow,
+  Network,
+  Cloud,
+  Layers,
+  Cpu,
+  Gauge,
+  Link2,
+  Share2,
+  UserCheck,
+  GitBranch,
+  Monitor,
+  Chrome,
+  Download
 } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 export default function Home() {
   const [activeFeature, setActiveFeature] = useState(0);
@@ -874,6 +890,428 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* AI-Powered Insights Section */}
+      <section className="py-20 bg-gradient-to-br from-purple-50 via-pink-50 to-red-50 dark:from-purple-950/30 dark:via-pink-950/30 dark:to-red-950/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-full mb-6">
+                <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                <span className="text-sm font-medium text-purple-700 dark:text-purple-300">AI-Powered Intelligence</span>
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+                Smart Insights That
+                <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"> Save You Money</span>
+              </h2>
+              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                Our AI analyzes your spending patterns to provide personalized recommendations and automatically identifies opportunities for savings.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div className="space-y-8">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl text-white flex-shrink-0">
+                    <Cpu className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-3">Intelligent Spending Analysis</h3>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                      AI examines your transaction history to identify recurring charges, seasonal patterns, and potential duplicate subscriptions you might have missed.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl text-white flex-shrink-0">
+                    <Gauge className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-3">Predictive Savings Recommendations</h3>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                      Get personalized suggestions based on your usage patterns, seasonal trends, and alternative service options that could save you money.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl text-white flex-shrink-0">
+                    <Brain className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-3">Smart Budget Optimization</h3>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                      AI-powered insights help you optimize your subscription portfolio by identifying underused services and suggesting better alternatives.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                      <Brain className="h-5 w-5 text-purple-500" />
+                      AI Insights Dashboard
+                    </h4>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                          <TrendingDown className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-green-800 dark:text-green-400">Potential Monthly Savings</p>
+                          <p className="text-sm text-green-600 dark:text-green-500">Based on usage analysis</p>
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">$127</div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                          <AlertTriangle className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-yellow-800 dark:text-yellow-400">Underused Services</p>
+                          <p className="text-sm text-yellow-600 dark:text-yellow-500">Low activity detected</p>
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">3</div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                          <Lightbulb className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-purple-800 dark:text-purple-400">Smart Recommendations</p>
+                          <p className="text-sm text-purple-600 dark:text-purple-500">Optimized for your needs</p>
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">7</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Integrations & Connections */}
+      <section className="py-20 bg-white dark:bg-gray-950">
+        <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-full mb-6">
+                <Plug className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Seamless Integrations</span>
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+                Connect Everything in
+                <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"> One Place</span>
+              </h2>
+              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                Integrate with your favorite tools and services for a complete subscription management experience. 
+                From banking to calendar apps, we connect it all.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              <div className="text-center p-8 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 rounded-2xl border border-blue-200 dark:border-blue-800 hover:shadow-xl transition-all duration-300">
+                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center text-white">
+                  <Database className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold mb-4">Banking & Cards</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Connect your bank accounts and credit cards for automatic transaction monitoring and subscription discovery.
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm">Chase</span>
+                  <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm">Wells Fargo</span>
+                  <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm">Visa</span>
+                </div>
+              </div>
+
+              <div className="text-center p-8 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-2xl border border-green-200 dark:border-green-800 hover:shadow-xl transition-all duration-300">
+                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center text-white">
+                  <Calendar className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold mb-4">Calendar Apps</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Sync with your calendar to get renewal reminders exactly when and where you need them.
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm">Google Calendar</span>
+                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm">Apple Calendar</span>
+                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm">Outlook</span>
+                </div>
+              </div>
+
+              <div className="text-center p-8 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-2xl border border-purple-200 dark:border-purple-800 hover:shadow-xl transition-all duration-300">
+                <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white">
+                  <MessageSquare className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold mb-4">Communication</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Get alerts through your preferred communication channels and never miss important renewals.
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm">WhatsApp</span>
+                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm">Slack</span>
+                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm">Email</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                And many more integrations with enterprise-grade security and reliability
+              </p>
+              <Link href="/integrations" data-testid="button-view-integrations">
+                <Button size="lg" variant="outline" className="px-8 py-3">
+                  View All Integrations
+                  <Network className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile & Browser Extensions */}
+      <section className="py-20 bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 dark:from-indigo-950/30 dark:via-blue-950/30 dark:to-purple-950/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-full mb-6">
+                <Monitor className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">Cross-Platform Access</span>
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+                Access SubTracker
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Everywhere</span>
+              </h2>
+              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                Manage your subscriptions on any device, anywhere. Our mobile app and browser extension ensure 
+                you're always in control of your recurring expenses.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <div className="space-y-8">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl text-white">
+                      <Smartphone className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold">Mobile App</h3>
+                      <p className="text-gray-600 dark:text-gray-400">iOS & Android</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">4.9★</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">App Store Rating</div>
+                    </div>
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">50K+</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Downloads</div>
+                    </div>
+                  </div>
+                  <div className="mt-6 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span className="text-gray-700 dark:text-gray-300">Touch-optimized interface with bottom navigation</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span className="text-gray-700 dark:text-gray-300">Push notifications for upcoming renewals</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span className="text-gray-700 dark:text-gray-300">Offline access to subscription data</span>
+                    </div>
+                  </div>
+                  <div className="mt-6 flex gap-3">
+                    <Button className="flex-1" data-testid="button-download-ios">
+                      <Download className="mr-2 h-4 w-4" />
+                      App Store
+                    </Button>
+                    <Button variant="outline" className="flex-1" data-testid="button-download-android">
+                      <Download className="mr-2 h-4 w-4" />
+                      Google Play
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-8">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl text-white">
+                      <Chrome className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold">Browser Extension</h3>
+                      <p className="text-gray-600 dark:text-gray-400">Chrome, Firefox, Safari</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">4.8★</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Chrome Web Store</div>
+                    </div>
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">25K+</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Active Users</div>
+                    </div>
+                  </div>
+                  <div className="mt-6 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span className="text-gray-700 dark:text-gray-300">Detect subscriptions while browsing</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span className="text-gray-700 dark:text-gray-300">Quick add subscriptions from any website</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span className="text-gray-700 dark:text-gray-300">Real-time spending tracker badge</span>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Button className="w-full" data-testid="button-add-extension">
+                      <Chrome className="mr-2 h-4 w-4" />
+                      Add to Chrome (Free)
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Team Collaboration Features */}
+      <section className="py-20 bg-white dark:bg-gray-950">
+        <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-teal-100 dark:from-green-900/30 dark:to-teal-900/30 rounded-full mb-6">
+                <UserCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <span className="text-sm font-medium text-green-700 dark:text-green-300">Team Features</span>
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+                Collaborate with Your
+                <span className="bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent"> Team</span>
+              </h2>
+              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                Perfect for businesses, families, and teams. Share subscription management responsibilities 
+                and ensure everyone stays informed about important renewals.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-950/30 dark:to-teal-950/30 rounded-2xl p-8 border border-green-200 dark:border-green-800">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center text-white mb-6">
+                  <Share2 className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold mb-4">Shared Workspaces</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                  Create separate workspaces for different projects, departments, or family members. 
+                  Keep business and personal subscriptions organized.
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span>Unlimited workspaces</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span>Role-based access control</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span>Separate billing & reporting</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-2xl p-8 border border-blue-200 dark:border-blue-800">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center text-white mb-6">
+                  <Users className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold mb-4">Team Management</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                  Invite team members with different permission levels. Admins can manage everything 
+                  while viewers can access reports and notifications.
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                    <span>Granular permissions</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                    <span>Activity audit logs</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                    <span>Team notification settings</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white mb-6">
+                  <Workflow className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold mb-4">Approval Workflows</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                  Set up approval processes for new subscriptions and budget changes. 
+                  Ensure compliance and prevent unauthorized spending.
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-purple-500" />
+                    <span>Multi-level approvals</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-purple-500" />
+                    <span>Budget threshold alerts</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-purple-500" />
+                    <span>Automated compliance reports</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-12 text-center">
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+                Ready to get your team organized? Start with our Business plan.
+              </p>
+              <Link href="/pricing" data-testid="button-team-pricing">
+                <Button size="lg" className="px-12 py-4 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700">
+                  <Users className="mr-3 h-6 w-6" />
+                  View Team Pricing
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }
