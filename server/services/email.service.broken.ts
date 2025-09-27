@@ -484,8 +484,7 @@ Manage all your subscriptions in one place`;
       const iv = Buffer.from(ivHex, 'hex');
       const authTag = Buffer.from(authTagHex, 'hex');
       
-      const decipher = crypto.createDecipher('aes-256-gcm', this.encryptionKey);
-      decipher.setAAD(iv);
+      const decipher = crypto.createDecipheriv('aes-256-gcm', this.encryptionKey, iv);
       decipher.setAuthTag(authTag);
       
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
