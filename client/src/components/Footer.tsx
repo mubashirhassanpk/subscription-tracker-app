@@ -1,4 +1,3 @@
-import { Link } from "wouter";
 import { Crown, Mail, Phone, MapPin, Github, Twitter, Linkedin, Facebook, ChevronRight, Shield, Globe, Award, Users, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,41 +6,6 @@ import { Separator } from "@/components/ui/separator";
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
-  const productLinks = [
-    { name: "Features", href: "/features" },
-    { name: "Pricing", href: "/pricing" },
-    { name: "Dashboard", href: "/dashboard" },
-    { name: "Analytics", href: "/analytics" },
-    { name: "Mobile App", href: "#mobile-app" },
-    { name: "Browser Extension", href: "#chrome-extension" },
-  ];
-
-  const companyLinks = [
-    { name: "About Us", href: "/about" },
-    { name: "Blog", href: "/blog" },
-    { name: "Careers", href: "/careers" },
-    { name: "Press Kit", href: "/press" },
-    { name: "Contact", href: "/contact" },
-    { name: "Partners", href: "/partners" },
-  ];
-
-  const supportLinks = [
-    { name: "Help Center", href: "/help" },
-    { name: "Documentation", href: "/docs" },
-    { name: "API Reference", href: "/api" },
-    { name: "Status Page", href: "/status" },
-    { name: "Feature Requests", href: "/feature-requests" },
-    { name: "Community", href: "/community" },
-  ];
-
-  const legalLinks = [
-    { name: "Privacy Policy", href: "/privacy" },
-    { name: "Terms of Service", href: "/terms" },
-    { name: "Cookie Policy", href: "/cookies" },
-    { name: "GDPR", href: "/gdpr" },
-    { name: "Security", href: "/security" },
-    { name: "Compliance", href: "/compliance" },
-  ];
 
   const socialLinks = [
     { name: "Twitter", href: "https://twitter.com/subtracker", icon: <Twitter className="h-5 w-5" /> },
@@ -89,9 +53,9 @@ export function Footer() {
       {/* Main Footer Content */}
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-4xl mx-auto">
             {/* Brand Section */}
-            <div className="lg:col-span-1">
+            <div>
               <div className="flex items-center gap-2 mb-6">
                 <Crown className="h-8 w-8 text-purple-400" />
                 <span className="font-bold text-2xl">SubTracker</span>
@@ -138,69 +102,12 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Product Links */}
+            {/* Contact */}
             <div>
-              <h4 className="font-semibold text-lg mb-6 text-white">Product</h4>
-              <ul className="space-y-4">
-                {productLinks.map((link) => (
-                  <li key={link.name}>
-                    <Link 
-                      href={link.href}
-                      className="text-gray-400 hover:text-white transition-colors flex items-center gap-2 group"
-                      data-testid={`footer-link-${link.name.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Company Links */}
-            <div>
-              <h4 className="font-semibold text-lg mb-6 text-white">Company</h4>
-              <ul className="space-y-4">
-                {companyLinks.map((link) => (
-                  <li key={link.name}>
-                    <Link 
-                      href={link.href}
-                      className="text-gray-400 hover:text-white transition-colors flex items-center gap-2 group"
-                      data-testid={`footer-link-${link.name.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Support Links */}
-            <div>
-              <h4 className="font-semibold text-lg mb-6 text-white">Support</h4>
-              <ul className="space-y-4">
-                {supportLinks.map((link) => (
-                  <li key={link.name}>
-                    <Link 
-                      href={link.href}
-                      className="text-gray-400 hover:text-white transition-colors flex items-center gap-2 group"
-                      data-testid={`footer-link-${link.name.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Legal & Contact */}
-            <div>
-              <h4 className="font-semibold text-lg mb-6 text-white">Legal & Contact</h4>
+              <h4 className="font-semibold text-lg mb-6 text-white">Contact</h4>
               
               {/* Contact Info */}
-              <div className="space-y-4 mb-6">
+              <div className="space-y-4">
                 <div className="flex items-center gap-3 text-gray-400">
                   <Mail className="h-4 w-4 text-purple-400 flex-shrink-0" />
                   <span className="text-sm">hello@subtracker.uk</span>
@@ -214,22 +121,6 @@ export function Footer() {
                   <span className="text-sm">San Francisco, CA<br />United States</span>
                 </div>
               </div>
-
-              {/* Legal Links */}
-              <ul className="space-y-3">
-                {legalLinks.map((link) => (
-                  <li key={link.name}>
-                    <Link 
-                      href={link.href}
-                      className="text-gray-400 hover:text-white transition-colors text-sm flex items-center gap-2 group"
-                      data-testid={`footer-link-${link.name.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
         </div>
