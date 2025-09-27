@@ -8,12 +8,36 @@ export class EmailService {
   private encryptionKey: string;
   
   constructor() {
-    this.encryptionKey = process.env.ENCRYPTION_KEY;
+    const rawKey = process.env.ENCRYPTION_KEY;
     
-    if (!this.encryptionKey) {
+    if (!rawKey) {
       console.error('CRITICAL SECURITY ERROR: ENCRYPTION_KEY environment variable is not set!');
       console.error('Email service cannot securely encrypt credentials without a proper encryption key.');
       throw new Error('ENCRYPTION_KEY environment variable is required for secure credential storage');
+    }
+    
+    // Ensure the key is exactly 32 bytes for AES-256
+    this.encryptionKey = crypto.scryptSync(rawKey, 'subtracker-salt', 32).toString('hex').slice(0, 64);
+  }
+
+  /**
+   * Encrypt API keys for secure storage
+   */
+  encrypt(data: string): string {
+    try {
+      const iv = crypto.randomBytes(12); // 12 bytes for GCM
+      const keyBuffer = Buffer.from(this.encryptionKey.slice(0, 64), 'hex'); // Use hex decoded key
+      const cipher = crypto.createCipheriv('aes-256-gcm', keyBuffer, iv);
+      
+      let encrypted = cipher.update(data, 'utf8', 'hex');
+      encrypted += cipher.final('hex');
+      
+      const authTag = cipher.getAuthTag();
+      
+      return iv.toString('hex') + ':' + encrypted + ':' + authTag.toString('hex');
+    } catch (error) {
+      console.error('Encryption failed:', error);
+      throw new Error('Failed to encrypt API key');
     }
   }
 
@@ -22,9 +46,18 @@ export class EmailService {
    */
   private decrypt(encryptedData: string): string {
     try {
-      const [iv, encrypted, authTag] = encryptedData.split(':');
-      const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(this.encryptionKey), Buffer.from(iv, 'hex'));
-      decipher.setAuthTag(Buffer.from(authTag, 'hex'));
+      const parts = encryptedData.split(':');
+      if (parts.length !== 3) {
+        throw new Error('Invalid encrypted key format');
+      }
+      
+      const iv = Buffer.from(parts[0], 'hex');
+      const encrypted = parts[1];
+      const authTag = Buffer.from(parts[2], 'hex');
+      
+      const keyBuffer = Buffer.from(this.encryptionKey.slice(0, 64), 'hex'); // Use hex decoded key
+      const decipher = crypto.createDecipheriv('aes-256-gcm', keyBuffer, iv, { authTagLength: 16 });
+      decipher.setAuthTag(authTag);
       
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');

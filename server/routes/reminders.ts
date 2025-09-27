@@ -7,6 +7,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { EmailService } from "../services/email.service";
+import { storeApiKey } from '../routes/userExternalApiKeys';
 
 // Extend Express Request to include session
 declare global {
@@ -65,17 +66,20 @@ router.put("/preferences", async (req, res) => {
     const userId = req.session?.user?.id || "1"; // Mock user for development
     const updateData = updateUserNotificationPreferencesSchema.parse(req.body);
     
-    // Handle Resend API key encryption
+    // Handle Resend API key storage using userExternalApiKeys system
     if (req.body.resendApiKey && req.body.resendApiKey.trim() !== '') {
       try {
-        // Encrypt the API key before storing
-        updateData.resendApiKeyEncrypted = (emailService as any).encrypt(req.body.resendApiKey);
-        console.log('Resend API key encrypted successfully');
+        // Store the API key using the userExternalApiKeys system
+        await storeApiKey(userId, 'resend', req.body.resendApiKey);
+        console.log('Resend API key stored successfully in userExternalApiKeys');
+        
+        // Don't store the key in the preferences table
+        delete updateData.resendApiKeyEncrypted;
       } catch (error) {
-        console.error('Failed to encrypt Resend API key:', error);
+        console.error('Failed to store Resend API key:', error);
         return res.status(400).json({
           success: false,
-          error: "Failed to encrypt API key"
+          error: "Failed to store API key securely"
         });
       }
     }

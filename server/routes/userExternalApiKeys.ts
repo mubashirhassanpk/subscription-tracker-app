@@ -184,3 +184,29 @@ export async function getDecryptedApiKey(userId: string, service: string): Promi
     return null;
   }
 }
+
+// Helper function to store API keys from other parts of the application
+export async function storeApiKey(userId: string, service: string, keyValue: string) {
+  try {
+    const encryptedKey = encryptKey(keyValue);
+    
+    // Check if key already exists for this service
+    const existingKey = await storage.getUserExternalApiKey(userId, service);
+    
+    if (existingKey) {
+      // Update existing key
+      return await storage.updateUserExternalApiKey(userId, service, encryptedKey);
+    } else {
+      // Create new key
+      const validatedData = insertUserExternalApiKeySchema.parse({
+        userId,
+        service,
+        keyValue: encryptedKey
+      });
+      return await storage.createUserExternalApiKey(validatedData);
+    }
+  } catch (error) {
+    console.error('Error storing API key:', error);
+    throw error;
+  }
+}
