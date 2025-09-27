@@ -1,6 +1,6 @@
-# Subscription Tracker Chrome Extension
+# SubTracker Chrome Extension
 
-A Chrome extension that synchronizes with your Subscription Tracker web application to manage subscriptions directly from your browser.
+A Chrome extension that synchronizes with your SubTracker web application to manage subscriptions directly from your browser.
 
 ## Features
 
@@ -23,7 +23,7 @@ A Chrome extension that synchronizes with your Subscription Tracker web applicat
 ## Setup
 
 1. Click the extension icon in your browser toolbar
-2. Configure your Subscription Tracker app URL and API key
+2. Configure your SubTracker app URL and API key
 3. Test the connection to ensure everything is working
 4. The extension will automatically sync your subscriptions
 
@@ -54,9 +54,9 @@ chrome-extension/
 
 ## API Integration
 
-The extension connects to your Subscription Tracker web application using:
+The extension connects to your SubTracker web application using:
 
-- **API URL**: Your app's base URL (e.g., `https://your-app.replit.dev`)
+- **API URL**: Your app's base URL (e.g., `https://subtacker.uk`)
 - **API Key**: Authentication key from your app settings
 - **Endpoints**: Uses the same REST API as the web application
 
