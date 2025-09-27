@@ -1,0 +1,84 @@
+{
+  "manifest_version": 3,
+  "name": "Subscription Tracker",
+  "version": "1.0.0",
+  "description": "Manage and track your subscriptions directly from your browser",
+  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "background",
+    "notifications",
+    "alarms",
+    "tabs"
+  ],
+  
+  "host_permissions": [
+    "http://localhost:5000/*",
+    "https://*.replit.dev/*",
+    "https://*.replit.com/*",
+    "https://*.replit.app/*",
+    "*://*/*"
+  ],
+  
+  "background": {
+    "service_worker": "background/background.js"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": [
+        "*://netflix.com/*",
+        "*://www.netflix.com/*",
+        "*://spotify.com/*",
+        "*://www.spotify.com/*",
+        "*://adobe.com/*",
+        "*://www.adobe.com/*",
+        "*://microsoft.com/*",
+        "*://www.microsoft.com/*",
+        "*://google.com/*",
+        "*://www.google.com/*",
+        "*://apple.com/*",
+        "*://www.apple.com/*",
+        "*://amazon.com/*",
+        "*://www.amazon.com/*",
+        "*://youtube.com/*",
+        "*://www.youtube.com/*",
+        "*://hulu.com/*",
+        "*://www.hulu.com/*",
+        "*://disneyplus.com/*",
+        "*://www.disneyplus.com/*"
+      ],
+      "js": ["content/content.js"],
+      "css": ["content/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Subscription Tracker",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "32": "assets/icon32.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  
+  "options_page": "options/options.html",
+  
+  "icons": {
+    "16": "assets/icon16.png",
+    "32": "assets/icon32.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*", "popup/*", "content/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

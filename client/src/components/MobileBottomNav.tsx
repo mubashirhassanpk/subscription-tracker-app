@@ -41,9 +41,9 @@ export function MobileBottomNav() {
     },
     { 
       title: "Reminders", 
-      url: "/reminders", 
+      url: "/settings", 
       icon: AlertCircle, 
-      active: location === "/reminders" || location === "/reminder-settings"
+      active: location === "/settings" || location === "/reminder-settings"
     },
     { 
       title: "Profile", 

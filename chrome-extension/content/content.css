@@ -1,0 +1,273 @@
+/* Chrome Extension Content Script Styles */
+
+.subscription-tracker-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 350px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e1e5e9;
+  z-index: 2147483647; /* Maximum z-index */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #1a1a1a;
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.subscription-tracker-notification * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.notification-content {
+  padding: 0;
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.notification-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.notification-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 15px;
+  color: #1a1a1a;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.notification-close:hover {
+  background: #f5f5f5;
+  color: #1a1a1a;
+}
+
+.notification-body {
+  padding: 16px;
+}
+
+.service-info {
+  margin-bottom: 16px;
+}
+
+.service-info h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.service-details {
+  font-size: 13px;
+  color: #666;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.notification-actions button {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-add {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-add:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-dismiss {
+  background: #f8f9fa;
+  color: #666;
+  border: 1px solid #e9ecef;
+}
+
+.btn-dismiss:hover {
+  background: #e9ecef;
+  color: #1a1a1a;
+}
+
+/* Toast Notifications */
+.subscription-tracker-toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  background: #ffffff;
+  color: #1a1a1a;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e1e5e9;
+  z-index: 2147483647;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 400px;
+  text-align: center;
+}
+
+.subscription-tracker-toast.toast-success {
+  background: #d4edda;
+  color: #155724;
+  border-color: #c3e6cb;
+}
+
+.subscription-tracker-toast.toast-error {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+.subscription-tracker-toast.toast-info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border-color: #bee5eb;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .subscription-tracker-notification {
+    width: calc(100vw - 40px);
+    right: 20px;
+  }
+  
+  .notification-actions {
+    flex-direction: column;
+  }
+  
+  .subscription-tracker-toast {
+    max-width: calc(100vw - 40px);
+    left: 50%;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .subscription-tracker-notification {
+    border-width: 2px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .notification-close:hover {
+    background: #000;
+    color: #fff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .subscription-tracker-notification,
+  .subscription-tracker-toast,
+  .notification-close,
+  .notification-actions button {
+    transition: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .subscription-tracker-notification {
+    background: #2a2a2a;
+    border-color: #404040;
+    color: #e0e0e0;
+  }
+  
+  .notification-header {
+    border-bottom-color: #404040;
+  }
+  
+  .notification-title,
+  .service-info h4 {
+    color: #e0e0e0;
+  }
+  
+  .service-details,
+  .notification-close {
+    color: #b0b0b0;
+  }
+  
+  .notification-close:hover {
+    background: #404040;
+    color: #e0e0e0;
+  }
+  
+  .btn-dismiss {
+    background: #404040;
+    color: #b0b0b0;
+    border-color: #555;
+  }
+  
+  .btn-dismiss:hover {
+    background: #555;
+    color: #e0e0e0;
+  }
+  
+  .subscription-tracker-toast {
+    background: #2a2a2a;
+    color: #e0e0e0;
+    border-color: #404040;
+  }
+  
+  .subscription-tracker-toast.toast-success {
+    background: #1e3a28;
+    color: #4caf50;
+    border-color: #2e5233;
+  }
+  
+  .subscription-tracker-toast.toast-error {
+    background: #3a1e1e;
+    color: #f44336;
+    border-color: #522e2e;
+  }
+  
+  .subscription-tracker-toast.toast-info {
+    background: #1e2a3a;
+    color: #2196f3;
+    border-color: #2e3a52;
+  }
+}
