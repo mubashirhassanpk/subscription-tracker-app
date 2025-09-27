@@ -43,7 +43,6 @@ const reminderSettingsSchema = z.object({
   emailAddress: z.string().email().optional().or(z.literal('')),
   emailProvider: z.enum(['resend', 'smtp']),
   emailTemplate: z.enum(['professional', 'casual', 'minimal']),
-  resendApiKey: z.string().optional(),
   smtpHost: z.string().optional(),
   smtpPort: z.number().optional(),
   smtpUsername: z.string().optional(),
@@ -102,7 +101,6 @@ export default function ReminderSettings() {
       emailEnabled: true,
       emailProvider: 'resend',
       emailTemplate: 'professional',
-      resendApiKey: '',
       googleCalendarEnabled: false,
       whatsappEnabled: false,
       reminderDaysBefore: [7, 3, 1],
@@ -122,7 +120,6 @@ export default function ReminderSettings() {
         emailAddress: prefs.emailAddress || '',
         emailProvider: prefs.emailProvider || 'resend',
         emailTemplate: prefs.emailTemplate || 'professional',
-        resendApiKey: '', // Don't populate encrypted API key for security
         smtpHost: prefs.smtpHost || '',
         smtpPort: prefs.smtpPort || 587,
         smtpUsername: prefs.smtpUsername || '',
@@ -268,7 +265,6 @@ export default function ReminderSettings() {
           emailEnabled: true,
           emailAddress: formData.emailAddress,
           emailProvider: formData.emailProvider,
-          resendApiKey: formData.resendApiKey,
           smtpHost: formData.smtpHost,
           smtpPort: formData.smtpPort,
           smtpUsername: formData.smtpUsername,
@@ -448,22 +444,6 @@ export default function ReminderSettings() {
                       </Select>
                     </div>
 
-                    {form.watch('emailProvider') === 'resend' && (
-                      <div>
-                        <Label htmlFor="resendApiKey">Resend API Key</Label>
-                        <Input
-                          id="resendApiKey"
-                          type="password"
-                          placeholder="Enter your Resend API key (starts with re_...)"
-                          value={form.watch('resendApiKey') || ''}
-                          onChange={(e) => form.setValue('resendApiKey', e.target.value)}
-                          data-testid="input-resend-api-key"
-                        />
-                        <p className="text-sm text-muted-foreground mt-1">
-                          🔒 Your API key will be encrypted and stored securely
-                        </p>
-                      </div>
-                    )}
 
                     {form.watch('emailProvider') === 'smtp' && (
                       <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
