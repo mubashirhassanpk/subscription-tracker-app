@@ -1157,26 +1157,6 @@ export default function Settings() {
               </CardContent>
             </Card>
 
-            {/* Save Button for Reminders */}
-            <div className="flex justify-end">
-              <Button 
-                type="submit"
-                disabled={saveReminderSettingsMutation.isPending}
-                data-testid="button-save-reminder-settings"
-              >
-                {saveReminderSettingsMutation.isPending ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent mr-2" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Reminder Settings
-                  </>
-                )}
-              </Button>
-            </div>
           </form>
         </TabsContent>
 
