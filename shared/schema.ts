@@ -105,6 +105,7 @@ export const userNotificationPreferences = pgTable("user_notification_preference
   emailEnabled: boolean("email_enabled").default(true).notNull(),
   emailAddress: text("email_address"),
   emailProvider: text("email_provider").default("resend").notNull(), // 'resend', 'smtp'
+  emailDomain: text("email_domain").default("custom").notNull(), // 'custom', 'default' - custom uses subtracker.uk, default uses resend domain
   resendApiKeyEncrypted: text("resend_api_key_encrypted"), // AES-256-GCM encrypted Resend API key
   smtpHost: text("smtp_host"),
   smtpPort: integer("smtp_port"),

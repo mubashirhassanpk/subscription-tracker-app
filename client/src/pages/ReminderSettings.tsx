@@ -42,6 +42,7 @@ const reminderSettingsSchema = z.object({
   emailEnabled: z.boolean(),
   emailAddress: z.string().email().optional().or(z.literal('')),
   emailProvider: z.enum(['resend', 'smtp']),
+  emailDomain: z.enum(['custom', 'default']),
   emailTemplate: z.enum(['professional', 'casual', 'minimal']),
   smtpHost: z.string().optional(),
   smtpPort: z.number().optional(),
@@ -107,6 +108,7 @@ export default function ReminderSettings() {
     defaultValues: {
       emailEnabled: true,
       emailProvider: 'resend',
+      emailDomain: 'custom',
       emailTemplate: 'professional',
       googleCalendarEnabled: false,
       whatsappEnabled: false,
@@ -126,6 +128,7 @@ export default function ReminderSettings() {
         emailEnabled: prefs.emailEnabled || false,
         emailAddress: prefs.emailAddress || '',
         emailProvider: prefs.emailProvider || 'resend',
+        emailDomain: prefs.emailDomain || 'custom',
         emailTemplate: prefs.emailTemplate || 'professional',
         smtpHost: prefs.smtpHost || '',
         smtpPort: prefs.smtpPort || 587,
@@ -332,6 +335,7 @@ export default function ReminderSettings() {
           emailEnabled: true,
           emailAddress: formData.emailAddress,
           emailProvider: formData.emailProvider,
+          emailDomain: formData.emailDomain,
           smtpHost: formData.smtpHost,
           smtpPort: formData.smtpPort,
           smtpUsername: formData.smtpUsername,
@@ -510,6 +514,27 @@ export default function ReminderSettings() {
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {form.watch('emailProvider') === 'resend' && (
+                      <div>
+                        <Label htmlFor="emailDomain">Sender Domain</Label>
+                        <Select 
+                          value={form.watch('emailDomain')} 
+                          onValueChange={(value: any) => form.setValue('emailDomain', value)}
+                        >
+                          <SelectTrigger data-testid="select-email-domain">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="custom">Custom Domain (subtracker.uk)</SelectItem>
+                            <SelectItem value="default">Default Resend Domain</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Custom domain provides professional branding, default domain uses Resend's domain
+                        </p>
+                      </div>
+                    )}
 
 
                     {form.watch('emailProvider') === 'smtp' && (

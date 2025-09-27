@@ -101,9 +101,13 @@ export class EmailService {
 
     const resend = new Resend(apiKey);
     
-    // Send test email
+    // Send test email - use domain preference
+    const fromAddress = preferences.emailDomain === 'default' 
+      ? 'SubTracker <onboarding@resend.dev>'
+      : 'SubTracker <notifications@subtracker.uk>';
+    
     const { data, error } = await resend.emails.send({
-      from: 'SubTracker <notifications@subtracker.uk>',
+      from: fromAddress,
       to: [preferences.emailAddress!],
       subject: 'Test Email from SubTracker',
       html: '<p>This is a test email to verify your email configuration.</p>'
@@ -368,8 +372,13 @@ export class EmailService {
 
     const resend = new Resend(apiKey);
     
+    // Select sender domain based on user preference
+    const fromAddress = preferences.emailDomain === 'default' 
+      ? 'SubTracker <onboarding@resend.dev>'
+      : 'SubTracker <notifications@subtracker.uk>';
+    
     const { data, error } = await resend.emails.send({
-      from: 'SubTracker <notifications@subtracker.uk>',
+      from: fromAddress,
       to: [preferences.emailAddress!],
       subject,
       html: htmlContent
