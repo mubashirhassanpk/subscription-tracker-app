@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,11 +25,63 @@ import {
   Save,
   Eye,
   EyeOff,
-  Trash2
+  Trash2,
+  Calendar,
+  Mail,
+  MessageSquare,
+  TestTube,
+  Clock,
+  XCircle,
+  Info,
+  BookOpen,
+  Link2,
+  Smartphone,
+  Globe,
+  Zap
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+
+const reminderSettingsSchema = z.object({
+  // Email settings
+  emailEnabled: z.boolean(),
+  emailAddress: z.string().email().optional().or(z.literal('')),
+  emailProvider: z.enum(['resend', 'smtp']),
+  emailDomain: z.enum(['custom', 'default']),
+  emailTemplate: z.enum(['professional', 'casual', 'minimal']),
+  smtpHost: z.string().optional(),
+  smtpPort: z.number().optional(),
+  smtpUsername: z.string().optional(),
+  smtpPassword: z.string().optional(),
+
+  // Google Calendar settings
+  googleCalendarEnabled: z.boolean(),
+  googleCalendarId: z.string().optional(),
+
+  // WhatsApp settings
+  whatsappEnabled: z.boolean(),
+  whatsappNumber: z.string().optional(),
+  whatsappBusinessAccountId: z.string().optional(),
+  whatsappPhoneNumberId: z.string().optional(),
+  whatsappAccessToken: z.string().optional(),
+
+  // General reminder settings
+  reminderDaysBefore: z.array(z.number()),
+  reminderTime: z.string(),
+  timezone: z.string(),
+  includeSpendingSummary: z.boolean(),
+  includeActionButtons: z.boolean()
+});
+
+type ReminderSettingsForm = z.infer<typeof reminderSettingsSchema>;
+
+interface ConnectionStatus {
+  service: string;
+  connected: boolean;
+  lastTested?: Date;
+  error?: string;
+}
 
 interface UserSettings {
   theme: 'light' | 'dark' | 'system';
@@ -86,6 +141,10 @@ export default function Settings() {
   const [resendApiKey, setResendApiKey] = useState('');
   const [isShowingResendKey, setIsShowingResendKey] = useState(false);
 
+  // Reminder settings state
+  const [connectionStatuses, setConnectionStatuses] = useState<ConnectionStatus[]>([]);
+  const [isTestingConnection, setIsTestingConnection] = useState<string | null>(null);
+
   // Update URL when tab changes
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -115,6 +174,111 @@ export default function Settings() {
     refetchOnWindowFocus: false,
   });
 
+  // Fetch current notification preferences for reminders
+  const { data: reminderPreferences, isLoading: isLoadingReminders } = useQuery({
+    queryKey: ['/api/reminders/preferences']
+  });
+
+  // Fetch available timezones
+  const { data: timezones } = useQuery({
+    queryKey: ['/api/timezones']
+  });
+
+  // Form setup for reminders
+  const reminderForm = useForm<ReminderSettingsForm>({
+    resolver: zodResolver(reminderSettingsSchema),
+    defaultValues: {
+      emailEnabled: true,
+      emailProvider: 'resend',
+      emailDomain: 'custom',
+      emailTemplate: 'professional',
+      googleCalendarEnabled: false,
+      whatsappEnabled: false,
+      reminderDaysBefore: [7, 3, 1],
+      reminderTime: '09:00',
+      timezone: 'UTC',
+      includeSpendingSummary: true,
+      includeActionButtons: true
+    }
+  });
+
+  // Effects for reminder settings
+  useEffect(() => {
+    if (reminderPreferences && (reminderPreferences as any)?.preferences) {
+      const prefs = (reminderPreferences as any).preferences;
+      reminderForm.reset({
+        emailEnabled: prefs.emailEnabled || false,
+        emailAddress: prefs.emailAddress || '',
+        emailProvider: prefs.emailProvider || 'resend',
+        emailDomain: prefs.emailDomain || 'custom',
+        emailTemplate: prefs.emailTemplate || 'professional',
+        smtpHost: prefs.smtpHost || '',
+        smtpPort: prefs.smtpPort || 587,
+        smtpUsername: prefs.smtpUsername || '',
+        
+        googleCalendarEnabled: prefs.googleCalendarEnabled || false,
+        googleCalendarId: prefs.googleCalendarId || '',
+        
+        whatsappEnabled: prefs.whatsappEnabled || false,
+        whatsappNumber: prefs.whatsappNumber || '',
+        whatsappBusinessAccountId: prefs.whatsappBusinessAccountId || '',
+        whatsappPhoneNumberId: prefs.whatsappPhoneNumberId || '',
+        
+        reminderDaysBefore: prefs.reminderDaysBefore || [7, 3, 1],
+        reminderTime: prefs.reminderTime || '09:00',
+        timezone: prefs.timezone || 'UTC',
+        includeSpendingSummary: prefs.includeSpendingSummary !== false,
+        includeActionButtons: prefs.includeActionButtons !== false
+      });
+    }
+  }, [reminderPreferences, reminderForm]);
+
+  // Update connection statuses based on preferences and API keys
+  useEffect(() => {
+    if (reminderPreferences && (reminderPreferences as any)?.preferences) {
+      const prefs = (reminderPreferences as any).preferences;
+      
+      // Check if Resend API key is configured
+      const resendApiKey = (userApiKeys as any)?.find((key: any) => key.service === 'resend');
+      const hasResendKey = resendApiKey?.hasKey || false;
+      
+      // Determine email connection status
+      let emailConnected = false;
+      let emailError = undefined;
+      
+      if (prefs.emailEnabled) {
+        if (!prefs.emailAddress) {
+          emailError = 'Email address not configured';
+        } else if (prefs.emailProvider === 'resend' && !hasResendKey) {
+          emailError = 'Resend API key not configured';
+        } else if (prefs.emailProvider === 'smtp' && (!prefs.smtpHost || !prefs.smtpUsername)) {
+          emailError = 'SMTP settings not configured';
+        } else {
+          emailConnected = true;
+        }
+      }
+      
+      const statuses: ConnectionStatus[] = [
+        {
+          service: 'Email',
+          connected: emailConnected,
+          error: emailError
+        },
+        {
+          service: 'Google Calendar',
+          connected: prefs.googleCalendarEnabled && !!prefs.googleAccessToken,
+          error: !prefs.googleAccessToken && prefs.googleCalendarEnabled ? 'Not connected to Google Calendar' : undefined
+        },
+        {
+          service: 'WhatsApp',
+          connected: prefs.whatsappEnabled && !!prefs.whatsappAccessTokenEncrypted,
+          error: !prefs.whatsappAccessTokenEncrypted && prefs.whatsappEnabled ? 'WhatsApp Business API not configured' : undefined
+        }
+      ];
+      setConnectionStatuses(statuses);
+    }
+  }, [reminderPreferences, userApiKeys]);
+
   const saveSettingsMutation = useMutation({
     mutationFn: async (settings: UserSettings) => {
       // In a real app, this would save to backend
@@ -128,8 +292,173 @@ export default function Settings() {
     },
   });
 
+  // Save reminder settings mutation
+  const saveReminderSettingsMutation = useMutation({
+    mutationFn: async (data: ReminderSettingsForm) => {
+      return apiRequest('PUT', '/api/reminders/preferences', data);
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Reminder settings saved',
+        description: 'Your reminder preferences have been updated.'
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/reminders/preferences'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error saving reminder settings',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  });
+
+  // Test connection mutation
+  const testConnectionMutation = useMutation({
+    mutationFn: async ({ service, settings }: { service: string; settings: any }) => {
+      const response = await apiRequest('POST', `/api/test-connection/${service.toLowerCase()}`, settings);
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Connection test failed');
+      }
+      
+      return data;
+    },
+    onSuccess: (data, { service }) => {
+      toast({
+        title: `${service} connection successful`,
+        description: 'Test message sent successfully!'
+      });
+      // Update connection status
+      setConnectionStatuses(prev => 
+        prev.map(status => 
+          status.service === service 
+            ? { ...status, connected: true, lastTested: new Date(), error: undefined }
+            : status
+        )
+      );
+    },
+    onError: (error: any, { service }) => {
+      // Parse and clean the error message
+      let cleanErrorMessage = error.message;
+      
+      // Extract meaningful message from JSON error responses
+      if (error.message && error.message.includes('{"success":false')) {
+        try {
+          const match = error.message.match(/"message":"([^"]+)"/);
+          if (match && match[1]) {
+            cleanErrorMessage = match[1];
+          }
+        } catch (e) {
+          // If parsing fails, extract after the colon
+          const colonIndex = error.message.indexOf(':');
+          if (colonIndex > -1) {
+            cleanErrorMessage = error.message.substring(colonIndex + 1).trim();
+          }
+        }
+      }
+      
+      // Check if this is a Resend API key not configured error
+      const isApiKeyError = cleanErrorMessage && cleanErrorMessage.includes('API key not configured');
+      
+      if (isApiKeyError && service === 'Email') {
+        toast({
+          title: "🔑 API Key Required",
+          description: "To test email functionality, you need to configure your Resend API key first. Go to Settings → API Keys to set it up.",
+          variant: 'default'
+        });
+        
+        // Automatically open the API keys page for convenience
+        setTimeout(() => {
+          setActiveTab('api-keys');
+        }, 2000);
+        
+        // Set a clean error message for display
+        cleanErrorMessage = "Resend API key not configured";
+      } else {
+        toast({
+          title: `${service} connection failed`,
+          description: cleanErrorMessage,
+          variant: 'destructive'
+        });
+      }
+      
+      // Update connection status with clean error message
+      setConnectionStatuses(prev => 
+        prev.map(status => 
+          status.service === service 
+            ? { ...status, connected: false, error: cleanErrorMessage }
+            : status
+        )
+      );
+    },
+    onSettled: () => {
+      setIsTestingConnection(null);
+    }
+  });
+
+  // Google Calendar OAuth initiation
+  const initiateGoogleOAuth = useMutation({
+    mutationFn: () => apiRequest('GET', '/api/auth/google/calendar'),
+    onSuccess: (data: any) => {
+      if (data.authUrl) {
+        window.open(data.authUrl, '_blank', 'width=500,height=600');
+      }
+      // Poll for completion
+      const pollInterval = setInterval(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/reminders/preferences'] });
+      }, 2000);
+      
+      setTimeout(() => clearInterval(pollInterval), 30000); // Stop polling after 30 seconds
+    }
+  });
+
   const handleSaveSettings = () => {
     saveSettingsMutation.mutate(userSettings);
+  };
+
+  const onSubmitReminders = (data: ReminderSettingsForm) => {
+    saveReminderSettingsMutation.mutate(data);
+  };
+
+  const handleTestConnection = (service: string) => {
+    const formData = reminderForm.getValues();
+    setIsTestingConnection(service);
+    
+    let settings: any = {};
+    
+    switch (service) {
+      case 'Email':
+        settings = {
+          emailEnabled: true,
+          emailAddress: formData.emailAddress,
+          emailProvider: formData.emailProvider,
+          emailDomain: formData.emailDomain,
+          emailTemplate: formData.emailTemplate,
+          smtpHost: formData.smtpHost,
+          smtpPort: formData.smtpPort,
+          smtpUsername: formData.smtpUsername,
+          smtpPassword: formData.smtpPassword
+        };
+        break;
+      case 'WhatsApp':
+        settings = {
+          whatsappNumber: formData.whatsappNumber,
+          whatsappBusinessAccountId: formData.whatsappBusinessAccountId,
+          whatsappPhoneNumberId: formData.whatsappPhoneNumberId,
+          whatsappAccessToken: formData.whatsappAccessToken
+        };
+        break;
+    }
+    
+    testConnectionMutation.mutate({ service, settings });
+  };
+
+  const getConnectionIcon = (connected: boolean, error?: string) => {
+    if (error) return <XCircle className="h-4 w-4 text-red-500" />;
+    if (connected) return <CheckCircle className="h-4 w-4 text-green-500" />;
+    return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
   };
 
   const openApiKeysPage = () => {
@@ -240,8 +569,12 @@ export default function Settings() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="reminders" className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            Reminders
+          </TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
           <TabsTrigger value="api-keys">API Keys</TabsTrigger>
           <TabsTrigger value="privacy">Privacy</TabsTrigger>
@@ -350,6 +683,392 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Reminders Settings */}
+        <TabsContent value="reminders" className="space-y-6">
+          {/* Connection Status Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <SettingsIcon className="h-5 w-5" />
+                Integration Status
+              </CardTitle>
+              <CardDescription>
+                Overview of your connected notification services
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {connectionStatuses.map((status) => (
+                  <div key={status.service} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      {getConnectionIcon(status.connected, status.error)}
+                      <div>
+                        <div className="font-medium">{status.service}</div>
+                        {status.error && (
+                          <div className="text-sm text-red-500">{status.error}</div>
+                        )}
+                        {status.connected && !status.error && (
+                          <div className="text-sm text-green-600">Connected</div>
+                        )}
+                      </div>
+                    </div>
+                    <Badge variant={status.connected ? "default" : "secondary"}>
+                      {status.connected ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <form onSubmit={reminderForm.handleSubmit(onSubmitReminders)} className="space-y-6">
+            <Tabs defaultValue="email" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="email" className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email
+                </TabsTrigger>
+                <TabsTrigger value="calendar" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Calendar
+                </TabsTrigger>
+                <TabsTrigger value="whatsapp" className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  WhatsApp
+                </TabsTrigger>
+                <TabsTrigger value="general" className="flex items-center gap-2">
+                  <Bell className="h-4 w-4" />
+                  General
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Email Settings Tab */}
+              <TabsContent value="email" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Mail className="h-5 w-5" />
+                      Email Notifications
+                    </CardTitle>
+                    <CardDescription>
+                      Configure email reminders with professional templates
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="emailEnabled">Enable email notifications</Label>
+                      <Switch 
+                        id="emailEnabled"
+                        {...reminderForm.register('emailEnabled')}
+                        checked={reminderForm.watch('emailEnabled')}
+                        onCheckedChange={(checked) => reminderForm.setValue('emailEnabled', checked)}
+                      />
+                    </div>
+
+                    {reminderForm.watch('emailEnabled') && (
+                      <div className="space-y-4 pl-6 border-l-2 border-blue-200">
+                        {/* API Keys Notice */}
+                        <Alert>
+                          <Key className="h-4 w-4" />
+                          <AlertDescription>
+                            <div className="space-y-2">
+                              <p className="font-medium">📧 Email Setup Required</p>
+                              <p className="text-sm">
+                                To send email reminders, you need to configure your Resend API key first.
+                              </p>
+                              <div className="flex gap-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setActiveTab('api-keys')}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Key className="h-3 w-3" />
+                                  Configure API Keys
+                                </Button>
+                              </div>
+                            </div>
+                          </AlertDescription>
+                        </Alert>
+
+                        <div>
+                          <Label htmlFor="emailAddress">Email Address</Label>
+                          <Input
+                            id="emailAddress"
+                            type="email"
+                            placeholder="your@email.com"
+                            {...reminderForm.register('emailAddress')}
+                            data-testid="input-email-address"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="emailProvider">Email Provider</Label>
+                          <Select 
+                            value={reminderForm.watch('emailProvider')} 
+                            onValueChange={(value: any) => reminderForm.setValue('emailProvider', value)}
+                          >
+                            <SelectTrigger data-testid="select-email-provider">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="resend">Resend (Recommended)</SelectItem>
+                              <SelectItem value="smtp">Custom SMTP</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {reminderForm.watch('emailProvider') === 'resend' && (
+                          <div>
+                            <Label htmlFor="emailDomain">Sender Domain</Label>
+                            <Select 
+                              value={reminderForm.watch('emailDomain')} 
+                              onValueChange={(value: any) => reminderForm.setValue('emailDomain', value)}
+                            >
+                              <SelectTrigger data-testid="select-email-domain">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="custom">Custom Domain (subtracker.uk)</SelectItem>
+                                <SelectItem value="default">Default Resend Domain</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Custom domain provides professional branding, default domain uses Resend's domain
+                            </p>
+                          </div>
+                        )}
+
+                        {reminderForm.watch('emailProvider') === 'smtp' && (
+                          <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium">SMTP Configuration</h4>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => window.open('https://www.gmass.co/blog/gmail-smtp/', '_blank')}
+                                className="flex items-center gap-1 text-xs"
+                              >
+                                <BookOpen className="h-3 w-3" />
+                                SMTP Guide
+                              </Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="smtpHost">SMTP Host</Label>
+                                <Input
+                                  id="smtpHost"
+                                  placeholder="smtp.example.com"
+                                  {...reminderForm.register('smtpHost')}
+                                  data-testid="input-smtp-host"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="smtpPort">SMTP Port</Label>
+                                <Input
+                                  id="smtpPort"
+                                  type="number"
+                                  placeholder="587"
+                                  {...reminderForm.register('smtpPort', { valueAsNumber: true })}
+                                  data-testid="input-smtp-port"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label htmlFor="smtpUsername">Username</Label>
+                              <Input
+                                id="smtpUsername"
+                                placeholder="username"
+                                {...reminderForm.register('smtpUsername')}
+                                data-testid="input-smtp-username"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="smtpPassword">Password</Label>
+                              <Input
+                                id="smtpPassword"
+                                type="password"
+                                placeholder="app password or regular password"
+                                {...reminderForm.register('smtpPassword')}
+                                data-testid="input-smtp-password"
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        <div>
+                          <Label htmlFor="emailTemplate">Email Template Style</Label>
+                          <Select 
+                            value={reminderForm.watch('emailTemplate')} 
+                            onValueChange={(value: any) => reminderForm.setValue('emailTemplate', value)}
+                          >
+                            <SelectTrigger data-testid="select-email-template">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="professional">Professional</SelectItem>
+                              <SelectItem value="casual">Casual</SelectItem>
+                              <SelectItem value="minimal">Minimal</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleTestConnection('Email')}
+                            disabled={testConnectionMutation.isPending || isTestingConnection === 'Email'}
+                            data-testid="button-test-email"
+                          >
+                            {isTestingConnection === 'Email' ? (
+                              <>
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent mr-2" />
+                                Testing...
+                              </>
+                            ) : (
+                              <>
+                                <TestTube className="h-4 w-4 mr-2" />
+                                Test Email
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* General Settings Tab */}
+              <TabsContent value="general" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5" />
+                      Reminder Timing
+                    </CardTitle>
+                    <CardDescription>
+                      Configure when and how you receive reminders
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="reminderTime">Daily reminder time</Label>
+                      <Input
+                        id="reminderTime"
+                        type="time"
+                        {...reminderForm.register('reminderTime')}
+                        data-testid="input-reminder-time"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="timezone">Timezone</Label>
+                      <Select 
+                        value={reminderForm.watch('timezone')} 
+                        onValueChange={(value) => reminderForm.setValue('timezone', value)}
+                      >
+                        <SelectTrigger data-testid="select-timezone">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="UTC">UTC</SelectItem>
+                          <SelectItem value="America/New_York">Eastern Time</SelectItem>
+                          <SelectItem value="America/Chicago">Central Time</SelectItem>
+                          <SelectItem value="America/Denver">Mountain Time</SelectItem>
+                          <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                          <SelectItem value="Europe/London">London</SelectItem>
+                          <SelectItem value="Europe/Paris">Paris</SelectItem>
+                          <SelectItem value="Asia/Tokyo">Tokyo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Reminder days before renewal</Label>
+                      <div className="mt-2 space-y-2">
+                        {[1, 3, 7, 14, 30].map((day) => (
+                          <div key={day} className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              id={`day-${day}`}
+                              checked={reminderForm.watch('reminderDaysBefore').includes(day)}
+                              onChange={(e) => {
+                                const current = reminderForm.watch('reminderDaysBefore');
+                                if (e.target.checked) {
+                                  reminderForm.setValue('reminderDaysBefore', [...current, day].sort((a, b) => b - a));
+                                } else {
+                                  reminderForm.setValue('reminderDaysBefore', current.filter(d => d !== day));
+                                }
+                              }}
+                              className="rounded border-gray-300"
+                            />
+                            <Label htmlFor={`day-${day}`}>{day} day{day !== 1 ? 's' : ''} before</Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Include spending summary</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Add total subscription costs to reminders
+                        </p>
+                      </div>
+                      <Switch
+                        checked={reminderForm.watch('includeSpendingSummary')}
+                        onCheckedChange={(checked) => reminderForm.setValue('includeSpendingSummary', checked)}
+                        data-testid="switch-include-spending"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Include action buttons</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Add quick action buttons in emails
+                        </p>
+                      </div>
+                      <Switch
+                        checked={reminderForm.watch('includeActionButtons')}
+                        onCheckedChange={(checked) => reminderForm.setValue('includeActionButtons', checked)}
+                        data-testid="switch-include-actions"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+
+            {/* Save Button for Reminders */}
+            <div className="flex justify-end">
+              <Button 
+                type="submit"
+                disabled={saveReminderSettingsMutation.isPending}
+                data-testid="button-save-reminder-settings"
+              >
+                {saveReminderSettingsMutation.isPending ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Reminder Settings
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
         </TabsContent>
 
         {/* Payments Settings */}
