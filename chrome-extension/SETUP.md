@@ -1,6 +1,6 @@
 # Chrome Extension Setup Guide
 
-Follow these steps to install and configure the Subscription Tracker Chrome extension:
+Follow these steps to install and configure the SubTracker Chrome extension:
 
 ## Installation
 
@@ -14,7 +14,7 @@ Follow these steps to install and configure the Subscription Tracker Chrome exte
 ## Configuration
 
 2. **Get Your App Details**
-   - Your app URL: `https://3b09af3c-f605-44fe-8597-73a8f24d40cc-00-2xkffllmc9j6n.kirk.replit.dev`
+   - Your app URL: `https://subtacker.uk`
    - Demo API Key: `dev-api-key` (for testing)
 
 3. **Configure Extension**
