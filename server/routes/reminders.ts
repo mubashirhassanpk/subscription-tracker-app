@@ -175,4 +175,72 @@ router.delete("/:reminderId", async (req, res) => {
   }
 });
 
+// Test email reminder endpoint
+router.post("/test-email", async (req, res) => {
+  try {
+    const userId = req.session?.user?.id || "1"; // Mock user for development
+    
+    // Get user preferences and subscriptions
+    const preferences = await storage.getUserNotificationPreferences(userId);
+    const subscriptions = await storage.getUserSubscriptions(userId);
+    
+    if (!preferences) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "User preferences not found" 
+      });
+    }
+
+    if (!preferences.emailEnabled || !preferences.emailAddress) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Email notifications not enabled or email address not set" 
+      });
+    }
+
+    if (subscriptions.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "No subscriptions found to send reminder for" 
+      });
+    }
+
+    // Use the first active subscription for testing
+    const testSubscription = subscriptions.find(sub => sub.isActive) || subscriptions[0];
+    
+    // Send test reminder email using EmailService
+    const result = await emailService.sendSubscriptionReminder(
+      preferences,
+      {
+        name: testSubscription.name,
+        cost: testSubscription.cost,
+        nextBillingDate: testSubscription.nextBillingDate,
+        description: testSubscription.description || "Test subscription reminder",
+        category: testSubscription.category
+      },
+      3, // 3 days before reminder
+      subscriptions,
+      userId
+    );
+
+    res.json({
+      success: true,
+      message: "Test email reminder sent successfully",
+      details: {
+        to: preferences.emailAddress,
+        subscription: testSubscription.name,
+        messageId: result.messageId,
+        status: result.status
+      }
+    });
+  } catch (error) {
+    console.error("Test email reminder error:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: "Failed to send test email reminder",
+      details: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+});
+
 export { router as remindersRouter };
