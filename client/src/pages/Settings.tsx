@@ -616,16 +616,81 @@ export default function Settings() {
                         {saveApiKeyMutation.isPending ? 'Saving...' : 'Save'}
                       </Button>
                     </div>
-                    <Alert>
-                      <AlertTriangle className="h-4 w-4" />
+                    <Alert className="bg-green-50 border-green-200 dark:bg-green-950/20">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
                       <AlertDescription>
-                        <div className="space-y-2">
-                          <p>To get your Resend API key:</p>
-                          <ol className="list-decimal list-inside text-sm space-y-1">
-                            <li>Go to <a href="https://resend.com/api-keys" target="_blank" className="text-blue-600 hover:underline" rel="noopener noreferrer">Resend Dashboard</a></li>
-                            <li>Create a new API key</li>
-                            <li>Copy and paste it above</li>
-                          </ol>
+                        <div className="space-y-3">
+                          <p className="font-medium text-green-800 dark:text-green-200">📧 Easy Email Setup with Resend:</p>
+                          
+                          <div className="rounded-md bg-green-100 dark:bg-green-900/30 p-3">
+                            <div className="flex">
+                              <div className="flex-shrink-0">
+                                <CheckCircle className="h-4 w-4 text-green-400" />
+                              </div>
+                              <div className="ml-2">
+                                <h5 className="text-sm font-medium text-green-800 dark:text-green-200">
+                                  ✨ Resend API - Free & Reliable
+                                </h5>
+                                <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                                  Get <strong>3,000 free emails per month</strong> - perfect for subscription reminders!
+                                </p>
+                                <details className="mt-2">
+                                  <summary className="cursor-pointer text-sm font-medium hover:text-green-800 dark:hover:text-green-200">
+                                    📋 Quick Setup Instructions
+                                  </summary>
+                                  <div className="mt-2 space-y-2 text-xs">
+                                    <div>
+                                      <p><strong>Step 1: Create Free Account</strong></p>
+                                      <p>→ <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="underline text-green-600 hover:text-green-800">Sign up at resend.com</a></p>
+                                    </div>
+                                    
+                                    <div>
+                                      <p><strong>Step 2: Get API Key</strong></p>
+                                      <p>→ Go to <a href="https://resend.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline text-green-600 hover:text-green-800">API Keys</a> section</p>
+                                      <p>→ Click "Create API Key"</p>
+                                      <p>→ Copy your key (starts with <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">re_</code>)</p>
+                                    </div>
+                                    
+                                    <div>
+                                      <p><strong>Step 3: Enter API Key Above</strong></p>
+                                      <p>→ Paste your API key in the field above</p>
+                                      <p>→ Your key will be securely encrypted and stored</p>
+                                    </div>
+                                    
+                                    <div className="bg-blue-50 dark:bg-blue-950/30 p-2 rounded">
+                                      <p><strong>💡 Why Resend?</strong></p>
+                                      <p>→ No complex SMTP setup</p>
+                                      <p>→ 99.9% delivery rate</p>
+                                      <p>→ Free: 3,000 emails/month</p>
+                                    </div>
+                                  </div>
+                                </details>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open('https://resend.com', '_blank')}
+                              className="flex items-center gap-1"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              Create Resend Account
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open('https://resend.com/api-keys', '_blank')}
+                              className="flex items-center gap-1"
+                            >
+                              <Key className="h-3 w-3" />
+                              Get API Key
+                            </Button>
+                          </div>
                         </div>
                       </AlertDescription>
                     </Alert>

@@ -396,80 +396,25 @@ export default function ReminderSettings() {
 
                 {form.watch('emailEnabled') && (
                   <div className="space-y-4 pl-6 border-l-2 border-blue-200">
-                    {/* Email Setup Guide */}
+                    {/* API Keys Notice */}
                     <Alert>
-                      <Mail className="h-4 w-4" />
+                      <Key className="h-4 w-4" />
                       <AlertDescription>
-                        <div className="space-y-3">
-                          <p className="font-medium">📧 Easy Email Setup with Resend:</p>
-                          
-                          <div className="rounded-md bg-green-50 dark:bg-green-950/20 p-3">
-                            <div className="flex">
-                              <div className="flex-shrink-0">
-                                <CheckCircle className="h-4 w-4 text-green-400" />
-                              </div>
-                              <div className="ml-2">
-                                <h5 className="text-sm font-medium text-green-800 dark:text-green-200">
-                                  ✨ Resend API - Free & Reliable
-                                </h5>
-                                <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                                  Get <strong>3,000 free emails per month</strong> - perfect for subscription reminders!
-                                </p>
-                                <details className="mt-2">
-                                  <summary className="cursor-pointer text-sm font-medium hover:text-green-800 dark:hover:text-green-200">
-                                    📋 Quick Setup Instructions
-                                  </summary>
-                                  <div className="mt-2 space-y-2 text-xs">
-                                    <div>
-                                      <p><strong>Step 1: Create Free Account</strong></p>
-                                      <p>→ <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="underline text-green-600 hover:text-green-800">Sign up at resend.com</a></p>
-                                    </div>
-                                    
-                                    <div>
-                                      <p><strong>Step 2: Get API Key</strong></p>
-                                      <p>→ Go to <a href="https://resend.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline text-green-600 hover:text-green-800">API Keys</a> section</p>
-                                      <p>→ Click "Create API Key"</p>
-                                      <p>→ Copy your key (starts with <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">re_</code>)</p>
-                                    </div>
-                                    
-                                    <div>
-                                      <p><strong>Step 3: Enter API Key Below</strong></p>
-                                      <p>→ Paste your API key in the field below</p>
-                                      <p>→ Your key will be securely encrypted and stored</p>
-                                    </div>
-                                    
-                                    <div className="bg-blue-50 dark:bg-blue-950/30 p-2 rounded">
-                                      <p><strong>💡 Why Resend?</strong></p>
-                                      <p>→ No complex SMTP setup</p>
-                                      <p>→ 99.9% delivery rate</p>
-                                      <p>→ Free: 3,000 emails/month</p>
-                                    </div>
-                                  </div>
-                                </details>
-                              </div>
-                            </div>
-                          </div>
-                          
+                        <div className="space-y-2">
+                          <p className="font-medium">📧 Email Setup Required</p>
+                          <p className="text-sm">
+                            To send email reminders, you need to configure your Resend API key first.
+                          </p>
                           <div className="flex gap-2">
                             <Button
                               type="button"
                               variant="outline"
                               size="sm"
-                              onClick={() => window.open('https://resend.com', '_blank')}
-                              className="flex items-center gap-1"
-                            >
-                              <ExternalLink className="h-3 w-3" />
-                              Create Resend Account
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => window.open('https://resend.com/api-keys', '_blank')}
+                              onClick={() => window.open('/settings?tab=api-keys', '_blank')}
                               className="flex items-center gap-1"
                             >
                               <Key className="h-3 w-3" />
-                              Get API Key
+                              Configure API Keys
                             </Button>
                           </div>
                         </div>
