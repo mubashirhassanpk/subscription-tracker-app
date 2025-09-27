@@ -13,24 +13,24 @@ configStatusRouter.get("/", async (req, res) => {
     
     // Check for user-configured keys
     const hasUserGeminiKey = userApiKeys.find(key => key.service === 'gemini' && key.keyValue)?.keyValue;
-    const hasUserStripeKey = userApiKeys.find(key => key.service === 'stripe' && key.keyValue)?.keyValue;
+    const hasUserResendKey = userApiKeys.find(key => key.service === 'resend' && key.keyValue)?.keyValue;
     
     // Check environment variables
     const hasEnvGeminiKey = !!process.env.GEMINI_API_KEY;
-    const hasEnvStripeKey = !!(process.env.VITE_STRIPE_PUBLIC_KEY && process.env.STRIPE_SECRET_KEY);
+    const hasEnvResendKey = !!process.env.RESEND_API_KEY;
     
     // Determine final configuration status (user keys take priority)
     const geminiConfigured = !!hasUserGeminiKey || hasEnvGeminiKey;
-    const stripeConfigured = !!hasUserStripeKey || hasEnvStripeKey;
+    const resendConfigured = !!hasUserResendKey || hasEnvResendKey;
     
     res.json({
       gemini: {
         configured: geminiConfigured,
         source: hasUserGeminiKey ? 'user' : hasEnvGeminiKey ? 'environment' : 'none'
       },
-      stripe: {
-        configured: stripeConfigured,
-        source: hasUserStripeKey ? 'user' : hasEnvStripeKey ? 'environment' : 'none'
+      resend: {
+        configured: resendConfigured,
+        source: hasUserResendKey ? 'user' : hasEnvResendKey ? 'environment' : 'none'
       }
     });
   } catch (error) {
