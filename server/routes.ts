@@ -19,35 +19,6 @@ import { googleAuthRouter } from "./routes/google-auth";
 import { adminRouter } from "./routes/admin";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Primary health check endpoint at root for deployment
-  app.get('/', (req, res) => {
-    // Simple health check that responds immediately
-    res.status(200).json({ 
-      status: 'ok', 
-      service: 'SubTracker',
-      timestamp: new Date().toISOString()
-    });
-  });
-
-  // Additional health check endpoints
-  app.get('/health', (req, res) => {
-    res.status(200).json({ 
-      status: 'healthy', 
-      timestamp: new Date().toISOString(),
-      service: 'SubTracker',
-      uptime: Math.floor(process.uptime())
-    });
-  });
-
-  app.get('/api/health', (req, res) => {
-    res.status(200).json({ 
-      status: 'healthy', 
-      timestamp: new Date().toISOString(),
-      service: 'SubTracker',
-      uptime: Math.floor(process.uptime()),
-      env: process.env.NODE_ENV || 'development'
-    });
-  });
 
   // Register API route modules
   app.use('/auth', authRouter);

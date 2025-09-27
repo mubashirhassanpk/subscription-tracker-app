@@ -16,8 +16,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Health check endpoint for deployment at root (simple version)
-app.get('/health', (req, res) => {
+// Health check endpoint for deployment (NOT at root to avoid conflicts)
+app.get('/healthz', (req, res) => {
   res.status(200).json({ 
     status: 'ok',
     service: 'SubTracker'
