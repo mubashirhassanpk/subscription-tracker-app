@@ -49,7 +49,7 @@ export function HeaderMenu() {
     { title: "Dashboard", url: "/dashboard", icon: User, active: location === "/dashboard" },
     { title: "Analytics", url: "/analytics", icon: BarChart3, active: location === "/analytics" },
     { title: "Calendar", url: "/calendar", icon: CalendarIcon, active: location === "/calendar" },
-    { title: "Reminders", url: "/settings", icon: AlertCircle, active: location === "/settings" },
+    { title: "Settings", url: "/settings", icon: AlertCircle, active: location === "/settings" },
     { title: "Reminder Settings", url: "/reminder-settings", icon: Cog, active: location === "/reminder-settings" },
     { title: "History", url: "/history", icon: Clock, active: location === "/history" },
     { title: "API Keys", url: "/api-keys", icon: CreditCard, active: location === "/api-keys" },

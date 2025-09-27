@@ -40,7 +40,7 @@ export function MobileBottomNav() {
       active: location === "/calendar" 
     },
     { 
-      title: "Reminders", 
+      title: "Settings", 
       url: "/settings", 
       icon: AlertCircle, 
       active: location === "/settings" || location === "/reminder-settings"
