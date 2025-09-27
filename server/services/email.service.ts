@@ -8,7 +8,13 @@ export class EmailService {
   private encryptionKey: string;
   
   constructor() {
-    this.encryptionKey = process.env.ENCRYPTION_KEY || 'fallback-key-change-in-production';
+    this.encryptionKey = process.env.ENCRYPTION_KEY;
+    
+    if (!this.encryptionKey) {
+      console.error('CRITICAL SECURITY ERROR: ENCRYPTION_KEY environment variable is not set!');
+      console.error('Email service cannot securely encrypt credentials without a proper encryption key.');
+      throw new Error('ENCRYPTION_KEY environment variable is required for secure credential storage');
+    }
   }
 
   /**

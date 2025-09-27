@@ -7,7 +7,14 @@ import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 export const userExternalApiKeysRouter = Router();
 
 // Get encryption key from environment (should be 32 bytes for AES-256)
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'fallback-key-for-dev-only-not-secure-32';
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
+
+if (!ENCRYPTION_KEY) {
+  console.error('CRITICAL SECURITY ERROR: ENCRYPTION_KEY environment variable is not set!');
+  console.error('API keys cannot be securely encrypted without a proper encryption key.');
+  console.error('Please set ENCRYPTION_KEY to a secure 32-byte random string.');
+  throw new Error('ENCRYPTION_KEY environment variable is required for secure API key storage');
+}
 
 // Proper AES-256-GCM encryption for API keys
 function encryptKey(key: string): string {
