@@ -83,6 +83,8 @@ export default function Settings() {
   // API Key form states
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [isShowingGeminiKey, setIsShowingGeminiKey] = useState(false);
+  const [resendApiKey, setResendApiKey] = useState('');
+  const [isShowingResendKey, setIsShowingResendKey] = useState(false);
 
   // Update URL when tab changes
   useEffect(() => {
@@ -150,6 +152,9 @@ export default function Settings() {
       if (variables.service === 'gemini') {
         setGeminiApiKey('');
         setIsShowingGeminiKey(false);
+      } else if (variables.service === 'resend') {
+        setResendApiKey('');
+        setIsShowingResendKey(false);
       }
     },
     onError: (error: any) => {
@@ -199,8 +204,28 @@ export default function Settings() {
     deleteApiKeyMutation.mutate('gemini');
   };
 
+  const handleSaveResendKey = () => {
+    if (!resendApiKey.trim()) {
+      toast({
+        title: "Invalid API key",
+        description: "Please enter a valid Resend API key.",
+        variant: "destructive",
+      });
+      return;
+    }
+    saveApiKeyMutation.mutate({ service: 'resend', keyValue: resendApiKey.trim() });
+  };
+
+  const handleDeleteResendKey = () => {
+    deleteApiKeyMutation.mutate('resend');
+  };
+
   const getGeminiApiKey = () => {
     return (userApiKeys as UserExternalApiKey[])?.find((key: UserExternalApiKey) => key.service === 'gemini');
+  };
+
+  const getResendApiKey = () => {
+    return (userApiKeys as UserExternalApiKey[])?.find((key: UserExternalApiKey) => key.service === 'resend');
   };
 
   return (
@@ -520,17 +545,17 @@ export default function Settings() {
 
               <Separator />
 
-              {/* Stripe Status (Read-only for now) */}
+              {/* Resend API Key */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">Stripe Integration</h4>
+                    <h4 className="font-medium">Resend API Key</h4>
                     <p className="text-sm text-muted-foreground">
-                      Required for payment processing (configured via environment)
+                      Required for sending email notifications and reminders
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {(apiKeysStatus as any)?.stripe?.configured ? (
+                    {getResendApiKey()?.hasKey ? (
                       <Badge variant="default" className="bg-green-100 text-green-800">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Configured
@@ -544,19 +569,67 @@ export default function Settings() {
                   </div>
                 </div>
 
-                {!(apiKeysStatus as any)?.stripe?.configured && (
-                  <Alert>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                      <div className="space-y-2">
-                        <p>Stripe is not configured. Contact your administrator to set up:</p>
-                        <ul className="list-disc list-inside text-sm space-y-1 ml-4">
-                          <li>VITE_STRIPE_PUBLIC_KEY environment variable</li>
-                          <li>STRIPE_SECRET_KEY environment variable</li>
-                        </ul>
+                {getResendApiKey()?.hasKey ? (
+                  <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-green-800">API Key configured</p>
+                      <p className="text-xs text-green-600">
+                        Last updated: {getResendApiKey()?.createdAt ? new Date(getResendApiKey()!.createdAt).toLocaleDateString() : 'Unknown'}
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDeleteResendKey}
+                      disabled={deleteApiKeyMutation.isPending}
+                      data-testid="button-delete-resend-key"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <div className="flex-1 relative">
+                        <Input
+                          type={isShowingResendKey ? "text" : "password"}
+                          placeholder="Enter your Resend API key"
+                          value={resendApiKey}
+                          onChange={(e) => setResendApiKey(e.target.value)}
+                          data-testid="input-resend-api-key"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3"
+                          onClick={() => setIsShowingResendKey(!isShowingResendKey)}
+                        >
+                          {isShowingResendKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
                       </div>
-                    </AlertDescription>
-                  </Alert>
+                      <Button
+                        onClick={handleSaveResendKey}
+                        disabled={saveApiKeyMutation.isPending || !resendApiKey.trim()}
+                        data-testid="button-save-resend-key"
+                      >
+                        {saveApiKeyMutation.isPending ? 'Saving...' : 'Save'}
+                      </Button>
+                    </div>
+                    <Alert>
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        <div className="space-y-2">
+                          <p>To get your Resend API key:</p>
+                          <ol className="list-decimal list-inside text-sm space-y-1">
+                            <li>Go to <a href="https://resend.com/api-keys" target="_blank" className="text-blue-600 hover:underline" rel="noopener noreferrer">Resend Dashboard</a></li>
+                            <li>Create a new API key</li>
+                            <li>Copy and paste it above</li>
+                          </ol>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  </div>
                 )}
               </div>
             </CardContent>
