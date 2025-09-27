@@ -68,7 +68,7 @@ export function HeaderMenu() {
       <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
         <Link href={isMarketingPage ? "/" : "/dashboard"} className="flex items-center gap-2 hover-elevate rounded-md px-2 py-1 -mx-2 -my-1" data-testid="link-dashboard-logo">
           <Crown className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" />
-          <span className="font-semibold text-sm sm:text-lg hidden xs:block truncate">Subscription Tracker</span>
+          <span className="font-semibold text-sm sm:text-lg hidden xs:block truncate">SubTracker</span>
         </Link>
         
       </div>

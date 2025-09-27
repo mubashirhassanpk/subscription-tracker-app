@@ -167,7 +167,7 @@ export default function Dashboard({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
             <div className="text-center sm:text-left">
               <h1 className="text-xl sm:text-2xl font-bold text-foreground" data-testid="text-page-title">
-                Subscription Tracker
+                SubTracker
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-0">
                 Manage and monitor your recurring subscriptions

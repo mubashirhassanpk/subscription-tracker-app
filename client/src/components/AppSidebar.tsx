@@ -37,7 +37,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Subscription Tracker</SidebarGroupLabel>
+          <SidebarGroupLabel>SubTracker</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
