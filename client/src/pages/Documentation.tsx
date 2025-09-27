@@ -118,8 +118,8 @@ export default function Documentation() {
   -d '{
     "name": "Your Name",
     "email": "your@email.com",
-    "password": "YOUR_SECURE_PASSWORD",
-    "confirmPassword": "YOUR_SECURE_PASSWORD"
+    "password": "[ENTER_YOUR_PASSWORD]",
+    "confirmPassword": "[ENTER_YOUR_PASSWORD]"
   }'`)}
                         data-testid="button-copy-register"
                       >
