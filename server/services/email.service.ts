@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 import { UserNotificationPreferences } from '@shared/schema';
 import crypto from 'crypto';
+import { getDecryptedApiKey } from '../routes/userExternalApiKeys';
 
 export class EmailService {
   private encryptionKey: string;
@@ -16,8 +17,7 @@ export class EmailService {
   private decrypt(encryptedData: string): string {
     try {
       const [iv, encrypted, authTag] = encryptedData.split(':');
-      const decipher = crypto.createDecipherGCM('aes-256-gcm', Buffer.from(this.encryptionKey));
-      decipher.setIV(Buffer.from(iv, 'hex'));
+      const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(this.encryptionKey), Buffer.from(iv, 'hex'));
       decipher.setAuthTag(Buffer.from(authTag, 'hex'));
       
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
@@ -33,10 +33,10 @@ export class EmailService {
   /**
    * Test email connection
    */
-  async testConnection(preferences: UserNotificationPreferences) {
+  async testConnection(preferences: UserNotificationPreferences, userId: string = 'dev-user-1') {
     try {
       if (preferences.emailProvider === 'resend') {
-        return await this.testResendConnection(preferences);
+        return await this.testResendConnection(preferences, userId);
       } else {
         return await this.testSMTPConnection(preferences);
       }
@@ -47,14 +47,17 @@ export class EmailService {
     }
   }
 
-  private async testResendConnection(preferences: UserNotificationPreferences) {
-    let apiKey = process.env.RESEND_API_KEY;
-    if (preferences.resendApiKeyEncrypted) {
-      apiKey = this.decrypt(preferences.resendApiKeyEncrypted);
+  private async testResendConnection(preferences: UserNotificationPreferences, userId: string = 'dev-user-1') {
+    // Try to get user-specific API key first
+    let apiKey = await getDecryptedApiKey(userId, 'resend');
+    
+    // Fall back to environment variable if no user key
+    if (!apiKey) {
+      apiKey = process.env.RESEND_API_KEY || null;
     }
 
     if (!apiKey) {
-      throw new Error('Resend API key not configured');
+      throw new Error('Resend API key not configured. Please configure your API key in Settings.');
     }
 
     const resend = new Resend(apiKey);
@@ -79,7 +82,7 @@ export class EmailService {
   }
 
   private async testSMTPConnection(preferences: UserNotificationPreferences) {
-    const transporter = nodemailer.createTransporter({
+    const config = {
       host: preferences.smtpHost,
       port: preferences.smtpPort || 587,
       secure: (preferences.smtpPort || 587) === 465,
@@ -87,7 +90,9 @@ export class EmailService {
         user: preferences.smtpUsername,
         pass: preferences.smtpPasswordEncrypted ? this.decrypt(preferences.smtpPasswordEncrypted) : undefined
       }
-    });
+    };
+    
+    const transporter = nodemailer.createTransport(config);
 
     await transporter.verify();
 
@@ -109,7 +114,8 @@ export class EmailService {
       description?: string;
       category: string;
     },
-    daysBefore: number
+    daysBefore: number,
+    userId: string = 'dev-user-1'
   ) {
     try {
       if (!preferences.emailEnabled || !preferences.emailAddress) {
@@ -130,7 +136,7 @@ export class EmailService {
       `;
 
       if (preferences.emailProvider === 'resend') {
-        return await this.sendViaResend(preferences, subject, htmlContent);
+        return await this.sendViaResend(preferences, subject, htmlContent, userId);
       } else {
         return await this.sendViaSMTP(preferences, subject, htmlContent);
       }
@@ -141,14 +147,17 @@ export class EmailService {
     }
   }
 
-  private async sendViaResend(preferences: UserNotificationPreferences, subject: string, htmlContent: string) {
-    let apiKey = process.env.RESEND_API_KEY;
-    if (preferences.resendApiKeyEncrypted) {
-      apiKey = this.decrypt(preferences.resendApiKeyEncrypted);
+  private async sendViaResend(preferences: UserNotificationPreferences, subject: string, htmlContent: string, userId: string = 'dev-user-1') {
+    // Try to get user-specific API key first
+    let apiKey = await getDecryptedApiKey(userId, 'resend');
+    
+    // Fall back to environment variable if no user key
+    if (!apiKey) {
+      apiKey = process.env.RESEND_API_KEY || null;
     }
 
     if (!apiKey) {
-      throw new Error('Resend API key not configured');
+      throw new Error('Resend API key not configured. Please configure your API key in Settings.');
     }
 
     const resend = new Resend(apiKey);
@@ -174,7 +183,7 @@ export class EmailService {
   }
 
   private async sendViaSMTP(preferences: UserNotificationPreferences, subject: string, htmlContent: string) {
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       host: preferences.smtpHost,
       port: preferences.smtpPort || 587,
       secure: (preferences.smtpPort || 587) === 465,
