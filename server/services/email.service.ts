@@ -259,41 +259,55 @@ export class EmailService {
 
   private getCasualTemplate(subscription: any, timeframe: string) {
     return `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-        <div style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4); color: white; padding: 24px; border-radius: 12px 12px 0 0; text-align: center;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: 700;">🔔 Hey there!</h1>
-          <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9;">Your subscription is coming up for renewal</p>
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 32px; border-radius: 16px 16px 0 0; text-align: center;">
+          <h1 style="margin: 0; font-size: 32px; font-weight: 800;">👋 Hey friend!</h1>
+          <p style="margin: 12px 0 0 0; font-size: 18px; opacity: 0.95; font-weight: 500;">Just a friendly reminder about your subscription ✨</p>
         </div>
         
-        <div style="padding: 24px;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; padding: 20px; margin: 20px 0; transform: rotate(-1deg);">
-            <h2 style="margin: 0 0 12px 0; font-size: 22px;">📱 ${subscription.name}</h2>
-            <p style="margin: 0; font-size: 18px; opacity: 0.9;">Renews ${timeframe} for <strong>$${subscription.cost}</strong></p>
-          </div>
-
-          <div style="text-align: center; margin: 24px 0;">
-            <p style="font-size: 16px; color: #555; margin: 0 0 12px 0;">
-              Don't worry, we've got your back! 😎
-            </p>
-            <p style="font-size: 14px; color: #777; margin: 0;">
-              Just a friendly heads up about your <strong>${subscription.category}</strong> subscription.
+        <div style="padding: 32px;">
+          <div style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4); color: white; border-radius: 20px; padding: 24px; margin: 24px 0; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -10px; right: -10px; background: rgba(255, 255, 255, 0.2); width: 60px; height: 60px; border-radius: 50%; opacity: 0.6;"></div>
+            <div style="position: absolute; bottom: -15px; left: -15px; background: rgba(255, 255, 255, 0.15); width: 80px; height: 80px; border-radius: 50%; opacity: 0.4;"></div>
+            <h2 style="margin: 0 0 16px 0; font-size: 26px; font-weight: 700; position: relative;">🎯 ${subscription.name}</h2>
+            <p style="margin: 0; font-size: 20px; opacity: 0.95; font-weight: 600; position: relative;">
+              Renews <strong>${timeframe}</strong> for <span style="background: rgba(255, 255, 255, 0.2); padding: 4px 12px; border-radius: 20px; font-weight: 800;">$${subscription.cost}</span>
             </p>
           </div>
 
-          <div style="background: #fff3cd; border: 2px dashed #ffc107; border-radius: 12px; padding: 16px; margin: 20px 0; text-align: center;">
-            <p style="margin: 0; color: #856404; font-size: 14px;">
-              🎯 <strong>Pro tip:</strong> You can cancel or modify this subscription anytime in your dashboard!
+          <div style="text-align: center; margin: 28px 0; padding: 24px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 16px; color: white;">
+            <p style="font-size: 18px; margin: 0 0 8px 0; font-weight: 600;">
+              No stress, no rush! 😊
+            </p>
+            <p style="font-size: 16px; margin: 0; opacity: 0.9;">
+              We just wanted to give you a heads up about your <strong>${subscription.category}</strong> subscription coming up.
             </p>
           </div>
-          
-          <div style="text-align: center; margin-top: 24px;">
-            <a href="#" style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4); color: white; padding: 14px 28px; text-decoration: none; border-radius: 25px; font-weight: 600; display: inline-block; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">Manage Subscriptions 🚀</a>
+
+          <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border: none; border-radius: 16px; padding: 20px; margin: 24px 0; text-align: center; position: relative;">
+            <div style="position: absolute; top: 8px; right: 8px; font-size: 24px;">💡</div>
+            <p style="margin: 0; color: #2d3748; font-size: 16px; font-weight: 600;">
+              <strong>Quick tip:</strong> You're in complete control! Cancel, pause, or update this subscription anytime in your dashboard. No hassle, no hidden fees! 🎉
+            </p>
+          </div>
+
+          <div style="text-align: center; margin: 32px 0;">
+            <p style="margin: 0 0 16px 0; color: #666; font-size: 14px;">Ready to take action?</p>
+            <a href="#" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 30px; font-weight: 700; display: inline-block; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); font-size: 16px; transition: transform 0.2s;">
+              🚀 Manage My Subscriptions
+            </a>
+          </div>
+
+          <div style="background: #f7fafc; border-radius: 12px; padding: 16px; margin: 24px 0; text-align: center;">
+            <p style="margin: 0; color: #4a5568; font-size: 14px; font-weight: 500;">
+              🎈 Thanks for being awesome! If you have any questions, just hit reply - we're here to help!
+            </p>
           </div>
         </div>
         
-        <div style="background: #f8f9fa; padding: 16px; border-radius: 0 0 12px 12px; text-align: center;">
-          <p style="margin: 0; color: #666; font-size: 12px;">
-            Sent with ❤️ from SubTracker | You can change these notifications anytime
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 0 0 16px 16px; text-align: center;">
+          <p style="margin: 0; color: white; font-size: 13px; font-weight: 500; opacity: 0.9;">
+            Made with 💜 by SubTracker | Change notification preferences anytime in settings
           </p>
         </div>
       </div>
