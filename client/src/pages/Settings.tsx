@@ -148,6 +148,8 @@ export default function Settings() {
       });
       refetchApiKeys();
       queryClient.invalidateQueries({ queryKey: ['/api/config/status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-external-api-keys'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/reminders/preferences'] });
       // Clear the input field
       if (variables.service === 'gemini') {
         setGeminiApiKey('');
@@ -178,6 +180,8 @@ export default function Settings() {
       });
       refetchApiKeys();
       queryClient.invalidateQueries({ queryKey: ['/api/config/status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-external-api-keys'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/reminders/preferences'] });
     },
     onError: (error: any) => {
       toast({

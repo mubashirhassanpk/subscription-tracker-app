@@ -97,7 +97,8 @@ export default function ReminderSettings() {
   // Fetch user's external API keys to check if Resend is configured
   const { data: userApiKeys } = useQuery({
     queryKey: ['/api/user-external-api-keys'],
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always refetch for fresh data
   });
 
   // Form setup
