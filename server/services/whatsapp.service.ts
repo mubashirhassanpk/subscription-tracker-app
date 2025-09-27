@@ -51,7 +51,7 @@ export class WhatsAppService {
       throw new Error('Invalid authentication tag length');
     }
     
-    const decipher = crypto.createDecipheriv('aes-256-gcm', this.encryptionKey, iv);
+    const decipher = crypto.createDecipheriv('aes-256-gcm', this.encryptionKey, iv, { authTagLength: 16 });
     decipher.setAuthTag(authTag);
     
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
