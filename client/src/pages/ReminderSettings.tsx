@@ -94,6 +94,12 @@ export default function ReminderSettings() {
     queryKey: ['/api/timezones']
   });
 
+  // Fetch user's external API keys to check if Resend is configured
+  const { data: userApiKeys } = useQuery({
+    queryKey: ['/api/user-external-api-keys'],
+    refetchOnWindowFocus: false,
+  });
+
   // Form setup
   const form = useForm<ReminderSettingsForm>({
     resolver: zodResolver(reminderSettingsSchema),
@@ -141,15 +147,36 @@ export default function ReminderSettings() {
     }
   }, [preferences, form]);
 
-  // Update connection statuses based on preferences
+  // Update connection statuses based on preferences and API keys
   useEffect(() => {
     if (preferences && (preferences as any)?.preferences) {
       const prefs = (preferences as any).preferences;
+      
+      // Check if Resend API key is configured
+      const resendApiKey = (userApiKeys as any)?.find((key: any) => key.service === 'resend');
+      const hasResendKey = resendApiKey?.hasKey || false;
+      
+      // Determine email connection status
+      let emailConnected = false;
+      let emailError = undefined;
+      
+      if (prefs.emailEnabled) {
+        if (!prefs.emailAddress) {
+          emailError = 'Email address not configured';
+        } else if (prefs.emailProvider === 'resend' && !hasResendKey) {
+          emailError = 'Resend API key not configured';
+        } else if (prefs.emailProvider === 'smtp' && (!prefs.smtpHost || !prefs.smtpUsername)) {
+          emailError = 'SMTP settings not configured';
+        } else {
+          emailConnected = true;
+        }
+      }
+      
       const statuses: ConnectionStatus[] = [
         {
           service: 'Email',
-          connected: prefs.emailEnabled && !!prefs.emailAddress,
-          error: !prefs.emailAddress && prefs.emailEnabled ? 'Email address not configured' : undefined
+          connected: emailConnected,
+          error: emailError
         },
         {
           service: 'Google Calendar',
@@ -164,7 +191,7 @@ export default function ReminderSettings() {
       ];
       setConnectionStatuses(statuses);
     }
-  }, [preferences]);
+  }, [preferences, userApiKeys]);
 
   // Save settings mutation
   const saveSettingsMutation = useMutation({
