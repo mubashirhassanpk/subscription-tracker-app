@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Subscription Tracker",
+  "name": "SubTracker",
   "version": "1.0.0",
   "description": "Manage and track your subscriptions directly from your browser",
   
@@ -15,9 +15,8 @@
   
   "host_permissions": [
     "http://localhost:5000/*",
-    "https://*.replit.dev/*",
-    "https://*.replit.com/*",
-    "https://*.replit.app/*",
+    "https://subtacker.uk/*",
+    "https://*.subtacker.uk/*",
     "*://*/*"
   ],
   
@@ -57,7 +56,7 @@
   
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Subscription Tracker",
+    "default_title": "SubTracker",
     "default_icon": {
       "16": "assets/icon16.png",
       "32": "assets/icon32.png",
